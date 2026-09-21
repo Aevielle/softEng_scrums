@@ -6,9 +6,9 @@ Write your name below
  
 Scrum Master: Kim Aeriel V. Fonseca
 
-UI/UX: Rilaneh Marie L. Acabal
+UI/UX: 
 
-BackEnd Developer: Earl Paolo M. Octoman
+BackEnd Developer: 
 
 DevSecOps Engineer:
 
