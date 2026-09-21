@@ -8,7 +8,7 @@ Scrum Master: Kim Aeriel V. Fonseca
 
 UI/UX: 
 
-BackEnd Developer: 
+BackEnd Developer: Earl Paolo M. Octoman
 
 DevSecOps Engineer: Isabel Geliz V. Ramos
 
