@@ -4,7 +4,7 @@ Write your name below
 
 # Group 4
  
-Scrum Master: Kim Aeriel V. Fonseca
+Scrum Master: Kim AMArieriel V. Fonseca
 
 UI/UX Developer: Rilaneh Marie L. Acabal
 
