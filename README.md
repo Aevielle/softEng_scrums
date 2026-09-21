@@ -10,6 +10,6 @@ UI/UX:
 
 BackEnd Developer: 
 
-DevSecOps Engineer:
+DevSecOps Engineer: Isabel Geliz V. Ramos
 
 Test Engineer: Franchesca E. Ramirez
