@@ -4,7 +4,7 @@ Write your name below
  
 Scrum Master: Kim Aeriel V. Fonseca
 
-UI/UX:
+UI/UX: Rilaneh Marie L. Acabal
 
 BackEnd Developer:
 
