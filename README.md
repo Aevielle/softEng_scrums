@@ -12,4 +12,4 @@ BackEnd Developer: Earl Paolo M. Octoman
 
 DevSecOps Engineer:
 
-Test Engineer:
+Test Engineer: Franchesca E. Ramirez
