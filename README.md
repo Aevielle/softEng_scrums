@@ -4,13 +4,13 @@ A small, database-driven Enterprise Resource Planning (ERP) web system for the f
 
 ## Team
 
-| Role | Name | GitHub |
-|------|------|--------|
-| Scrum Master | Kim Aeriel V. Fonseca | @Aevielle |
-| UI/UX Developer |  | @username |
-| Backend Developer |  | @username |
-| DevSecOps Engineer |  | @username |
-| Test Engineer |  | @username |
+| Role | Name                  | GitHub      |
+|------|-----------------------|-------------|
+| Scrum Master | Kim Aeriel V. Fonseca | @Aevielle   |
+| UI/UX Developer |                       | @username   |
+| Backend Developer |                       | @username   |
+| DevSecOps Engineer | Isabel Geliz V. Ramos | @GelizRamos |
+| Test Engineer |                       | @username   |
 
 ## Sprint Progress
 
