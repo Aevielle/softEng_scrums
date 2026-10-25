@@ -11,3 +11,8 @@ A small, database-driven Enterprise Resource Planning (ERP) web system for the f
 | Backend Developer |  | @username |
 | DevSecOps Engineer |  | @username |
 | Test Engineer |  | @username |
+
+## Sprint Progress
+
+- [Issues](https://github.com/Aevielle/softEng_scrums/issues)
+- [Project Board](https://github.com/Aevielle/softEng_scrums/projects)
