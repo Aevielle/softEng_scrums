@@ -1,13 +1,13 @@
-This is our project repository
+# Group 4 – [Project Name]
 
-# Group 4
- 
-Scrum Master: Kim Aeriel V. Fonseca
+A small, database-driven Enterprise Resource Planning (ERP) web system for the fictitious company Hope, Inc. It keeps customers, products, employees and sales in one place, with role-based access, soft delete and an audit trail.
 
-UI/UX Developer: Rilaneh Marie L. Acabal
+## Team
 
-BackEnd Developer: Earl Paolo M. Octoman
-
-DevSecOps Engineer: Isabel Geliz V. Ramos
-
-Test Engineer: Franchesca E. Ramirez
+| Role | Name | GitHub |
+|------|------|--------|
+| Scrum Master | Kim Aeriel V. Fonseca | @Aevielle |
+| UI/UX Developer |  | @username |
+| Backend Developer |  | @username |
+| DevSecOps Engineer |  | @username |
+| Test Engineer |  | @username |
