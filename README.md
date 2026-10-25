@@ -1,4 +1,4 @@
-# Group 4 – [Project Name]
+# Group 4 
 
 A small, database-driven Enterprise Resource Planning (ERP) web system for the fictitious company Hope, Inc. It keeps customers, products, employees and sales in one place, with role-based access, soft delete and an audit trail.
 
