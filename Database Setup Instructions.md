@@ -1,4 +1,4 @@
-#Database Setup Instructions
+## Database Setup Instructions
 
 Follow these steps to set up your local database and run migrations without using Docker:
 
@@ -34,3 +34,10 @@ Follow these steps to set up your local database and run migrations without usin
          node database/migrate.js
 
 Note: The migration script is fully idempotent. You can re-run it multiple times safely without encountering database errors.
+
+## User & Permissions Schema (`002_user_permissions_setup.sql`)
+- **`role`**: Defines user roles across the system.
+- **`app_user`**: Stores user authentication data (first_name, last_name, unique email, password_hash, role_id, and is_blocked flag).
+- **`module`**: Tracks system modules for access control.
+- **`rights_catalogue`**: Stores permission rights associated with system modules.
+- **`user_permission`**: Maps users to specific rights with **soft delete** support (`is_deleted` and `deleted_at`).
