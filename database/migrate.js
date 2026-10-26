@@ -1,24 +1,60 @@
 require('dotenv').config();
-const { createClient } = require('@supabase/supabase-js');
+const fs = require('fs');
+const path = require('path');
+const { Client } = require('pg');
 
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_ANON_KEY;
+async function runMigrations() {
+  if (!process.env.DB_HOST || !process.env.DB_USER || !process.env.DB_PASSWORD) {
+    console.error('Error: Missing database credentials in .env file.');
+    process.exit(1);
+  }
 
-if (!supabaseUrl || !supabaseKey) {
-  console.error('❌ Error: SUPABASE_URL or SUPABASE_ANON_KEY is missing.');
-  process.exit(1);
-}
+  const client = new Client({
+    host: process.env.DB_HOST,
+    port: process.env.DB_PORT || 5432,
+    database: process.env.DB_NAME || 'postgres',
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    ssl: { rejectUnauthorized: false }
+  });
 
-const supabase = createClient(supabaseUrl, supabaseKey);
+  try {
+    console.log('Connecting to Supabase database...');
+    await client.connect();
+    console.log('Connected successfully!');
 
-async function testConnection() {
-  console.log('🔄 Connecting to Supabase...');
-  const { error } = await supabase.from('CUSTOMER').select('*').limit(1);
-  if (error && error.code !== 'PGRST116' && error.code !== '42P01') {
-    console.error('❌ Connection Error:', error.message);
-  } else {
-    console.log('✅ Successfully connected to Supabase Database!');
+    const databaseDir = path.join(__dirname, 'migrations');
+
+    if (!fs.existsSync(databaseDir)) {
+      console.log('No migrations directory found.');
+      return;
+    }
+
+    const files = fs.readdirSync(databaseDir)
+      .filter(file => file.endsWith('.sql'))
+      .sort();
+
+    if (files.length === 0) {
+      console.log('No .sql migration files found in database/migrations folder.');
+      return;
+    }
+
+    for (const file of files) {
+      console.log(`Executing migration file: ${file}...`);
+      const filePath = path.join(databaseDir, file);
+      const sqlQuery = fs.readFileSync(filePath, 'utf8');
+
+      await client.query(sqlQuery);
+      console.log(`Finished executing: ${file}`);
+    }
+
+    console.log('All database migrations executed successfully!');
+  } catch (error) {
+    console.error('Migration error:', error);
+    process.exit(1);
+  } finally {
+    await client.end();
   }
 }
 
-testConnection();
+runMigrations();
