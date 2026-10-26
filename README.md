@@ -9,7 +9,7 @@ We're on **Sprint 1: Login and Sign Up** (landing page, register, sign in, forgo
 | Role | Name | GitHub |
 |---|---|---|
 | Scrum Master | Kim Aeriel V. Fonseca | @Aevielle |
-| UI/UX Developer |  |  |
+| UI/UX Developer | Rilaneh Marie L. Acabal | @RilanehMarie |
 | Backend Developer |  |  |
 | DevSecOps Engineer |  |  |
 | Test Engineer | Franchesca E. Ramirez | @cheesekaramirez |
