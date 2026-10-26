@@ -10,7 +10,7 @@ We're on **Sprint 1: Login and Sign Up** (landing page, register, sign in, forgo
 |---|---|---|
 | Scrum Master | Kim Aeriel V. Fonseca | @Aevielle |
 | UI/UX Developer | Rilaneh Marie L. Acabal | @RilanehMarie |
-| Backend Developer |  |  |
+| Backend Developer | Earl Paolo M. Octoman | @Paolo-Octoman |
 | DevSecOps Engineer | Isabel Geliz V. Ramos | @GelizRamos |
 | Test Engineer | Franchesca E. Ramirez | @cheesekaramirez |
 
