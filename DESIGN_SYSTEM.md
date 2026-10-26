@@ -41,4 +41,6 @@ Here are the exact hex codes used in the design:
     *   *Input Error:* Red text below the text box.
 *   **Links:** White texts text. On hover, a highlight or underline effect is applied (as noted in the design).
 
-![alt text](image.png)
+Canva Link: https://canva.link/w1fo05cpml138p0
+
+<img width="1105" height="680" alt="image" src="https://github.com/user-attachments/assets/7b576c3d-d14e-4b7a-be9c-80f7c844273b" />
