@@ -12,7 +12,7 @@ We're on **Sprint 1: Login and Sign Up** (landing page, register, sign in, forgo
 | UI/UX Developer |  |  |
 | Backend Developer |  |  |
 | DevSecOps Engineer |  |  |
-| Test Engineer |  |  |
+| Test Engineer | Franchesca E. Ramirez | @cheesekaramirez |
 
 ## Tech
 Supabase and Next.js (setup steps are coming from S1-DBA-01 and S1-DEV-01).
