@@ -37,7 +37,7 @@ Automated tests using Jest
 ### Access Control
 | Scenario | Pass | Fail |
 |---|---|---|
-| Opening the protected page as an unauthenticated user.| The user is informed that they cannot access the protected page.|The user is able to view the protected page. |
+| Opening the protected page as an unauthenticated.| The user is informed that they cannot access the protected page.|The user is able to view the protected page. |
 | Opening the protected page without required privileges | The user is informed that they lack privileges to access the protected page. | The user is able to view the protected page.|
 ### Set/Reset password
 | Scenario | Pass | Fail |
@@ -51,3 +51,11 @@ Automated tests using Jest
 |The link to reset the password is valid.| The reset password screen shows up.| The reset password screen doesn't show up.|
 |The link to reset the password is expired.| The user is informed that the link is expired.| The reset password screen shows up.|
 |The link to reset the password is already used.| The user is informed that the link was already used.| The reset password screen shows up.|
+
+## Test Accounts
+|Account|Use|How To Create|
+|-------|---|-------------|
+|Verified User/Employee|Login,Logout,Access Control|Register via form then verify|
+|Blocked User|Blocked Login, Access Control|Seed script/Set user as blocked in the DB|
+|Admin|Access Control|Seed script|
+|Superadmin|Access Control|Seed script|
