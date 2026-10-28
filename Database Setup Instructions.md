@@ -1,4 +1,4 @@
-#Database Setup Instructions
+# Database Setup Instructions
 
 Follow these steps to set up your local database and run migrations without using Docker:
 
