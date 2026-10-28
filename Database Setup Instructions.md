@@ -1,24 +1,29 @@
-## Database Setup Instructions
+# Database Setup Instructions
 
 Follow these steps to set up your local database and run migrations without using Docker:
 
 1. Environment Setup (.env)
 
-   1. In the main project folder, make a copy of the .env.example file and rename the new copy to .env.
+   1. Environment Setup
 
-      - Option A (Terminal): Run the command "cp .env.example .env"
+   1. For Database Setup (Root Directory):
+      Create a `.env` file in the main project root directory with your database connection credentials (used by `migrate.js`):
 
-      - Option B (File Explorer / IntelliJ): Right-click .env.example, select Copy, paste it in the root directory, and rename it to .env. 
+      ```env
+      DB_HOST=your_supabase_host_here
+      DB_PORT=5432
+      DB_NAME=postgres
+      DB_USER=your_db_user
+      DB_PASSWORD=your_db_password
+      ```
+
+   2. For Web App Frontend:
       
-   2. Open your new .env file and fill in your Supabase database credentials:
-   
-            DB_HOST=your_supabase_host_here 
-            DB_PORT=5432 
-            DB_NAME=postgres
-            DB_USER=your_db_user
-            DB_PASSWORD=your_db_password
+      Navigate to the `web` folder and copy `web/.env.example` to `web/.env.local` to set up the frontend Supabase keys (`SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, and `SUPABASE_TEST_TABLE`).
 
-   (Note: Never upload or commit your .env file to GitHub to keep your credentials safe.)
+      (Note: Never upload or commit your .env or .env.local files to GitHub to keep your credentials safe.)
+
+
 
 
 2. Install Dependencies:
