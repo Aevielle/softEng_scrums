@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS role (
 INSERT INTO role (role_name, description)
 VALUES
     ('CUSTOMER', 'Default standard user role for registration'),
+    ('USER', 'Default standard user role for registration'),
     ('STAFF', 'Internal staff member role'),
     ('ADMIN', 'System administrator role')
 ON CONFLICT (role_name) DO NOTHING;
