@@ -19,15 +19,10 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-<<<<<<< HEAD
     "dotenv": "^18.0.9",
     "eslint": "^9",
     "eslint-config-next": "16.4.3",
     "jest": "^30.5.2",
-=======
-    "eslint": "^9",
-    "eslint-config-next": "16.4.3",
->>>>>>> f9c285fed0be8f8295d0061409eb21635899fc06
     "typescript": "^5"
   },
   "allowScripts": {

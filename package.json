@@ -1,14 +1,9 @@
 {
   "dependencies": {
-<<<<<<< HEAD
     "pg": "^8.23.1"
   },
   "devDependencies": {
     "dotenv": "^18.0.9",
     "jest": "^30.5.2"
-=======
-    "dotenv": "^18.0.9",
-    "pg": "^8.23.1"
->>>>>>> f9c285fed0be8f8295d0061409eb21635899fc06
   }
 }
