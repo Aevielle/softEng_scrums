@@ -1,4 +1,8 @@
 .idea/
 .env
+<<<<<<< HEAD
 node_modules/
 .env.local
+=======
+node_modules/
+>>>>>>> f9c285fed0be8f8295d0061409eb21635899fc06
