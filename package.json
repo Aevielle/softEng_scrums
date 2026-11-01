@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "pg": "^8.23.1"
+  },
+  "devDependencies": {
+    "dotenv": "^18.0.9",
+    "jest": "^30.5.2"
+  }
+}
