@@ -1,24 +1,95 @@
 require('dotenv').config();
-const { createClient } = require('@supabase/supabase-js');
+const fs = require('fs');
+const path = require('path');
+const { Client } = require('pg');
 
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_ANON_KEY;
+async function runMigrations() {
+  if (!process.env.DB_HOST || !process.env.DB_USER || !process.env.DB_PASSWORD) {
+    console.error('Error: Missing database credentials in .env file.');
+    process.exitCode = 1;
+    return;
+  }
 
-if (!supabaseUrl || !supabaseKey) {
-  console.error('❌ Error: SUPABASE_URL or SUPABASE_ANON_KEY is missing.');
-  process.exit(1);
-}
+  const rejectUnauthorized = process.env.DB_SSL_REJECT_UNAUTHORIZED !== 'false';
 
-const supabase = createClient(supabaseUrl, supabaseKey);
+  const client = new Client({
+    host: process.env.DB_HOST,
+    port: process.env.DB_PORT || 5432,
+    database: process.env.DB_NAME || 'postgres',
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    ssl: { rejectUnauthorized }
+  });
 
-async function testConnection() {
-  console.log('🔄 Connecting to Supabase...');
-  const { error } = await supabase.from('CUSTOMER').select('*').limit(1);
-  if (error && error.code !== 'PGRST116' && error.code !== '42P01') {
-    console.error('❌ Connection Error:', error.message);
-  } else {
-    console.log('✅ Successfully connected to Supabase Database!');
+  try {
+    console.log('Connecting to Supabase database...');
+    await client.connect();
+    console.log('Connected successfully!');
+
+    const databaseDir = path.join(__dirname, 'migrations');
+
+    if (!fs.existsSync(databaseDir)) {
+      console.error('Error: Migrations directory not found.');
+      process.exitCode = 1;
+      return;
+    }
+
+    const files = fs.readdirSync(databaseDir)
+      .filter(file => file.endsWith('.sql'))
+      .sort((a, b) => {
+        const numA = parseInt(a.match(/^\d+/)?.[0] || '0', 10);
+        const numB = parseInt(b.match(/^\d+/)?.[0] || '0', 10);
+        return numA - numB || a.localeCompare(b);
+      });
+
+    if (files.length === 0) {
+      console.error('Error: No .sql migration files found in database/migrations folder.');
+      process.exitCode = 1;
+      return;
+    }
+
+    // Ensure tracking table exists
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS schema_migrations (
+        filename VARCHAR(255) PRIMARY KEY,
+        applied_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+
+    // Get already applied migrations
+    const appliedRes = await client.query('SELECT filename FROM schema_migrations;');
+    const appliedFiles = new Set(appliedRes.rows.map(row => row.filename));
+
+    for (const file of files) {
+      if (appliedFiles.has(file)) {
+        console.log(`Skipping already applied migration: ${file}`);
+        continue;
+      }
+
+      console.log(`Executing migration file: ${file}...`);
+      const filePath = path.join(databaseDir, file);
+      const sqlQuery = fs.readFileSync(filePath, 'utf8');
+
+      try {
+        await client.query('BEGIN');
+        await client.query(sqlQuery);
+        await client.query('INSERT INTO schema_migrations (filename) VALUES ($1);', [file]);
+        await client.query('COMMIT');
+        console.log(`Successfully executed: ${file}`);
+      } catch (err) {
+        await client.query('ROLLBACK');
+        console.error(`Migration failed on ${file}:`, err.message);
+        throw err;
+      }
+    }
+
+    console.log('All pending database migrations executed successfully!');
+  } catch (error) {
+    console.error('Migration process failed:', error.message);
+    process.exitCode = 1;
+  } finally {
+    await client.end();
   }
 }
 
-testConnection();
+runMigrations();
