@@ -10,7 +10,7 @@ async function runMigrations() {
     return;
   }
 
-  const rejectUnauthorized = process.env.DB_SSL_REJECT_UNAUTHORIZED !== 'false';
+  const rejectUnauthorized = process.env.DB_SSL_REJECT_UNAUTHORIZED === 'true';
 
   const client = new Client({
     host: process.env.DB_HOST,
