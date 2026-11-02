@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS public.job (
 );
 
 -- 4. JOB HISTORY
-CREATE TABLE IF NOT EXISTS public.jobHistory (
+CREATE TABLE IF NOT EXISTS public.jobhistory (
     empNo VARCHAR(5) NOT NULL REFERENCES public.employee(empno),
     jobCode VARCHAR(4) NOT NULL REFERENCES public.job(jobCode), 
     effDate DATE NOT NULL, 
@@ -57,8 +57,8 @@ CREATE TABLE IF NOT EXISTS public.product (
     unit VARCHAR(3) CONSTRAINT unit_ck CHECK (unit IN ('pc','ea','mtr','pkg','ltr'))
 );
 
--- 8. SALES DETAIL
-CREATE TABLE IF NOT EXISTS public.salesDetail (
+-- 8. SALES DETAIL (Lowercase)
+CREATE TABLE IF NOT EXISTS public.salesdetail (
     transNo VARCHAR(8) NOT NULL REFERENCES public.sales(transNo), 
     prodCode VARCHAR(6) NOT NULL REFERENCES public.product(prodCode), 
     quantity DECIMAL(10,2) CONSTRAINT quantity_ck CHECK (quantity >= 0.0), 
@@ -73,8 +73,8 @@ CREATE TABLE IF NOT EXISTS public.payment (
     transno VARCHAR(8) REFERENCES public.sales(transNo)
 );
 
--- 10. PRICE HISTORY
-CREATE TABLE IF NOT EXISTS public.priceHist (
+-- 10. PRICE HISTORY (Lowercase)
+CREATE TABLE IF NOT EXISTS public.pricehist (
     effDate DATE NOT NULL, 
     prodCode VARCHAR(6) NOT NULL REFERENCES public.product(prodCode), 
     unitPrice DECIMAL(10,2) CONSTRAINT unitP_ck CHECK (unitPrice > 0),  
@@ -146,7 +146,7 @@ INSERT INTO public.job VALUES
 ('HRS','HR Specialist')
 ON CONFLICT (jobCode) DO NOTHING;
 
-INSERT INTO public.jobHistory VALUES
+INSERT INTO public.jobhistory VALUES
 ('00001','PR1', '2010-05-11', 48000,'IT'),
 ('00001','PR2', '2010-12-01', 50000,'IT'),
 ('00003','PR2', '2010-05-11', 50000,'IT'),
@@ -475,7 +475,8 @@ INSERT INTO public.product VALUES
 ('PS0003','Cisco Virt Hardware', 'pc')
 ON CONFLICT (prodCode) DO NOTHING;
 
-INSERT INTO public.salesDetail VALUES
+-- Updated to lowercase salesdetail
+INSERT INTO public.salesdetail VALUES
 ('TR000001','AK0002', 10),
 ('TR000001','AM0003', 10),
 ('TR000001','MD0001', 10),
@@ -959,7 +960,7 @@ INSERT INTO public.payment VALUES
 ('OR000165','2011-05-30', '27587.77', 'TR000122')
 ON CONFLICT (orNo) DO NOTHING;
 
-INSERT INTO public.priceHist VALUES
+INSERT INTO public.pricehist VALUES
 ('2010-05-15','AK0001', 12),
 ('2010-05-15','AK0002', 8.37),
 ('2010-05-15','AK0003', 99.99),

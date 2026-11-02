@@ -72,6 +72,11 @@ A successful response confirms that the application can perform the configured r
 
 ### Environment Variables
 The `web/.env.example` file documents the required environment variables using placeholders. The local `web/.env.local` file contains machine-specific values and must not be committed to Git.
+
+## Running Database Migrations
+
+1. Run the SQL files inside the `database/migrations/` folder one by one in order.
+2. You can safely run these files multiple times. They use safe commands (`IF NOT EXISTS` and `ON CONFLICT DO NOTHING`), so your data will not be deleted or duplicated.
 =======
 Test Engineer: Franchesca E. Ramirez
 >>>>>>> Stashed changes
