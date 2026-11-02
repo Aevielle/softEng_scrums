@@ -14,7 +14,6 @@ We're on **Sprint 1: Login and Sign Up** (landing page, register, sign in, forgo
 | DevSecOps Engineer | Isabel Geliz V. Ramos | @GelizRamos |
 | Test Engineer | Franchesca E. Ramirez | @cheesekaramirez |
 
-<<<<<<< Updated upstream
 ## Sprint progress
 - [Issues](https://github.com/Aevielle/softEng_scrums/issues)
 - [Project board](https://github.com/users/Aevielle/projects/4)
@@ -77,6 +76,5 @@ The `web/.env.example` file documents the required environment variables using p
 
 1. Run the SQL files inside the `database/migrations/` folder one by one in order.
 2. You can safely run these files multiple times. They use safe commands (`IF NOT EXISTS` and `ON CONFLICT DO NOTHING`), so your data will not be deleted or duplicated.
-=======
 Test Engineer: Franchesca E. Ramirez
->>>>>>> Stashed changes
+
