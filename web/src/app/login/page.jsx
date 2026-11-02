@@ -3,7 +3,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import styles from './login.module.css';
 
-const TITLES = { EMPTY: 'Empty Field', INVALID: 'Sign in failed', BLOCKED: 'Account Blocked' };
+const TITLES = { EMPTY: 'Empty Field', INVALID: 'Sign in failed', BLOCKED: 'Account Blocked', PENDING: 'Account Pending' };
 
 export default function LoginPage() {
   const [form, setForm] = useState({ email: '', password: '', remember: false });
