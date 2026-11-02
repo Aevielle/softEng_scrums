@@ -30,5 +30,6 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts"
 , "src/app/register/page.jsx", "src/app/page.jsx"  ],
+  ],
   "exclude": ["node_modules"]
 }
