@@ -1,7 +1,4 @@
-{"timestamp":"00:00:04.426","source":"Server","level":"LOG","message":"- Cache Components enabled"}
-{"timestamp":"00:00:04.427","source":"Server","level":"LOG","message":"- Partial Prefetching enabled"}
-{"timestamp":"00:00:04.427","source":"Server","level":"LOG","message":""}
-{"timestamp":"00:00:30.024","source":"Browser","level":"INFO","message":"Download the React DevTools for a better development experience: https://react.dev/link/react-devtools"}
-{"timestamp":"00:00:34.793","source":"Browser","level":"INFO","message":"Download the React DevTools for a better development experience: https://react.dev/link/react-devtools"}
-{"timestamp":"00:04:08.819","source":"Server","level":"LOG","message":"  Reload env: .env.local"}
-{"timestamp":"00:04:20.753","source":"Browser","level":"INFO","message":"Download the React DevTools for a better development experience: https://react.dev/link/react-devtools"}
+{"timestamp":"00:00:03.210","source":"Server","level":"LOG","message":"- Cache Components enabled"}
+{"timestamp":"00:00:03.210","source":"Server","level":"LOG","message":"- Partial Prefetching enabled"}
+{"timestamp":"00:00:03.210","source":"Server","level":"LOG","message":""}
+{"timestamp":"00:00:38.246","source":"Browser","level":"INFO","message":"Download the React DevTools for a better development experience: https://react.dev/link/react-devtools"}
