@@ -21,6 +21,7 @@ CREATE TABLE IF NOT EXISTS public.app_user (
     email VARCHAR(255) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
     role_id INT REFERENCES public.role(role_id) ON DELETE SET NULL,
+    account_status VARCHAR(20) NOT NULL DEFAULT 'pending' CHECK (account_status IN ('pending', 'active', 'rejected')),
     is_blocked BOOLEAN DEFAULT FALSE NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
@@ -110,15 +111,15 @@ CREATE TABLE IF NOT EXISTS public.user_permission (
     UNIQUE(user_id, right_id)
 );
 
-INSERT INTO public.app_user (first_name, last_name, email, password_hash, role_id)
-SELECT u.first_name, u.last_name, u.email, u.password_hash, r.role_id AS role_id
+INSERT INTO public.app_user (first_name, last_name, email, password_hash, role_id, account_status)
+SELECT u.first_name, u.last_name, u.email, u.password_hash, r.role_id AS role_id, 'active' AS account_status
 FROM (
     VALUES 
         ('Geliz', 'Ramos', 'geliz@hope.erp', 'PENDING_SETUP_HASH'),
-        ('Aevielle', 'Team', 'aevielle@hope.erp', 'PENDING_SETUP_HASH'),
-        ('Kim', 'Team', 'kim@hope.erp', 'PENDING_SETUP_HASH'),
-        ('Paolo', 'Team', 'paolo@hope.erp', 'PENDING_SETUP_HASH'),
-        ('Chesca', 'Team', 'chesca@hope.erp', 'PENDING_SETUP_HASH')
+        ('Marie', 'Acabal', 'marie@hope.erp', 'PENDING_SETUP_HASH'),
+        ('Chesca', 'Ramirez', 'chesca@hope.erp', 'PENDING_SETUP_HASH'),
+        ('Paolo', 'Octoman', 'paolo@hope.erp', 'PENDING_SETUP_HASH'),
+        ('Kim', 'Fonseca', 'kim@hope.erp', 'PENDING_SETUP_HASH')
 ) AS u(first_name, last_name, email, password_hash)
 CROSS JOIN (SELECT role_id FROM public.role WHERE role_name = 'Superadmin' LIMIT 1) r
 ON CONFLICT (email) DO NOTHING;
@@ -130,5 +131,18 @@ CROSS JOIN public.rights_catalogue rc
 JOIN public.role r ON u.role_id = r.role_id
 WHERE r.role_name = 'Superadmin'
 ON CONFLICT (user_id, right_id) DO NOTHING;
+
+ALTER TABLE public.app_user ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Allow public user registration" ON public.app_user
+    FOR INSERT 
+    TO anon, authenticated
+    WITH CHECK (true);
+
+GRANT USAGE ON SCHEMA public TO anon, authenticated, service_role;
+GRANT ALL ON public.app_user TO anon, authenticated, service_role;
+GRANT USAGE, SELECT ON SEQUENCE public.app_user_user_id_seq TO anon, authenticated, service_role;
+
+NOTIFY pgrst, 'reload schema';
 
 COMMIT;
