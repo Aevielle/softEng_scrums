@@ -1,4 +1,5 @@
-{"timestamp":"00:00:02.929","source":"Server","level":"LOG","message":"- Cache Components enabled"}
-{"timestamp":"00:00:02.929","source":"Server","level":"LOG","message":"- Partial Prefetching enabled"}
-{"timestamp":"00:00:02.930","source":"Server","level":"LOG","message":""}
-{"timestamp":"00:00:06.633","source":"Browser","level":"INFO","message":"Download the React DevTools for a better development experience: https://react.dev/link/react-devtools"}
+{"timestamp":"00:00:02.502","source":"Server","level":"LOG","message":"- Cache Components enabled"}
+{"timestamp":"00:00:02.502","source":"Server","level":"LOG","message":"- Partial Prefetching enabled"}
+{"timestamp":"00:00:02.503","source":"Server","level":"LOG","message":""}
+{"timestamp":"00:00:03.852","source":"Browser","level":"INFO","message":"Download the React DevTools for a better development experience: https://react.dev/link/react-devtools"}
+{"timestamp":"00:00:04.282","source":"Browser","level":"INFO","message":"Download the React DevTools for a better development experience: https://react.dev/link/react-devtools"}
