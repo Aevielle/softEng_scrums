@@ -219,7 +219,7 @@ export default function RegisterPage() {
           type="button"
           className={styles.googleButton}
           disabled
-          title="Google sign-in is not configured yet"
+          title="Google sign-in (TBA)"
         >
           <span className={styles.googleIcon}>G</span>
           Continue with Google
@@ -229,7 +229,7 @@ export default function RegisterPage() {
         <p className={styles.signInText}>
           Already have an account?{" "}
           <Link href="/login">
-            Sign in
+            Click here to sign in.
           </Link>
         </p>
 
