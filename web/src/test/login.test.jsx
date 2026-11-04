@@ -1,3 +1,7 @@
+jest.mock('../lib/auth/session',() =>({
+    createSession: jest.fn(),
+}));
+
 function mockNextRequest(bodyData){
     return {
         json: async() => bodyData,
@@ -11,8 +15,8 @@ test("Prevents user login when one or more fields are empty",async () =>{
     const body = await response.json();
 
     console.log(response.status);
-    console.log(body);
+    console.log(body.message);
 
     expect(response.status).toBe(400);
-    expect(body.message).toBe("Please fill in all required fields.");
+    expect(body.message).toBe("Please fill out the forms.");
 });

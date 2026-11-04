@@ -5,7 +5,7 @@ test("Supabase connection is successful",async () =>{
     const body = await response.json();
 
     console.log(response.status);
-    console.log(body);
+    console.log(body.message);
 
     expect(response.status).toBe(200);
     expect(body.success).toBe(true);
