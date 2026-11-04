@@ -241,3 +241,333 @@
     font-size: 26px;
   }
 }
+
+
+/* Registration Modal Overrides */
+
+.modalPage {
+  min-height: auto !important;
+  width: 100%;
+  padding: 0 !important;
+  margin: 0;
+  background: transparent !important;
+  justify-content: center;
+  align-items: center;
+}
+
+.modalPage .card {
+  width: 100%;
+  max-width: 520px;
+  max-height: 85vh;
+  overflow-y: auto;
+  margin: 0 auto;
+  box-shadow: none;
+}
+
+.modalPage .closeButton {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.modalLink {
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: #285da5;
+  font: inherit;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.modalLink:hover {
+  text-decoration: underline;
+}
+
+/* ===== DARK BLUE REGISTRATION DESIGN ===== */
+
+.page,
+.modalPage {
+  background: transparent !important;
+  color: #eef2ff !important;
+  color-scheme: dark;
+  font-family: Arial, sans-serif;
+}
+
+.modalPage {
+  min-height: auto !important;
+  padding: 0 !important;
+  width: 100%;
+}
+
+.modalPage .card {
+  width: 100%;
+  max-width: 380px;
+  max-height: 85vh;
+  overflow-y: auto;
+  margin: 0 auto;
+  padding: 28px;
+  box-sizing: border-box;
+
+  background: #081747 !important;
+  color: #eef2ff !important;
+  border: 1px solid #1b347c;
+  border-radius: 19px;
+  box-shadow: none;
+}
+
+.card {
+  background: #081747 !important;
+  color: #eef2ff !important;
+  border-color: #1b347c;
+}
+
+.header {
+  margin-bottom: 22px;
+}
+
+.header h1 {
+  color: #f1f4ff !important;
+  font-size: 25px;
+  letter-spacing: -0.5px;
+}
+
+.header p {
+  color: #9eadd2 !important;
+  font-size: 14px;
+}
+
+.closeButton {
+  color: #a5b4d6 !important;
+}
+
+.notice {
+  background: #102968 !important;
+  color: #aebde3 !important;
+  border: 1px solid #24458e;
+}
+
+.nameRow {
+  grid-template-columns: 1fr;
+  gap: 0;
+}
+
+.field {
+  gap: 7px;
+  margin-bottom: 14px;
+}
+
+.field label {
+  color: #aab9dc !important;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.field input {
+  height: 43px;
+  padding: 0 12px;
+  background: #020b2e !important;
+  color: #f1f4ff !important;
+  border: 1px solid #203d88;
+  border-radius: 9px;
+  font-size: 14px;
+}
+
+.field input:focus {
+  border-color: #3972ff;
+  box-shadow: 0 0 0 2px rgba(48, 100, 240, 0.2);
+}
+
+.field input::placeholder {
+  color: #61729f;
+}
+
+.showPassword {
+  color: #a8b9e7;
+}
+
+.passwordHint {
+  color: #9caed6 !important;
+}
+
+.errorMessage {
+  background: #351b35;
+  border-color: #8e405b;
+  color: #ffb6c5;
+}
+
+.successMessage {
+  background: #123b37;
+  border-color: #286c5a;
+  color: #a9f0d0;
+}
+
+.registerButton {
+  height: 43px;
+  background: linear-gradient(100deg, #1945bb, #2858d1);
+  color: white;
+  border: 1px solid #315ed2;
+  border-radius: 9px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.registerButton:hover:not(:disabled) {
+  background: linear-gradient(100deg, #2457d4, #3972ed);
+}
+
+.signInText {
+  color: #aab8d8 !important;
+  font-size: 12px;
+  margin-top: 18px;
+}
+
+.signInText a,
+.modalLink {
+  color: #3975ff !important;
+}
+
+.divider span {
+  background: #24396e;
+}
+
+.divider p {
+  color: #93a5d0;
+}
+
+.googleButton {
+  background: #0c2055;
+  color: #aab8d8;
+  border-color: #263e78;
+}
+
+
+/* ===== PASSWORD REQUIREMENTS ===== */
+
+.passwordRequirements {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin: -2px 0 18px;
+}
+
+.passwordRequirements p {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  color: #9baad0;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.passwordRequirements p span {
+  font-size: 12px;
+}
+
+.passwordRequirements .requirementMet {
+  color: #7ed9a7;
+}
+
+/* Better registration spacing */
+
+.modalPage .card {
+  max-width: 380px;
+  padding: 26px 28px;
+}
+
+.modalPage .header {
+  margin-bottom: 20px;
+}
+
+.modalPage .field {
+  margin-bottom: 13px;
+}
+
+.modalPage .registerButton {
+  margin-top: 2px;
+}
+
+.modalPage .signInText {
+  margin-bottom: 0;
+}
+
+
+
+/* =========================================
+   FORCE REGISTER CARD TO FOLLOW LIGHT MODE
+========================================= */
+
+:global(html[data-theme="light"]) .card,
+:global(html[data-theme="light"]) .modalPage .card {
+  background: #ffffff !important;
+  color: #17233f !important;
+  border: 1px solid #dce3ef !important;
+  color-scheme: light !important;
+}
+
+:global(html[data-theme="light"]) .card h1 {
+  color: #17233f !important;
+}
+
+:global(html[data-theme="light"]) .card p {
+  color: #647294;
+}
+
+:global(html[data-theme="light"]) .card .header p {
+  color: #647294 !important;
+}
+
+:global(html[data-theme="light"]) .card .field label {
+  color: #344054 !important;
+}
+
+:global(html[data-theme="light"]) .card .field input {
+  background: #ffffff !important;
+  color: #17233f !important;
+  border-color: #cbd5e1 !important;
+  color-scheme: light !important;
+}
+
+:global(html[data-theme="light"]) .card .notice {
+  background: #eff4ff !important;
+  color: #52627f !important;
+  border-color: #dce5f5 !important;
+}
+
+:global(html[data-theme="light"]) .card .passwordHint,
+:global(html[data-theme="light"]) .card .passwordRequirements p {
+  color: #647294 !important;
+}
+
+:global(html[data-theme="light"]) .card .signInText {
+  color: #647294 !important;
+}
+
+:global(html[data-theme="light"]) .card .signInText a,
+:global(html[data-theme="light"]) .card .modalLink {
+  color: #2858c5 !important;
+}
+
+:global(html[data-theme="light"]) .card .closeButton,
+:global(html[data-theme="light"]) .card .showPassword {
+  color: #2858c5 !important;
+}
+
+:global(html[data-theme="light"]) .card .googleButton {
+  background: #ffffff !important;
+  color: #647294 !important;
+  border-color: #dce3ef !important;
+}
+
+:global(html[data-theme="light"]) .card .divider span {
+  background: #dce3ef !important;
+}
+
+:global(html[data-theme="light"]) .card .divider p {
+  color: #647294 !important;
+}

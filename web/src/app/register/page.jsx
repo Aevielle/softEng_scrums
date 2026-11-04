@@ -5,16 +5,30 @@ import { useState } from "react";
 import Link from "next/link";
 import styles from "./register.module.css";
 
-export default function RegisterPage() {
+export default function RegisterPage({
+  modal = false,
+  onClose,
+  onSwitchToLogin,
+}) {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+
+  const validEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+  const hasMinimumLength = password.length >= 8;
+  const hasLettersAndNumbers =
+    /[A-Za-z]/.test(password) && /\d/.test(password);
+  const passwordsMatch =
+    password.length > 0 && password === confirmPassword;
 
   async function handleRegister(event) {
     event.preventDefault();
@@ -22,13 +36,35 @@ export default function RegisterPage() {
     setError("");
     setSuccess("");
 
+    // Required fields
     if (
       !firstName.trim() ||
       !lastName.trim() ||
       !email.trim() ||
-      !password
+      !password ||
+      !confirmPassword
     ) {
-      setError("This field is required.");
+      setError("Please complete all required fields.");
+      return;
+    }
+
+    // Email validation
+    if (!validEmail) {
+      setError("Please enter a valid email address.");
+      return;
+    }
+
+    // Password validation
+    if (!hasMinimumLength || !hasLettersAndNumbers) {
+      setError(
+        "Password must contain at least 8 characters, including letters and numbers."
+      );
+      return;
+    }
+
+    // Confirm password validation
+    if (!passwordsMatch) {
+      setError("Passwords do not match.");
       return;
     }
 
@@ -41,9 +77,9 @@ export default function RegisterPage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          firstName,
-          lastName,
-          email,
+          firstName: firstName.trim(),
+          lastName: lastName.trim(),
+          email: email.trim().toLowerCase(),
           password,
         }),
       });
@@ -55,16 +91,19 @@ export default function RegisterPage() {
         return;
       }
 
-      setSuccess(result.message);
+      setSuccess(
+        result.message ||
+          "Registration successful! Your account is waiting for approval."
+      );
 
       setFirstName("");
       setLastName("");
       setEmail("");
       setPassword("");
-
+      setConfirmPassword("");
     } catch (err) {
       setError(
-        "No internet connection. Please check your Wi-Fi and try again."
+        "Unable to connect. Please check your internet connection and try again."
       );
     } finally {
       setLoading(false);
@@ -72,79 +111,71 @@ export default function RegisterPage() {
   }
 
   return (
-    <main className={styles.page}>
+    <main className={`${styles.page} ${modal ? styles.modalPage : ""}`}>
       <section className={styles.card}>
 
         {/* Header */}
         <header className={styles.header}>
           <div>
             <h1>Create your account</h1>
-            <p>Join Hope, Inc. ERP</p>
+            <p>New accounts start as User.</p>
           </div>
 
-          <Link
-            href="/"
-            className={styles.closeButton}
-            aria-label="Close registration"
-          >
-            ×
-          </Link>
+          {modal ? (
+            <button
+              type="button"
+              className={styles.closeButton}
+              onClick={onClose}
+              aria-label="Close registration"
+            >
+              ×
+            </button>
+          ) : (
+            <Link
+              href="/"
+              className={styles.closeButton}
+              aria-label="Close registration"
+            >
+              ×
+            </Link>
+          )}
         </header>
-
-        {/* Account Information */}
-        <div className={styles.notice}>
-          New accounts are created as <strong>User</strong>.
-          Superadmin and Admin roles can only be assigned by
-          existing administrators.
-        </div>
 
         <form onSubmit={handleRegister} noValidate>
 
-          {/* First Name and Last Name */}
-          <div className={styles.nameRow}>
+          {/* First Name */}
+          <div className={styles.field}>
+            <label htmlFor="firstName">First name</label>
+            <input
+              id="firstName"
+              type="text"
+              placeholder="Enter your first name"
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
+              autoComplete="given-name"
+            />
+          </div>
 
-            <div className={styles.field}>
-              <label htmlFor="firstName">
-                First name
-              </label>
-
-              <input
-                id="firstName"
-                type="text"
-                placeholder="First name"
-                value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
-                autoComplete="given-name"
-              />
-            </div>
-
-            <div className={styles.field}>
-              <label htmlFor="lastName">
-                Last name
-              </label>
-
-              <input
-                id="lastName"
-                type="text"
-                placeholder="Last name"
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
-                autoComplete="family-name"
-              />
-            </div>
-
+          {/* Last Name */}
+          <div className={styles.field}>
+            <label htmlFor="lastName">Last name</label>
+            <input
+              id="lastName"
+              type="text"
+              placeholder="Enter your last name"
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
+              autoComplete="family-name"
+            />
           </div>
 
           {/* Email */}
           <div className={styles.field}>
-            <label htmlFor="email">
-              Email address
-            </label>
-
+            <label htmlFor="email">Email</label>
             <input
               id="email"
               type="email"
-              placeholder="you@example.com"
+              placeholder="Enter your email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               autoComplete="email"
@@ -153,15 +184,13 @@ export default function RegisterPage() {
 
           {/* Password */}
           <div className={styles.field}>
-            <label htmlFor="password">
-              Password
-            </label>
+            <label htmlFor="password">Password</label>
 
             <div className={styles.passwordWrapper}>
               <input
                 id="password"
                 type={showPassword ? "text" : "password"}
-                placeholder="Create a strong password"
+                placeholder="Create a password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 autoComplete="new-password"
@@ -171,25 +200,70 @@ export default function RegisterPage() {
                 type="button"
                 className={styles.showPassword}
                 onClick={() => setShowPassword(!showPassword)}
+                aria-label={showPassword ? "Hide password" : "Show password"}
               >
-                {showPassword ? "Hide" : "Show"}
+                {showPassword ? "◉" : "◎"}
               </button>
             </div>
-
-            <small className={styles.passwordHint}>
-              At least 8 characters, uppercase and lowercase
-              letters, a number, and a special character.
-            </small>
           </div>
 
-          {/* Error Message */}
+          {/* Confirm Password */}
+          <div className={styles.field}>
+            <label htmlFor="confirmPassword">Confirm password</label>
+
+            <div className={styles.passwordWrapper}>
+              <input
+                id="confirmPassword"
+                type={showConfirmPassword ? "text" : "password"}
+                placeholder="Confirm your password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                autoComplete="new-password"
+              />
+
+              <button
+                type="button"
+                className={styles.showPassword}
+                onClick={() =>
+                  setShowConfirmPassword(!showConfirmPassword)
+                }
+                aria-label={
+                  showConfirmPassword
+                    ? "Hide confirm password"
+                    : "Show confirm password"
+                }
+              >
+                {showConfirmPassword ? "◉" : "◎"}
+              </button>
+            </div>
+          </div>
+
+          {/* Password Requirements */}
+          <div className={styles.passwordRequirements}>
+            <p className={hasMinimumLength ? styles.requirementMet : ""}>
+              <span>{hasMinimumLength ? "✓" : "○"}</span>
+              At least 8 characters
+            </p>
+
+            <p className={hasLettersAndNumbers ? styles.requirementMet : ""}>
+              <span>{hasLettersAndNumbers ? "✓" : "○"}</span>
+              Includes letters and numbers
+            </p>
+
+            <p className={passwordsMatch ? styles.requirementMet : ""}>
+              <span>{passwordsMatch ? "✓" : "○"}</span>
+              Passwords match
+            </p>
+          </div>
+
+          {/* Error */}
           {error && (
             <div className={styles.errorMessage} role="alert">
               {error}
             </div>
           )}
 
-          {/* Success Message */}
+          {/* Success */}
           {success && (
             <div className={styles.successMessage} role="status">
               {success}
@@ -202,35 +276,25 @@ export default function RegisterPage() {
             className={styles.registerButton}
             disabled={loading}
           >
-            {loading ? "Registering..." : "Register"}
+            {loading ? "Creating account..." : "Create Account"}
           </button>
-
         </form>
 
-        {/* Divider */}
-        <div className={styles.divider}>
-          <span></span>
-          <p>or</p>
-          <span></span>
-        </div>
-
-        {/* Google Sign In Placeholder */}
-        <button
-          type="button"
-          className={styles.googleButton}
-          disabled
-          title="Google sign-in (TBA)"
-        >
-          <span className={styles.googleIcon}>G</span>
-          Continue with Google
-        </button>
-
-        {/* Sign In Link */}
+        {/* Sign In */}
         <p className={styles.signInText}>
-          Already have an account?{" "}
-          <Link href="/login">
-            Click here to sign in.
-          </Link>
+          Have an account?{" "}
+
+          {modal ? (
+            <button
+              type="button"
+              className={styles.modalLink}
+              onClick={onSwitchToLogin}
+            >
+              Sign in.
+            </button>
+          ) : (
+            <Link href="/login">Sign in.</Link>
+          )}
         </p>
 
       </section>

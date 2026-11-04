@@ -1,17 +1,384 @@
 .wrap { min-height: 100vh; display: grid; place-items: center; background: #f5f5f5; padding: 16px; }
-.card { width: 100%; max-width: 360px; background: #fff; border: 1px solid #dfe6ee; border-radius: 16px; padding: 28px; display: flex; flex-direction: column; gap: 8px; }
-.card h1 { font-size: 28px; font-weight: 800; margin: 0; }
+.card { position: relative; width: 100%; max-width: 360px; background: #fff; border: 1px solid #dfe6ee; border-radius: 16px; padding: 28px; display: flex; flex-direction: column; gap: 8px; }
+.card h1 { font-size: 24px; font-weight: 600; margin: 0; }
+.header {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 28px;
+}
+
+.closeButton {
+  position: absolute;
+  top: 14px;
+  right: 18px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 30px;
+  height: 30px;
+
+  color: #6b7f99;
+  font-size: 26px;
+  text-decoration: none;
+  line-height: 1;
+
+  border-radius: 6px;
+  transition: background 0.2s;
+}
+
+.closeButton:hover { background: #1b2a41; }
+
+.signUpText { text-align: center; font-size: var(--fs-body); margin: 8px 0 0; }
+.signUpText a { font-weight: 700; color: #1b2a41; }
+
 .sub { color: #6b7f99; margin: 0 0 12px; }
-.card label { font-size: 13px; font-weight: 700; color: #1b2a41; }
+.card label { font-size: 14px; font-weight: 700; color: #1b2a41; }
 .card input[type='email'], .card input[type='password'], .card input[type='text'] { width: 100%; padding: 10px 12px; border: 1px solid #aab4c0; border-radius: 8px; }
 .bad { border-color: #c4283c !important; }
 .pw { position: relative; }
 .pw button { position: absolute; right: 8px; top: 8px; background: none; border: 0; font-size: 12px; cursor: pointer; }
-.row { display: flex; justify-content: space-between; align-items: center; font-size: 13px; margin: 6px 0; }
+.row { display: flex; justify-content: space-between; align-items: center; font-size: 14px; margin: 6px 0; }
 .check { display: flex; gap: 6px; align-items: center; font-weight: 400 !important; }
 .submit { padding: 12px; border: 0; border-radius: 8px; color: #fff; font-weight: 700; cursor: pointer; background: linear-gradient(90deg, #000, #bbb); }
 .submit:disabled { opacity: .6; }
-.foot { text-align: center; font-size: 13px; }
+.foot { text-align: center; font-size: 14px; }
 .toast { position: fixed; top: 24px; right: 24px; display: flex; gap: 12px; padding: 12px 16px; background: #fff; border-left: 5px solid #c4283c; border-radius: 6px; box-shadow: 0 2px 10px rgba(0,0,0,.25); max-width: 340px; }
-.toast p { margin: 4px 0 0; font-size: 13px; font-style: italic; }
+.toast p { margin: 4px 0 0; font-size: 12px; font-style: italic; }
 .toast button { background: none; border: 0; cursor: pointer; font-size: 18px; }
+
+.center { text-align: center; align-items: stretch; }
+.icon { width: 64px; height: 64px; border-radius: 50%; background: #d9d9d9; display: grid; place-items: center; font-size: 28px; margin: 8px auto 0; }
+.pill { align-self: center; font-size: 12px; font-weight: 700; color: #555; background: #d9d9d9; padding: 4px 12px; border-radius: 6px; }
+.center h1 { font-size: 30px; }
+.success { color: #1b7a3d; font-weight: 700; }
+
+
+/* Login Modal Overrides */
+
+.modalWrap {
+  min-height: auto !important;
+  width: 100%;
+  padding: 0 !important;
+  margin: 0;
+  background: transparent !important;
+  justify-content: center;
+}
+
+.modalWrap .card {
+  width: 100%;
+  max-width: 440px;
+  margin: 0 auto;
+  box-shadow: none;
+}
+
+.modalWrap .closeButton {
+  position: absolute;
+  top: 0;
+  right: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.modalLink {
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: #2858c5;
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* ===== DARK BLUE LOGIN DESIGN ===== */
+
+.wrap,
+.modalWrap {
+  background: transparent !important;
+  color: #eef2ff;
+  color-scheme: dark;
+}
+
+.modalWrap {
+  min-height: auto !important;
+  width: 100%;
+  padding: 0 !important;
+}
+
+.modalWrap .card {
+  width: 100%;
+  max-width: 380px;
+  margin: 0 auto;
+  padding: 28px;
+  box-sizing: border-box;
+
+  background: #081747;
+  color: #eef2ff;
+  border: 1px solid #1b347c;
+  border-radius: 19px;
+  box-shadow: none;
+}
+
+.card h1 {
+  color: #f1f4ff;
+  font-size: 25px;
+}
+
+.sub {
+  color: #a1afd4;
+  font-size: 14px;
+}
+
+.card label {
+  color: #aab9dc;
+  font-size: 12px;
+}
+
+.card input[type='email'],
+.card input[type='password'],
+.card input[type='text'] {
+  height: 43px;
+  padding: 0 12px;
+  background: #020b2e;
+  color: #f1f4ff;
+  border: 1px solid #203d88;
+  border-radius: 9px;
+  box-sizing: border-box;
+}
+
+.card input:focus {
+  outline: none;
+  border-color: #3972ff;
+  box-shadow: 0 0 0 2px rgba(48, 100, 240, 0.2);
+}
+
+.pw button {
+  color: #a8b9e7;
+}
+
+.row {
+  color: #aab8d8;
+}
+
+.check {
+  color: #aab8d8 !important;
+}
+
+.submit {
+  min-height: 43px;
+  background: linear-gradient(100deg, #1945bb, #2858d1);
+  color: white;
+  border: 1px solid #315ed2;
+  border-radius: 9px;
+}
+
+.submit:hover:not(:disabled) {
+  filter: brightness(1.15);
+}
+
+.foot,
+.signUpText {
+  color: #aab8d8;
+}
+
+.foot a,
+.signUpText a,
+.modalLink {
+  color: #3975ff;
+}
+
+.closeButton {
+  color: #a5b4d6;
+}
+
+.pill {
+  background: #102968;
+  color: #c4d2f5;
+}
+
+.toast {
+  background: #081747;
+  color: #eef2ff;
+  border: 1px solid #1b347c;
+}
+
+.toast p {
+  color: #aab8d8;
+}
+
+
+/* ===== DEMO ACCOUNT INFORMATION ===== */
+
+.demoNotice {
+  padding: 12px;
+  margin: 4px 0 8px;
+  background: #102968;
+  border: 1px solid #1b3984;
+  border-radius: 9px;
+  color: #aebfe9;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.demoNotice p {
+  margin: 0;
+}
+
+.demoNotice p + p {
+  margin-top: 2px;
+}
+
+/* ===== LOGIN MODAL SPACING ===== */
+
+.modalWrap .card {
+  max-width: 380px;
+  padding: 28px;
+  gap: 9px;
+}
+
+.modalWrap .header {
+  margin-bottom: 12px;
+}
+
+.modalWrap .row {
+  margin: 5px 0 9px;
+}
+
+.modalWrap .submit {
+  margin-top: 2px;
+}
+
+.modalWrap .signUpText {
+  margin-top: 8px;
+}
+
+
+/* =====================================
+   LIGHT MODE - LOGIN
+===================================== */
+
+:global(html[data-theme="light"]) .modalWrap {
+  color-scheme: light;
+  color: #17233f;
+}
+
+:global(html[data-theme="light"]) .modalWrap .card {
+  background: #ffffff;
+  color: #17233f;
+  border: 1px solid #dce3ef;
+}
+
+:global(html[data-theme="light"]) .card h1 {
+  color: #17233f;
+}
+
+:global(html[data-theme="light"]) .sub {
+  color: #647294;
+}
+
+:global(html[data-theme="light"]) .card label {
+  color: #344054;
+}
+
+:global(html[data-theme="light"]) .card input[type="email"],
+:global(html[data-theme="light"]) .card input[type="password"],
+:global(html[data-theme="light"]) .card input[type="text"] {
+  background: #ffffff;
+  color: #17233f;
+  border-color: #cbd5e1;
+  color-scheme: light;
+}
+
+:global(html[data-theme="light"]) .card input::placeholder {
+  color: #94a3b8;
+}
+
+:global(html[data-theme="light"]) .pw button {
+  color: #2858c5;
+}
+
+:global(html[data-theme="light"]) .row,
+:global(html[data-theme="light"]) .check {
+  color: #52627f;
+}
+
+:global(html[data-theme="light"]) .foot,
+:global(html[data-theme="light"]) .signUpText {
+  color: #647294;
+}
+
+:global(html[data-theme="light"]) .foot a,
+:global(html[data-theme="light"]) .signUpText a,
+:global(html[data-theme="light"]) .modalLink {
+  color: #2858c5;
+}
+
+:global(html[data-theme="light"]) .closeButton {
+  color: #647294;
+}
+
+:global(html[data-theme="light"]) .closeButton:hover {
+  background: #edf2ff;
+}
+
+:global(html[data-theme="light"]) .pill {
+  background: #eaf0ff;
+  color: #2858c5;
+}
+
+:global(html[data-theme="light"]) .toast {
+  background: #ffffff;
+  color: #17233f;
+  border-color: #dce3ef;
+}
+
+:global(html[data-theme="light"]) .toast p {
+  color: #647294;
+}
+
+:global(html[data-theme="light"]) .demoNotice {
+  background: #eff4ff;
+  border-color: #dce5f5;
+  color: #52627f;
+}
+
+
+/* =====================================
+   INLINE EMPTY-FIELD VALIDATION
+===================================== */
+
+.fieldError {
+  margin: -3px 0 8px;
+  color: #dc2626;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.bad {
+  border: 1px solid #dc2626 !important;
+  box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.10);
+}
+
+.bad::placeholder {
+  color: #dc2626 !important;
+  opacity: 1;
+}
+
+/* Light mode validation */
+:global(html[data-theme="light"]) .fieldError {
+  color: #dc2626;
+}
+
+/* Dark mode validation */
+:global(html[data-theme="dark"]) .fieldError {
+  color: #ff7b86;
+}
+
+:global(html[data-theme="dark"]) .bad::placeholder {
+  color: #ff7b86 !important;
+}
