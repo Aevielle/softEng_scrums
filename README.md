@@ -72,6 +72,9 @@ A successful response confirms that the application can perform the configured r
 ### To check the CREATE YOUR ACC
 http://localhost:3000/register
 
+### Sign in
+http://localhost:3000/login
+
 ### Environment Variables
 The `web/.env.example` file documents the required environment variables using placeholders. The local `web/.env.local` file contains machine-specific values and must not be committed to Git.
 
