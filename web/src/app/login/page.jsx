@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import styles from "./login.module.css";
+import { loginLocal } from "../lib/localAuth";
 
 const EMAIL_RE = /^\S+@\S+\.\S+$/;
 
@@ -122,34 +123,15 @@ export default function LoginPage({
     setLoading(true);
 
     try {
-      const res = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(form),
-      });
+      const result = loginLocal(form.email.trim(), form.password);
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        setError(data);
-        return;
-      }
-
-      // Admin accounts still go to their verification code step.
-      const needsVerification =
-        data.requiresVerification ||
-        data.requiresOtp ||
-        /verif|otp/i.test(data.redirect || "");
-
-      if (needsVerification && data.redirect) {
-        window.location.href = data.redirect;
+      if (!result.ok) {
+        setError(result);
         return;
       }
 
       // No dashboard yet: confirm the sign in in the popup.
-      setWelcome(describeUser(data, form.email.trim()));
+      setWelcome(describeUser(result, form.email.trim()));
       setForm((previous) => ({ ...previous, password: "" }));
     } catch {
       setError({

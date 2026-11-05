@@ -56,19 +56,34 @@ const AUTH_LABELS = {
   forgot: "Reset your password",
 };
 
+const INFO = {
+  privacy: {
+    title: "Privacy",
+    text: "This is a classroom prototype. Everything you enter is saved only in this browser and is never sent to a server.",
+  },
+  support: {
+    title: "Support",
+    text: "Need help? Ask your course instructor, or an Admin on your Hope, Inc. ERP team.",
+  },
+};
+
 export default function Home() {
   const [authModal, setAuthModal] = useState(null);
+  const [infoModal, setInfoModal] = useState(null); // "privacy" | "support" | null
   const [scrolled, setScrolled] = useState(false);
 
-  /* Lock scroll + close on Escape while the auth modal is open */
+  /* Lock scroll + close on Escape while any modal is open */
   useEffect(() => {
-    if (!authModal) return;
+    if (!authModal && !infoModal) return;
 
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
 
     function handleEscape(event) {
-      if (event.key === "Escape") setAuthModal(null);
+      if (event.key === "Escape") {
+        setAuthModal(null);
+        setInfoModal(null);
+      }
     }
 
     document.addEventListener("keydown", handleEscape);
@@ -76,7 +91,7 @@ export default function Home() {
       document.body.style.overflow = previousOverflow;
       document.removeEventListener("keydown", handleEscape);
     };
-  }, [authModal]);
+  }, [authModal, infoModal]);
 
   /* Header gets a stronger look once the page scrolls */
   useEffect(() => {
@@ -203,7 +218,18 @@ export default function Home() {
           </div>
 
           <div className={`${styles.previewWrap} ${styles.rise}`} style={{ "--d": "0.7s" }}>
-            <div className={styles.preview}>
+              <div
+              className={styles.preview}
+              role="button"
+              tabIndex={0}
+              onClick={() => setAuthModal("login")}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  setAuthModal("login");
+                }
+              }}
+              >
               <div className={styles.previewTop}>
                 <strong>Dashboard preview</strong>
                 <button
@@ -263,6 +289,15 @@ export default function Home() {
                   className={`${styles.card} ${styles.reveal}`}
                   data-reveal
                   style={{ transitionDelay: `${0.12 + i * 0.12}s` }}
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => setAuthModal("login")}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      setAuthModal("login");
+                    }
+                  }}
                 >
                   <span className={styles.cardNum}>{m.num}</span>
                   <span className={`${styles.mark} ${styles[m.tone]}`} aria-hidden="true">
@@ -300,8 +335,12 @@ export default function Home() {
           style={{ transitionDelay: "0.3s" }}
         >
           <span className={styles.note}>© 2026 Hope, Inc. ERP</span>
-          <a href="#" className={styles.footLink}>Privacy</a>
-          <a href="#" className={styles.footLink}>Support</a>
+          <button type="button" className={styles.footLink} onClick={() => setInfoModal("privacy")}>
+            Privacy
+          </button>
+          <button type="button" className={styles.footLink} onClick={() => setInfoModal("support")}>
+            Support
+          </button>
         </span>
       </footer>
 
@@ -339,6 +378,30 @@ export default function Home() {
                 onSwitchToLogin={() => setAuthModal("login")}
               />
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Privacy / Support Modal */}
+      {infoModal && (
+        <div className={styles.infoOverlay} onClick={() => setInfoModal(null)}>
+          <div
+            className={styles.infoModal}
+            role="dialog"
+            aria-modal="true"
+            aria-label={INFO[infoModal].title}
+            onClick={(event) => event.stopPropagation()}
+          >
+            <h2 className={styles.infoTitle}>{INFO[infoModal].title}</h2>
+            <p className={styles.infoText}>{INFO[infoModal].text}</p>
+            <button
+              type="button"
+              className={styles.infoClose}
+              onClick={() => setInfoModal(null)}
+              autoFocus
+            >
+              Close
+            </button>
           </div>
         </div>
       )}

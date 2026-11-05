@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import styles from "./register.module.css";
+import { registerLocal } from "../lib/localAuth";
 
 function EyeIcon({ off }) {
   return off ? (
@@ -119,22 +120,14 @@ export default function RegisterPage({
     setLoading(true);
 
     try {
-      const response = await fetch("/api/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          firstName: firstName.trim(),
-          lastName: lastName.trim(),
-          email: email.trim().toLowerCase(),
-          password,
-        }),
+            const result = registerLocal({
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+        email: email.trim().toLowerCase(),
+        password,
       });
 
-      const result = await response.json();
-
-      if (!response.ok) {
+      if (!result.ok) {
         showError(
           "Registration Failed",
           result.message || "Registration failed."
