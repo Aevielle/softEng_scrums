@@ -57,3 +57,22 @@ test("Returns 401 when password is wrong",async () =>{
     expect(body.message).toBe("Invalid email or password. Please check and try again.");
 });
 
+test("Returns 403 if user is blocked.", async () =>{
+    const mockRequest = mockNextRequest({
+          firstName:"Blocked",
+          lastName:"User",
+          email:"blocked_user@domain.com", 
+          password:"@ValidPass1",
+    });
+    const response = await POST(mockRequest);
+    const body = await response.json();
+
+    console.log(response.status);
+    console.log(body.message);
+
+    expect(response.status).toBe(403);
+    expect(body.message).toBe("Your account is blocked. Please contact your administrator.");
+});
+
+test("Returns 200 when login is successful")
+
