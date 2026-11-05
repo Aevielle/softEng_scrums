@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import styles from "./forgot-password.module.css";
+import { forgotLocal } from "../lib/localAuth";
 
 const COOLDOWN_MS = 30_000;
 const DEFAULT_EXPIRY_SECONDS = 180; // 3:00
@@ -83,15 +84,9 @@ export default function ForgotPasswordPage({
     setLoading(true);
 
     try {
-      const res = await fetch("/api/auth/forgot-password", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: target }),
-      });
+      const data = forgotLocal(target);
 
-      const data = await res.json();
-
-      if (!res.ok) {
+      if (!data.ok) {
         setError({
           title: serverErrorTitle(data),
           message: data.message || "We couldn't find an account with that email.",

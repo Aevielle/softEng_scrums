@@ -201,7 +201,7 @@
   overflow: hidden;
   width: 100%;
   min-height: 960px;
-  padding: 90px 16px 120px;
+  padding: 150px 16px 120px;
   text-align: center;
   display: flex;
   flex-direction: column;
@@ -687,7 +687,7 @@
 /* ---------- tablet / phone ---------- */
 @media (max-width: 900px) {
   .grid { grid-template-columns: 1fr; }
-  .hero { min-height: 0; padding-top: 64px; }
+  .hero { min-height: 0; padding-top: 120px; }
 }
 
 @media (max-width: 640px) {
@@ -837,3 +837,90 @@
   color: var(--auth-text);
   box-shadow: 0 20px 70px rgba(25, 45, 85, 0.2);
 }
+
+/* =====================================
+   CLICKABLE PREVIEW + CARDS
+===================================== */
+.preview { cursor: pointer; }
+.card { cursor: pointer; }
+
+/* =====================================
+   FOOTER LINKS AS BUTTONS
+===================================== */
+button.footLink {
+  padding: 0;
+  background: transparent;
+  border: none;
+  font: inherit;
+  font-size: var(--fs-small);
+  cursor: pointer;
+}
+
+/* =====================================
+   PRIVACY / SUPPORT POP-UP
+===================================== */
+.infoOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(1, 5, 24, 0.65);
+  backdrop-filter: blur(9px);
+  overflow-y: auto;
+}
+
+.infoModal {
+  width: 100%;
+  max-width: 340px;
+  padding: 18px;
+  border-radius: 16px;
+  background: #081747;
+  border: 1px solid #1b347c;
+  color: #eef2ff;
+  box-shadow: 0 20px 70px rgba(0, 0, 0, 0.5);
+  animation: modalAppear 0.2s ease-out;
+}
+
+.infoTitle {
+  margin: 0 0 8px;
+  font-size: 17px;
+  font-weight: 700;
+  color: #f1f4ff;
+}
+
+.infoText {
+  margin: 0 0 18px;
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: #aab8d8;
+}
+
+.infoClose {
+  width: 100%;
+  min-height: 40px;
+  border: 1px solid #315ed2;
+  border-radius: 9px;
+  background: linear-gradient(100deg, #1945bb, #2858d1);
+  color: #ffffff;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.2s ease, filter 0.2s ease;
+}
+.infoClose:hover { filter: brightness(1.15); transform: translateY(-1px); }
+.infoClose:active { transform: translateY(0); }
+.infoClose:focus-visible { outline: 2px solid #8fb0ff; outline-offset: 2px; }
+
+:global(html[data-theme="light"]) .infoOverlay { background: rgba(20, 35, 65, 0.35); }
+:global(html[data-theme="light"]) .infoModal {
+  background: #ffffff;
+  border-color: #dce5f5;
+  color: #17233f;
+  box-shadow: 0 20px 70px rgba(25, 45, 85, 0.2);
+}
+:global(html[data-theme="light"]) .infoTitle { color: #17233f; }
+:global(html[data-theme="light"]) .infoText { color: #647294; }
