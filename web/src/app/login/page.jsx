@@ -4,12 +4,51 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import styles from "./login.module.css";
 
+const EMAIL_RE = /^\S+@\S+\.\S+$/;
+
 const TITLES = {
   EMPTY: "Empty Field",
+  WRONG_EMAIL: "Wrong Email",
+  NOT_FOUND: "Account not Found",
   INVALID: "Sign in failed",
   BLOCKED: "Account Blocked",
   PENDING: "Account Pending",
 };
+
+function toastTitle(error) {
+  if (error.title) return error.title;
+  if (TITLES[error.code]) return TITLES[error.code];
+  if (/not found/i.test(error.message || "")) return TITLES.NOT_FOUND;
+  return "Login Error";
+}
+
+function titleCase(value) {
+  return String(value || "")
+    .toLowerCase()
+    .replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+// Name / role shown in the "Welcome back" popup.
+// Uses whatever the API returns and falls back to the email for the demo accounts.
+function describeUser(data, email) {
+  const person = data?.user || data || {};
+  const local = email.split("@")[0] || "";
+
+  const name =
+    person.firstName ||
+    (person.name ? String(person.name).split(" ")[0] : "") ||
+    titleCase(local.split(/[._-]/)[0]);
+
+  const role = person.role
+    ? titleCase(String(person.role).replace(/[_-]+/g, " "))
+    : local.startsWith("superadmin")
+      ? "Super Admin"
+      : local.startsWith("admin")
+        ? "Admin"
+        : "User";
+
+  return { name: name || "there", email: person.email || email, role };
+}
 
 function EyeIcon({ off }) {
   return off ? (
@@ -31,6 +70,7 @@ export default function LoginPage({
   modal = false,
   onClose,
   onSwitchToRegister,
+  onSwitchToForgot,
 }) {
   const [form, setForm] = useState({
     email: "",
@@ -42,8 +82,10 @@ export default function LoginPage({
   const [show, setShow] = useState(false);
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [welcome, setWelcome] = useState(null); // { name, email, role }
 
   const emptyEmail = submitted && !form.email.trim();
+  const badEmail = submitted && !EMAIL_RE.test(form.email.trim());
   const emptyPass = submitted && !form.password;
 
   // Toast closes itself after a few seconds.
@@ -59,11 +101,20 @@ export default function LoginPage({
     setSubmitted(true);
     setError(null);
 
-    // Validate each field separately.
+    // Required fields
     if (!form.email.trim() || !form.password) {
       setError({
         code: "EMPTY",
         message: "Please fill out the forms.",
+      });
+      return;
+    }
+
+    // Email format
+    if (!EMAIL_RE.test(form.email.trim())) {
+      setError({
+        code: "WRONG_EMAIL",
+        message: "Enter valid email address.",
       });
       return;
     }
@@ -86,7 +137,20 @@ export default function LoginPage({
         return;
       }
 
-      window.location.href = data.redirect;
+      // Admin accounts still go to their verification code step.
+      const needsVerification =
+        data.requiresVerification ||
+        data.requiresOtp ||
+        /verif|otp/i.test(data.redirect || "");
+
+      if (needsVerification && data.redirect) {
+        window.location.href = data.redirect;
+        return;
+      }
+
+      // No dashboard yet: confirm the sign in in the popup.
+      setWelcome(describeUser(data, form.email.trim()));
+      setForm((previous) => ({ ...previous, password: "" }));
     } catch {
       setError({
         code: "INVALID",
@@ -114,8 +178,72 @@ export default function LoginPage({
     setError(null);
   }
 
+  const wrapClass = `${styles.wrap} ${modal ? styles.modalWrap : ""}`;
+
+  /* ---------- Sign in confirmed ---------- */
+  if (welcome) {
+    return (
+      <main className={wrapClass}>
+        <section className={`${styles.card} ${styles.welcome}`}>
+          {modal ? (
+            <button
+              type="button"
+              className={styles.closeButton}
+              onClick={onClose}
+              aria-label="Close"
+            >
+              ×
+            </button>
+          ) : (
+            <Link href="/" className={styles.closeButton} aria-label="Close">
+              ×
+            </Link>
+          )}
+
+          <span className={styles.avatar} aria-hidden="true">
+            {welcome.name.charAt(0).toUpperCase()}
+          </span>
+
+          <span className={styles.welcomePill}>Sign in successful</span>
+
+          <h1 className={styles.welcomeTitle}>Welcome back, {welcome.name}!</h1>
+          <p className={styles.welcomeSub}>Your Sign in is confirmed.</p>
+
+          <div className={styles.details}>
+            <div className={styles.detailRow}>
+              <span>Email</span>
+              <strong>{welcome.email}</strong>
+            </div>
+            <div className={styles.detailRow}>
+              <span>Role</span>
+              <strong>{welcome.role}</strong>
+            </div>
+          </div>
+
+          <button type="button" className={styles.comingSoon} disabled>
+            Dashboard coming soon
+          </button>
+
+          {modal ? (
+            <button
+              type="button"
+              className={styles.backLink}
+              onClick={onClose}
+            >
+              Back to home
+            </button>
+          ) : (
+            <Link href="/" className={styles.backLink}>
+              Back to home
+            </Link>
+          )}
+        </section>
+      </main>
+    );
+  }
+
   return (
-    <main className={`${styles.wrap} ${modal ? styles.modalWrap : ""}`}>
+    <main className={wrapClass}>
 
       {/* Server / login error notification */}
       {error && (
@@ -123,7 +251,7 @@ export default function LoginPage({
           <span className={styles.toastIcon} aria-hidden="true">!</span>
 
           <div>
-            <strong>{TITLES[error.code] || "Login Error"}</strong>
+            <strong>{toastTitle(error)}</strong>
             <p>{error.message || "Something went wrong. Please try again."}</p>
           </div>
 
@@ -183,11 +311,11 @@ export default function LoginPage({
           type="email"
           autoComplete="email"
           value={form.email}
-          className={emptyEmail ? styles.bad : ""}
+          className={badEmail ? styles.bad : ""}
           placeholder={
             emptyEmail ? "Please fill out this form" : "Enter your email"
           }
-          aria-invalid={emptyEmail}
+          aria-invalid={badEmail}
           onChange={handleEmailChange}
         />
 
@@ -235,9 +363,19 @@ export default function LoginPage({
             Remember me
           </label>
 
-          <Link href="/forgot-password">
-            Forgot Password?
-          </Link>
+          {modal ? (
+            <button
+              type="button"
+              className={styles.linkButton}
+              onClick={onSwitchToForgot}
+            >
+              Forgot Password?
+            </button>
+          ) : (
+            <Link href="/forgot-password">
+              Forgot Password?
+            </Link>
+          )}
         </div>
 
         {/* Submit */}

@@ -7,6 +7,7 @@ import ThemeToggle from "./ThemeToggle";
 
 import LoginPage from "./login/page";
 import RegisterPage from "./register/page";
+import ForgotPasswordPage from "./forgot-password/page";
 
 const MODULES = [
   {
@@ -48,6 +49,12 @@ const MODULES = [
 ];
 
 const BARS = [28, 40, 34, 52, 44, 62, 72];
+
+const AUTH_LABELS = {
+  login: "Sign in to Hope ERP",
+  register: "Create your account",
+  forgot: "Reset your password",
+};
 
 export default function Home() {
   const [authModal, setAuthModal] = useState(null);
@@ -305,19 +312,28 @@ export default function Home() {
             className={styles.authModal}
             role="dialog"
             aria-modal="true"
-            aria-label={
-              authModal === "login" ? "Sign in to Hope ERP" : "Create your account"
-            }
+            aria-label={AUTH_LABELS[authModal]}
             onClick={(event) => event.stopPropagation()}
           >
-            {authModal === "login" ? (
+            {authModal === "login" && (
               <LoginPage
                 modal={true}
                 onClose={() => setAuthModal(null)}
                 onSwitchToRegister={() => setAuthModal("register")}
+                onSwitchToForgot={() => setAuthModal("forgot")}
               />
-            ) : (
+            )}
+
+            {authModal === "register" && (
               <RegisterPage
+                modal={true}
+                onClose={() => setAuthModal(null)}
+                onSwitchToLogin={() => setAuthModal("login")}
+              />
+            )}
+
+            {authModal === "forgot" && (
+              <ForgotPasswordPage
                 modal={true}
                 onClose={() => setAuthModal(null)}
                 onSwitchToLogin={() => setAuthModal("login")}

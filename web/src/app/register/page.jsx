@@ -40,7 +40,7 @@ export default function RegisterPage({
   // Toast: { type: "error" | "success", title, message }
   const [notice, setNotice] = useState(null);
 
-  const validEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+  const validEmail = /^\S+@\S+\.\S+$/.test(email.trim());
   const hasMinimumLength = password.length >= 8;
   const hasLettersAndNumbers =
     /[A-Za-z]/.test(password) && /\d/.test(password);
@@ -97,22 +97,22 @@ export default function RegisterPage({
 
     // Email validation
     if (!validEmail) {
-      showError("Invalid Email", "Please enter a valid email address.");
+      showError("Wrong Email", "Enter valid email address.");
       return;
     }
 
     // Password validation
     if (!hasMinimumLength || !hasLettersAndNumbers) {
       showError(
-        "Weak Password",
-        "Password must contain at least 8 characters, including letters and numbers."
+        "Password too weak",
+        "Use 8+ characters with letters and numbers."
       );
       return;
     }
 
     // Confirm password validation
     if (!passwordsMatch) {
-      showError("Passwords Don't Match", "Passwords do not match.");
+      showError("Passwords do not match", "Re-enter the same password.");
       return;
     }
 
