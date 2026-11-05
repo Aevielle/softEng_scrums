@@ -1,4 +1,3 @@
-
 .page {
   min-height: 100vh;
   display: flex;
@@ -570,4 +569,314 @@
 
 :global(html[data-theme="light"]) .card .divider p {
   color: #647294 !important;
+}
+
+
+/* =====================================
+   REGISTER POLISH (single-surface modal)
+===================================== */
+
+/* Use the site font instead of hard-coded Arial */
+.page,
+.modalPage {
+  font-family: inherit;
+}
+
+.card input,
+.card button {
+  font-family: inherit;
+}
+
+/* The homepage modal shell already draws the border + background,
+   so the card becomes transparent inside it (no double border). */
+.modalPage .card {
+  position: relative;
+  max-width: none;
+  max-height: none;
+  overflow: visible;
+  padding: 28px 24px 26px;
+  background: transparent !important;
+  border: none;
+  border-radius: 0;
+}
+
+:global(html[data-theme="light"]) .modalPage .card {
+  background: transparent !important;
+  border: none !important;
+}
+
+/* header */
+.modalPage .header {
+  margin-bottom: 18px;
+}
+
+.modalPage .header > div {
+  padding-right: 38px;
+}
+
+.modalPage .header h1 {
+  line-height: 1.2;
+}
+
+.modalPage .header p {
+  margin: 4px 0 0;
+  line-height: 1.4;
+}
+
+.modalPage .closeButton {
+  top: 14px;
+  right: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  font-size: 24px;
+  line-height: 1;
+  border-radius: 8px;
+  transition: background 0.2s ease, color 0.2s ease, transform 0.25s ease;
+}
+
+.modalPage .closeButton:hover {
+  background: rgba(120, 150, 230, 0.16);
+  color: #ffffff !important;
+  transform: rotate(90deg);
+}
+
+:global(html[data-theme="light"]) .modalPage .card .closeButton:hover {
+  background: #edf2ff;
+  color: #101a3a !important;
+}
+
+/* fields */
+.modalPage .field {
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.field input {
+  height: 48px;
+  padding: 0 14px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.field input:focus {
+  box-shadow: 0 0 0 3px rgba(48, 100, 240, 0.22);
+}
+
+.passwordWrapper input {
+  padding-right: 50px;
+}
+
+/* empty / invalid field look */
+.field input.bad {
+  background: #170d2e !important;
+  border-color: #e5384b !important;
+  box-shadow: 0 0 0 3px rgba(229, 56, 75, 0.14);
+}
+
+.field input.bad::placeholder {
+  color: #ff6b7a !important;
+  font-style: italic;
+  opacity: 1;
+}
+
+:global(html[data-theme="light"]) .card .field input.bad {
+  background: #fff5f6 !important;
+  border-color: #e5384b !important;
+}
+
+/* password eye */
+.showPassword {
+  top: 50%;
+  right: 6px;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border-radius: 8px;
+  transform: translateY(-50%);
+  transition: color 0.2s ease, background 0.2s ease;
+}
+
+.showPassword svg {
+  width: 19px;
+  height: 19px;
+}
+
+.showPassword:hover {
+  color: #ffffff;
+  background: rgba(120, 150, 230, 0.14);
+}
+
+:global(html[data-theme="light"]) .card .showPassword:hover {
+  color: #17233f !important;
+  background: #edf2ff;
+}
+
+/* password requirements */
+.passwordRequirements {
+  gap: 4px;
+  margin: 0 0 16px;
+}
+
+.passwordRequirements p {
+  gap: 7px;
+  font-size: 12px;
+  transition: color 0.25s ease;
+}
+
+.passwordRequirements p span {
+  display: inline-block;
+  width: 12px;
+  text-align: center;
+  font-size: 12px;
+}
+
+/* submit + sign in link */
+.registerButton {
+  height: 48px;
+  box-shadow: 0 6px 20px rgba(40, 89, 213, 0.3);
+  transition: transform 0.2s ease, filter 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.registerButton:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 26px rgba(40, 89, 213, 0.45);
+}
+
+.registerButton:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.modalPage .signInText {
+  margin-top: 16px;
+  font-size: 13px;
+}
+
+/* toast notification (top-right) */
+.toast {
+  position: fixed;
+  top: 72px;
+  right: 28px;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 300px;
+  max-width: 360px;
+  padding: 14px 16px;
+  background: #0a1a52;
+  color: #eef2ff;
+  border: 1px solid rgba(229, 56, 75, 0.45);
+  border-left: 4px solid #e5384b;
+  border-radius: 10px;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.45);
+  animation: toastIn 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.toast > div { flex: 1; }
+
+.toast strong {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.toast p {
+  margin: 2px 0 0;
+  color: #aab8d8;
+  font-size: 12.5px;
+  font-style: italic;
+  line-height: 1.45;
+}
+
+.toastIcon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #ff5d6c;
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.toastClose {
+  align-self: flex-start;
+  padding: 2px 4px;
+  border: none;
+  background: transparent;
+  color: #aab8d8;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.toastClose:hover { color: #ffffff; }
+
+.toastSuccess {
+  border-color: rgba(47, 191, 113, 0.45);
+  border-left-color: #2fbf71;
+}
+
+.toastSuccess .toastIcon { background: #2fbf71; }
+
+:global(html[data-theme="light"]) .toast {
+  background: #ffffff;
+  color: #17233f;
+  box-shadow: 0 12px 36px rgba(25, 45, 85, 0.18);
+}
+
+:global(html[data-theme="light"]) .toast p { color: #647294; }
+:global(html[data-theme="light"]) .toastClose { color: #647294; }
+:global(html[data-theme="light"]) .toastClose:hover { color: #17233f; }
+
+/* staggered entrance */
+.modalPage .header,
+.modalPage form > *,
+.modalPage .signInText {
+  animation: fieldIn 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.modalPage .header { animation-delay: 0.03s; }
+.modalPage form > *:nth-child(1) { animation-delay: 0.08s; }
+.modalPage form > *:nth-child(2) { animation-delay: 0.13s; }
+.modalPage form > *:nth-child(3) { animation-delay: 0.18s; }
+.modalPage form > *:nth-child(4) { animation-delay: 0.23s; }
+.modalPage form > *:nth-child(5) { animation-delay: 0.28s; }
+.modalPage form > *:nth-child(6) { animation-delay: 0.33s; }
+.modalPage form > *:nth-child(7) { animation-delay: 0.38s; }
+.modalPage .signInText { animation-delay: 0.43s; }
+
+@keyframes fieldIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes toastIn {
+  from { opacity: 0; transform: translateX(40px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .modalPage .header,
+  .modalPage form > *,
+  .modalPage .signInText,
+  .toast {
+    animation: none;
+  }
+}
+
+@media (max-width: 520px) {
+  .toast {
+    top: 64px;
+    right: 12px;
+    left: 12px;
+    min-width: 0;
+    max-width: none;
+  }
 }

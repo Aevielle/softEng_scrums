@@ -10,24 +10,40 @@ import RegisterPage from "./register/page";
 
 const MODULES = [
   {
-    mark: 'C',
-    title: 'Customers',
-    text: 'Keep customer records, accounts, payment terms and interaction history in one reliable place.',
+    num: "01",
+    tone: "blue",
+    title: "Customer Management",
+    text: "Keep customer records, payment terms, accounts, and interaction history in one reliable place.",
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M4 21V5a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v16" />
+        <path d="M15 10h3a2 2 0 0 1 2 2v9M2 21h20M8 7h3M8 11h3M8 15h3" />
+      </svg>
+    ),
   },
   {
-    mark: 'P',
-    title: 'Products',
-    text: 'Manage the product catalog, prices and inventory so every sale uses the right details.',
+    num: "02",
+    tone: "violet",
+    title: "Products & Sales",
+    text: "Connect product pricing and inventory to sales, line items, invoices, and revenue reporting.",
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M5 20V11M12 20V4M19 20v-6M3 20h18" />
+      </svg>
+    ),
   },
   {
-    mark: 'HR',
-    title: 'Human Resources',
-    text: 'Track employees, departments, job histories and payroll with clear, role-based access.',
-  },
-  {
-    mark: 'S',
-    title: 'Sales',
-    text: 'Connect orders, line items and invoices to customers and products, with revenue reporting.',
+    num: "03",
+    tone: "teal",
+    title: "People & Access",
+    text: "Manage employees, job histories, departments, roles, and module-level user rights.",
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+        <circle cx="9" cy="7" r="4" />
+        <path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
+      </svg>
+    ),
   },
 ];
 
@@ -35,7 +51,9 @@ const BARS = [28, 40, 34, 52, 44, 62, 72];
 
 export default function Home() {
   const [authModal, setAuthModal] = useState(null);
+  const [scrolled, setScrolled] = useState(false);
 
+  /* Lock scroll + close on Escape while the auth modal is open */
   useEffect(() => {
     if (!authModal) return;
 
@@ -43,25 +61,61 @@ export default function Home() {
     document.body.style.overflow = "hidden";
 
     function handleEscape(event) {
-      if (event.key === "Escape") {
-        setAuthModal(null);
-      }
+      if (event.key === "Escape") setAuthModal(null);
     }
 
     document.addEventListener("keydown", handleEscape);
-
     return () => {
       document.body.style.overflow = previousOverflow;
       document.removeEventListener("keydown", handleEscape);
     };
   }, [authModal]);
 
+  /* Header gets a stronger look once the page scrolls */
+  useEffect(() => {
+    function onScroll() {
+      setScrolled(window.scrollY > 12);
+    }
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  /* Scroll-reveal for anything marked with data-reveal */
+  useEffect(() => {
+    const items = document.querySelectorAll("[data-reveal]");
+
+    if (!("IntersectionObserver" in window)) {
+      items.forEach((el) => (el.dataset.in = "true"));
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.dataset.in = "true";
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.15, rootMargin: "0px 0px -40px 0px" }
+    );
+
+    items.forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <div className={styles.page}>
-      <header className={styles.header}>
+      <header className={`${styles.header} ${scrolled ? styles.headerScrolled : ""}`}>
         <Link href="/" className={styles.brand}>
           <span className={styles.logo} aria-hidden="true">H</span>
-          <span>Hope, Inc. ERP</span>
+          <span
+            className={`${styles.brandText} ${scrolled ? styles.brandTextHidden : ""}`}
+          >
+            Hope, Inc.
+          </span>
         </Link>
         <nav className={styles.actions} aria-label="Account">
           <button
@@ -74,10 +128,10 @@ export default function Home() {
 
           <button
             type="button"
-            className={`${styles.btn} ${styles.secondary} ${styles.small}`}
+            className={`${styles.btn} ${styles.primary} ${styles.small}`}
             onClick={() => setAuthModal("register")}
           >
-            Register →
+            Register
           </button>
 
           <ThemeToggle />
@@ -85,16 +139,49 @@ export default function Home() {
       </header>
 
       <main>
+        {/* ================= HERO ================= */}
         <section className={styles.hero}>
-          <h1 className={styles.heroTitle}>
-            Run your business with <span className={styles.accent}>clarity.</span>
+          {/* animated background layers */}
+          <div className={styles.stars} aria-hidden="true" />
+          <div className={`${styles.orb} ${styles.orbA}`} aria-hidden="true" />
+          <div className={`${styles.orb} ${styles.orbB}`} aria-hidden="true" />
+          <div className={`${styles.orb} ${styles.orbC}`} aria-hidden="true" />
+
+          <svg
+            className={styles.waves}
+            viewBox="0 0 1440 360"
+            preserveAspectRatio="none"
+            aria-hidden="true"
+          >
+            <defs>
+              <linearGradient id="waveGrad" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" className={styles.waveStopA} />
+                <stop offset="50%" className={styles.waveStopB} />
+                <stop offset="100%" className={styles.waveStopA} />
+              </linearGradient>
+            </defs>
+            <path className={`${styles.wave} ${styles.wave1}`} d="M-40,250 C220,170 460,330 720,240 S1200,150 1480,220" />
+            <path className={`${styles.wave} ${styles.wave2}`} d="M-40,270 C240,200 480,330 740,260 S1180,180 1480,245" />
+            <path className={`${styles.wave} ${styles.wave3}`} d="M-40,230 C200,150 500,300 700,220 S1220,130 1480,200" />
+            <path className={`${styles.wave} ${styles.wave4}`} d="M-40,290 C260,230 460,340 760,285 S1160,210 1480,270" />
+          </svg>
+
+          <div className={styles.floor} aria-hidden="true">
+            <div className={styles.gridPlane} />
+          </div>
+
+          {/* content */}
+          <h1 className={`${styles.heroTitle} ${styles.rise}`} style={{ "--d": "0.05s" }}>
+            Run your business with{" "}
+            <span className={styles.accent}>clarity.</span>
           </h1>
-          <p className={styles.heroText}>
-            Hope, Inc. ERP unifies Customer Management, Product Catalog, Human
-            Resources, and Sales into one powerful platform. Built for teams of
-            every size.
+
+          <p className={`${styles.heroText} ${styles.rise}`} style={{ "--d": "0.25s" }}>
+            Hope, Inc. ERP brings customers, products, employees, sales, and
+            role-based access together in one dependable business system.
           </p>
-          <div className={styles.heroButtons}>
+
+          <div className={`${styles.heroButtons} ${styles.rise}`} style={{ "--d": "0.45s" }}>
             <button
               type="button"
               className={`${styles.btn} ${styles.primary}`}
@@ -103,75 +190,123 @@ export default function Home() {
               Sign in to Hope ERP →
             </button>
 
-            <button
-              type="button"
-              className={`${styles.btn} ${styles.secondary}`}
-              onClick={() => setAuthModal("register")}
-            >
-              Register
-            </button>
+            <a href="#modules" className={`${styles.btn} ${styles.secondary}`}>
+              Explore the modules
+            </a>
           </div>
-          <a href="#modules" className={styles.explore}>Explore the modules ↓</a>
 
-          <div className={styles.preview}>
-            <div className={styles.previewTop}>
-              <strong>Dashboard preview</strong>
-              <Link href="/login" className={styles.previewBtn}>Sign in to open</Link>
-            </div>
-            <div className={styles.tiles}>
-              <div className={styles.tile}><strong>Customers</strong><span>Accounts and terms</span></div>
-              <div className={styles.tile}><strong>Products</strong><span>Catalog and prices</span></div>
-              <div className={styles.tile}><strong>Sales</strong><span>Orders and revenue</span></div>
-            </div>
-            <div className={styles.bars} aria-hidden="true">
-              {BARS.map((h, i) => (
-                <span key={i} style={{ height: `${h}px` }} />
-              ))}
+          <div className={`${styles.previewWrap} ${styles.rise}`} style={{ "--d": "0.7s" }}>
+            <div className={styles.preview}>
+              <div className={styles.previewTop}>
+                <strong>Dashboard preview</strong>
+                <button
+                  type="button"
+                  className={styles.previewBtn}
+                  onClick={() => setAuthModal("login")}
+                >
+                  Sign in to open
+                </button>
+              </div>
+              <div className={styles.tiles}>
+                <div className={styles.tile}><strong>Customers</strong><span>Accounts and terms</span></div>
+                <div className={styles.tile}><strong>Products</strong><span>Catalog and prices</span></div>
+                <div className={styles.tile}><strong>Sales</strong><span>Orders and revenue</span></div>
+              </div>
+              <div className={styles.bars} aria-hidden="true">
+                {BARS.map((h, i) => (
+                  <span
+                    key={i}
+                    style={{ height: `${h}px`, "--d": `${0.9 + i * 0.1}s` }}
+                  />
+                ))}
+              </div>
             </div>
           </div>
         </section>
 
-        <section id="modules" className={styles.modules}>
-          <p className={styles.eyebrow}>One platform. Every workflow.</p>
-          <h2 className={styles.sectionTitle}>Everything your team needs to work from one source.</h2>
-          <p className={styles.sectionText}>
-            Four core modules. Three user roles. One unified system.
-          </p>
+        {/* ================= MODULES ================= */}
+        <section id="modules" className={styles.modulesWrap}>
+          <div className={`${styles.orb} ${styles.orbD}`} aria-hidden="true" />
+          <div className={`${styles.orb} ${styles.orbE}`} aria-hidden="true" />
 
-          <div className={styles.grid}>
-            {MODULES.map((m) => (
-              <article key={m.title} className={styles.card}>
-                <span className={styles.mark} aria-hidden="true">{m.mark}</span>
-                <h3>{m.title}</h3>
-                <p>{m.text}</p>
-              </article>
-            ))}
+          <div className={styles.modules}>
+            <p className={`${styles.eyebrow} ${styles.reveal}`} data-reveal>
+              One platform. Every workflow.
+            </p>
+            <h2
+              className={`${styles.sectionTitle} ${styles.reveal}`}
+              data-reveal
+              style={{ transitionDelay: "0.08s" }}
+            >
+              Everything your team needs to work from one source.
+            </h2>
+            <p
+              className={`${styles.sectionText} ${styles.reveal}`}
+              data-reveal
+              style={{ transitionDelay: "0.16s" }}
+            >
+              Replace disconnected spreadsheets with an ERP that keeps every
+              record linked, every role clear, and every report ready.
+            </p>
+
+            <div className={styles.grid}>
+              {MODULES.map((m, i) => (
+                <article
+                  key={m.title}
+                  className={`${styles.card} ${styles.reveal}`}
+                  data-reveal
+                  style={{ transitionDelay: `${0.12 + i * 0.12}s` }}
+                >
+                  <span className={styles.cardNum}>{m.num}</span>
+                  <span className={`${styles.mark} ${styles[m.tone]}`} aria-hidden="true">
+                    {m.icon}
+                  </span>
+                  <h3>{m.title}</h3>
+                  <p>{m.text}</p>
+                  <button
+                    type="button"
+                    className={styles.learn}
+                    onClick={() => setAuthModal("login")}
+                  >
+                    Learn more <span aria-hidden="true">→</span>
+                  </button>
+                </article>
+              ))}
+            </div>
           </div>
         </section>
       </main>
 
       <footer className={styles.footer}>
-        <span className={styles.brand}>
+        <span className={styles.footerLine} data-reveal aria-hidden="true" />
+        <span
+          className={`${styles.brand} ${styles.slideLeft}`}
+          data-reveal
+          style={{ transitionDelay: "0.15s" }}
+        >
           <span className={styles.logo} aria-hidden="true">H</span>
           Hope, Inc.
         </span>
-        <span className={styles.note}>© 2026 Hope, Inc. ERP</span>
+        <span
+          className={`${styles.footerLinks} ${styles.slideRight}`}
+          data-reveal
+          style={{ transitionDelay: "0.3s" }}
+        >
+          <span className={styles.note}>© 2026 Hope, Inc. ERP</span>
+          <a href="#" className={styles.footLink}>Privacy</a>
+          <a href="#" className={styles.footLink}>Support</a>
+        </span>
       </footer>
 
       {/* Authentication Modal */}
       {authModal && (
-        <div
-          className={styles.authOverlay}
-          onClick={() => setAuthModal(null)}
-        >
+        <div className={styles.authOverlay} onClick={() => setAuthModal(null)}>
           <div
             className={styles.authModal}
             role="dialog"
             aria-modal="true"
             aria-label={
-              authModal === "login"
-                ? "Sign in to Hope ERP"
-                : "Create your account"
+              authModal === "login" ? "Sign in to Hope ERP" : "Create your account"
             }
             onClick={(event) => event.stopPropagation()}
           >

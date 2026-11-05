@@ -382,3 +382,362 @@
 :global(html[data-theme="dark"]) .bad::placeholder {
   color: #ff7b86 !important;
 }
+
+
+/* =====================================
+   SIGN-IN POLISH (single-surface modal)
+===================================== */
+
+.card input,
+.card button {
+  font-family: inherit;
+}
+
+/* The modal shell on the homepage already draws the border + background,
+   so the card itself becomes transparent (no double border). */
+.modalWrap .card {
+  max-width: none;
+  padding: 28px 24px 26px;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  gap: 8px;
+}
+
+:global(html[data-theme="light"]) .modalWrap .card {
+  background: transparent;
+  border: none;
+}
+
+/* header */
+.header > div { padding-right: 38px; }
+
+.header h1 {
+  margin: 0;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+.header p {
+  margin: 4px 0 0;
+  font-size: 14px;
+  line-height: 1.4;
+  color: #a1afd4;
+}
+
+:global(html[data-theme="light"]) .header p { color: #647294; }
+
+.modalWrap .header { margin-bottom: 8px; }
+
+.modalWrap .closeButton {
+  top: 2px;
+  right: 0;
+  width: 30px;
+  height: 30px;
+  font-size: 24px;
+  border-radius: 8px;
+  transition: background 0.2s ease, color 0.2s ease, transform 0.25s ease;
+}
+
+.modalWrap .closeButton:hover {
+  background: rgba(120, 150, 230, 0.16);
+  color: #ffffff;
+  transform: rotate(90deg);
+}
+
+:global(html[data-theme="light"]) .modalWrap .closeButton:hover {
+  background: #edf2ff;
+  color: #101a3a;
+}
+
+/* demo notice */
+.demoNotice {
+  padding: 11px 12px;
+  margin: 6px 0 10px;
+  border-radius: 10px;
+}
+
+/* labels + inputs */
+.card label {
+  margin-top: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.card input[type='email'],
+.card input[type='password'],
+.card input[type='text'] {
+  height: 48px;
+  padding: 0 14px;
+  font-size: 14px;
+  border-radius: 10px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.pw input[type='password'],
+.pw input[type='text'] {
+  padding-right: 50px;
+}
+
+.card input::placeholder { color: #6f82b4; }
+
+.card input:focus {
+  border-color: #3972ff;
+  box-shadow: 0 0 0 3px rgba(48, 100, 240, 0.22);
+}
+
+/* empty-field error look */
+.card input.bad {
+  background: #170d2e;
+  border-color: #e5384b !important;
+  box-shadow: 0 0 0 3px rgba(229, 56, 75, 0.14);
+}
+
+.card input.bad::placeholder {
+  color: #ff6b7a !important;
+  font-style: italic;
+  opacity: 1;
+}
+
+:global(html[data-theme="light"]) .card input.bad {
+  background: #fff5f6;
+}
+
+/* password eye */
+.pw button {
+  top: 50%;
+  right: 6px;
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border-radius: 8px;
+  color: #8fa4d8;
+  transform: translateY(-50%);
+  transition: color 0.2s ease, background 0.2s ease;
+}
+
+.pw button svg {
+  width: 19px;
+  height: 19px;
+}
+
+.pw button:hover {
+  color: #ffffff;
+  background: rgba(120, 150, 230, 0.14);
+}
+
+:global(html[data-theme="light"]) .pw button:hover {
+  color: #17233f;
+  background: #edf2ff;
+}
+
+/* remember me + forgot password */
+.row { margin: 4px 0 8px; }
+
+.card label.check {
+  gap: 9px;
+  margin-top: 0;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.row a {
+  color: #4a7dff;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.row a:hover {
+  color: #7aa2ff;
+  text-decoration: underline;
+}
+
+:global(html[data-theme="light"]) .row a { color: #2858c5; }
+
+.check input[type='checkbox'] {
+  appearance: none;
+  -webkit-appearance: none;
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  border: 1.5px solid #3b5bb5;
+  border-radius: 5px;
+  background: #020b2e;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.check input[type='checkbox']::after {
+  content: "";
+  width: 9px;
+  height: 5px;
+  margin-top: -2px;
+  border-left: 2px solid #ffffff;
+  border-bottom: 2px solid #ffffff;
+  transform: rotate(-45deg) scale(0);
+  transition: transform 0.15s ease;
+}
+
+.check input[type='checkbox']:checked {
+  background: #2858d1;
+  border-color: #3d6bff;
+}
+
+.check input[type='checkbox']:checked::after {
+  transform: rotate(-45deg) scale(1);
+}
+
+.check input[type='checkbox']:focus-visible {
+  outline: 2px solid #3972ff;
+  outline-offset: 2px;
+}
+
+:global(html[data-theme="light"]) .check input[type='checkbox'] {
+  background: #ffffff;
+  border-color: #94a3b8;
+}
+
+:global(html[data-theme="light"]) .check input[type='checkbox']:checked {
+  background: #2858d1;
+  border-color: #2858d1;
+}
+
+/* submit + register link */
+.submit {
+  min-height: 48px;
+  font-size: 14px;
+  box-shadow: 0 6px 20px rgba(40, 89, 213, 0.3);
+  transition: transform 0.2s ease, filter 0.2s ease, box-shadow 0.2s ease;
+}
+
+.submit:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 26px rgba(40, 89, 213, 0.45);
+}
+
+.submit:active:not(:disabled) { transform: translateY(0); }
+
+.signUpText a,
+.modalLink {
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.signUpText a:hover,
+.modalLink:hover {
+  text-decoration: underline;
+}
+
+/* toast notification (top-right) */
+.toast {
+  top: 72px;
+  right: 28px;
+  z-index: 10000;
+  align-items: center;
+  gap: 12px;
+  min-width: 300px;
+  max-width: 360px;
+  padding: 14px 16px;
+  background: #0a1a52;
+  border: 1px solid rgba(229, 56, 75, 0.45);
+  border-left: 4px solid #e5384b;
+  border-radius: 10px;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.45);
+  animation: toastIn 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+:global(html[data-theme="light"]) .toast {
+  border-left-color: #e5384b;
+  box-shadow: 0 12px 36px rgba(25, 45, 85, 0.18);
+}
+
+.toast > div { flex: 1; }
+
+.toast strong {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.toast p {
+  margin: 2px 0 0;
+  font-size: 12.5px;
+  font-style: italic;
+}
+
+.toastIcon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #ff5d6c;
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.toast button {
+  align-self: flex-start;
+  padding: 2px 4px;
+  color: #aab8d8;
+  font-size: 18px;
+  line-height: 1;
+  transition: color 0.2s ease;
+}
+
+.toast button:hover { color: #ffffff; }
+
+:global(html[data-theme="light"]) .toast button { color: #647294; }
+:global(html[data-theme="light"]) .toast button:hover { color: #17233f; }
+
+/* staggered entrance for the form */
+.modalWrap .card > * {
+  animation: fieldIn 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.modalWrap .card > *:nth-child(1) { animation-delay: 0.03s; }
+.modalWrap .card > *:nth-child(2) { animation-delay: 0.08s; }
+.modalWrap .card > *:nth-child(3) { animation-delay: 0.13s; }
+.modalWrap .card > *:nth-child(4) { animation-delay: 0.18s; }
+.modalWrap .card > *:nth-child(5) { animation-delay: 0.23s; }
+.modalWrap .card > *:nth-child(6) { animation-delay: 0.28s; }
+.modalWrap .card > *:nth-child(7) { animation-delay: 0.33s; }
+.modalWrap .card > *:nth-child(8) { animation-delay: 0.38s; }
+.modalWrap .card > *:nth-child(9) { animation-delay: 0.43s; }
+.modalWrap .card > *:nth-child(10) { animation-delay: 0.48s; }
+
+@keyframes fieldIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes toastIn {
+  from { opacity: 0; transform: translateX(40px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .modalWrap .card > *,
+  .toast {
+    animation: none;
+  }
+}
+
+@media (max-width: 520px) {
+  .toast {
+    top: 64px;
+    right: 12px;
+    left: 12px;
+    min-width: 0;
+    max-width: none;
+  }
+}
