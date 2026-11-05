@@ -4,7 +4,7 @@ import { readFileSync } from "node:fs";
 
 const { regularUser } = JSON.parse(readFileSync("./test-users.json", "utf8"));
 
-const url = process.env.NEXT_PUBLIC_SUPABASE_URL; // copy the exact names from lib/supabase/admin
+const url = process.env.SUPABASE_URL; // copy the exact names from lib/supabase/admin
 const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 if (!url || !key) throw new Error("Missing Supabase env vars. Run with .env.test loaded.");

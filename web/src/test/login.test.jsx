@@ -74,5 +74,12 @@ test("Returns 403 if user is blocked.", async () =>{
     expect(body.message).toBe("Your account is blocked. Please contact your administrator.");
 });
 
-test("Returns 200 when login is successful")
+test("Returns 200 when login is successful", async() => {
+    const mockRequest = mockNextRequest({
+      firstName:"Test",
+      lastName:"User",
+      email:"user@domain.com", 
+      password:"@ValidPass1",
+    });
+})
 
