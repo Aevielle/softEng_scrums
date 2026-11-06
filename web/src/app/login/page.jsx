@@ -1,11 +1,26 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import styles from "./login.module.css";
 import { loginLocal } from "../lib/localAuth";
 
 const EMAIL_RE = /^\S+@\S+\.\S+$/;
+
+const CODE_LENGTH = 6;
+const CODE_SECONDS = 180; // 03:00
+const RESEND_SECONDS = 30; // cooldown before Resend is allowed
+
+// Demo only: a real app would generate + send this from the server.
+function makeCode() {
+  return String(Math.floor(100000 + Math.random() * 900000));
+}
+
+function formatTime(total) {
+  const m = String(Math.floor(total / 60)).padStart(2, "0");
+  const s = String(total % 60).padStart(2, "0");
+  return `${m}:${s}`;
+}
 
 const TITLES = {
   EMPTY: "Empty Field",
@@ -40,10 +55,13 @@ function describeUser(data, email) {
     (person.name ? String(person.name).split(" ")[0] : "") ||
     titleCase(local.split(/[._-]/)[0]);
 
-  const role = person.role
+  const rawRole = String(person.role || "").toLowerCase().replace(/[\s_-]+/g, "");
+  const role = rawRole === "superadmin"
+    ? "Superadmin"
+    : person.role
     ? titleCase(String(person.role).replace(/[_-]+/g, " "))
     : local.startsWith("superadmin")
-      ? "Super Admin"
+      ? "Superadmin"
       : local.startsWith("admin")
         ? "Admin"
         : "User";
@@ -85,6 +103,14 @@ export default function LoginPage({
   const [submitted, setSubmitted] = useState(false);
   const [welcome, setWelcome] = useState(null); // { name, email, role }
 
+  // Verification step for admin / superadmin accounts
+  const [pending, setPending] = useState(null); // { info, code }
+  const [digits, setDigits] = useState(Array(CODE_LENGTH).fill(""));
+  const [seconds, setSeconds] = useState(CODE_SECONDS);
+  const [resendSeconds, setResendSeconds] = useState(RESEND_SECONDS);
+  const [codeTried, setCodeTried] = useState(false);
+  const boxRefs = useRef([]);
+
   const emptyEmail = submitted && !form.email.trim();
   const badEmail = submitted && !EMAIL_RE.test(form.email.trim());
   const emptyPass = submitted && !form.password;
@@ -95,6 +121,113 @@ export default function LoginPage({
     const timer = setTimeout(() => setError(null), 6000);
     return () => clearTimeout(timer);
   }, [error]);
+
+  // Countdown for the verification and resend codes
+  useEffect(() => {
+    if (!pending) return;
+    const timer = setInterval(() => {
+      setSeconds((s) => (s > 0 ? s - 1 : 0));
+      setResendSeconds((s) => (s > 0 ? s - 1 : 0));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [pending]);
+
+  // Focus the first code box when the verification step opens
+  useEffect(() => {
+    if (pending) {
+      const t = setTimeout(() => boxRefs.current[0]?.focus(), 60);
+      return () => clearTimeout(t);
+    }
+  }, [pending]);
+
+  function startVerification(info) {
+    setPending({ info, code: makeCode() });
+    setDigits(Array(CODE_LENGTH).fill(""));
+    setSeconds(CODE_SECONDS);
+    setResendSeconds(RESEND_SECONDS);
+    setCodeTried(false);
+  }
+
+  function resendCode() {
+    if (!pending || resendSeconds > 0) return;
+    setPending({ ...pending, code: makeCode() });
+    setDigits(Array(CODE_LENGTH).fill(""));
+    setSeconds(CODE_SECONDS);
+    setResendSeconds(RESEND_SECONDS);
+    setCodeTried(false);
+    setError(null);
+    boxRefs.current[0]?.focus();
+  }
+
+  function onDigitChange(index, value) {
+    const digit = value.replace(/\D/g, "").slice(-1);
+    setDigits((prev) => prev.map((d, i) => (i === index ? digit : d)));
+    setError(null);
+    if (digit && index < CODE_LENGTH - 1) boxRefs.current[index + 1]?.focus();
+  }
+
+  function onDigitKeyDown(index, e) {
+    if (e.key === "Backspace" && !digits[index] && index > 0) {
+      boxRefs.current[index - 1]?.focus();
+    } else if (e.key === "ArrowLeft" && index > 0) {
+      boxRefs.current[index - 1]?.focus();
+    } else if (e.key === "ArrowRight" && index < CODE_LENGTH - 1) {
+      boxRefs.current[index + 1]?.focus();
+    }
+  }
+
+  function onDigitPaste(index, e) {
+    const pasted = e.clipboardData.getData("text").replace(/\D/g, "");
+    if (!pasted) return;
+    e.preventDefault();
+    setDigits((prev) => {
+      const next = [...prev];
+      for (let i = 0; i < pasted.length && index + i < CODE_LENGTH; i++) {
+        next[index + i] = pasted[i];
+      }
+      return next;
+    });
+    boxRefs.current[Math.min(index + pasted.length, CODE_LENGTH - 1)]?.focus();
+  }
+
+  function onVerify(e) {
+    e.preventDefault();
+    setCodeTried(true);
+
+    const entered = digits.join("");
+
+    if (entered.length < CODE_LENGTH) {
+      setError({
+        code: "EMPTY",
+        title: "Enter the code",
+        message: "Please enter the 6-digit verification code.",
+      });
+      return;
+    }
+
+    if (seconds <= 0) {
+      setError({
+        code: "INVALID",
+        title: "Code Expired",
+        message: "This code has expired. Press Resend to get a new one.",
+      });
+      return;
+    }
+
+    if (entered !== pending.code) {
+      setError({
+        code: "INVALID",
+        title: "Wrong Code",
+        message: "That code is incorrect. Please try again.",
+      });
+      setDigits(Array(CODE_LENGTH).fill(""));
+      boxRefs.current[0]?.focus();
+      return;
+    }
+
+    setWelcome(pending.info);
+    setPending(null);
+  }
 
   async function onSubmit(e) {
     e.preventDefault();
@@ -130,9 +263,16 @@ export default function LoginPage({
         return;
       }
 
-      // No dashboard yet: confirm the sign in in the popup.
-      setWelcome(describeUser(result, form.email.trim()));
+      const info = describeUser(result, form.email.trim());
       setForm((previous) => ({ ...previous, password: "" }));
+
+      // Admin / Superadmin accounts must pass the verification code step.
+      if (/admin/i.test(info.role)) {
+        startVerification(info);
+      } else {
+        // No dashboard yet: confirm the sign in in the popup.
+        setWelcome(info);
+      }
     } catch {
       setError({
         code: "INVALID",
@@ -220,6 +360,114 @@ export default function LoginPage({
             </Link>
           )}
         </section>
+      </main>
+    );
+  }
+
+  /* ---------- Verification code (admin accounts) ---------- */
+  if (pending) {
+    const expired = seconds <= 0;
+
+    return (
+      <main className={wrapClass}>
+        {error && (
+          <div className={styles.toast} role="alert">
+            <span className={styles.toastIcon} aria-hidden="true">!</span>
+
+            <div>
+              <strong>{toastTitle(error)}</strong>
+              <p>{error.message || "Something went wrong. Please try again."}</p>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setError(null)}
+              aria-label="Close error"
+            >
+              ×
+            </button>
+          </div>
+        )}
+
+        <form className={styles.card} onSubmit={onVerify} noValidate>
+          <header className={styles.header}>
+            <div>
+              <h1>Verify your identity</h1>
+              <p>Enter the 6-digit code sent to {pending.info.email}</p>
+            </div>
+
+            {modal ? (
+              <button
+                type="button"
+                className={styles.closeButton}
+                onClick={onClose}
+                aria-label="Close"
+              >
+                ×
+              </button>
+            ) : (
+              <Link href="/" className={styles.closeButton} aria-label="Close">
+                ×
+              </Link>
+            )}
+          </header>
+
+          <span className={styles.channel}>
+            <span className={styles.channelDot} aria-hidden="true" />
+            Email
+          </span>
+
+          <div className={styles.otp} role="group" aria-label="6-digit verification code">
+            {digits.map((d, i) => (
+              <input
+                key={i}
+                ref={(el) => (boxRefs.current[i] = el)}
+                className={`${styles.otpBox} ${codeTried && !d ? styles.bad : ""}`}
+                type="text"
+                inputMode="numeric"
+                autoComplete={i === 0 ? "one-time-code" : "off"}
+                maxLength={1}
+                value={d}
+                aria-label={`Digit ${i + 1}`}
+                onChange={(e) => onDigitChange(i, e.target.value)}
+                onKeyDown={(e) => onDigitKeyDown(i, e)}
+                onPaste={(e) => onDigitPaste(i, e)}
+                onFocus={(e) => e.target.select()}
+              />
+            ))}
+          </div>
+
+          <p className={styles.codeMeta}>
+            {expired ? (
+              <span className={styles.expired}>Code expired</span>
+            ) : (
+              <>
+                Code expires in <strong>{formatTime(seconds)}</strong>
+              </>
+            )}
+            {" · "}
+            {resendSeconds > 0 ? (
+              <>
+                Resend in <strong>{formatTime(resendSeconds)}</strong>
+              </>
+            ) : (
+              <button type="button" className={styles.linkButton} onClick={resendCode}>
+                Resend
+              </button>
+            )}
+          </p>
+
+          <button type="submit" className={styles.submit}>
+            Verify code
+          </button>
+
+          <p className={styles.safety}>
+            This verification step is used for your account&apos;s safety.
+          </p>
+          <p className={styles.safety}>
+            Demo code: <strong>{pending.code}</strong>
+          </p>
+        </form>
       </main>
     );
   }
