@@ -94,6 +94,7 @@ export default function Home() {
   const [scrolled, setScrolled] = useState(false);
   const tiltRef = useRef(null);
   const heroRef = useRef(null);
+  const pageRef = useRef(null);
 
   /* Lock scroll + close on Escape while any modal is open */
   useEffect(() => {
@@ -130,8 +131,8 @@ export default function Home() {
      (far left / far right still rotates it in 3D) */
   useEffect(() => {
     const el = tiltRef.current;
-    const hero = heroRef.current;
-    if (!el || !hero) return;
+    const page = pageRef.current;
+    if (!el || !page) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
     const clamp = (v) => Math.max(-1, Math.min(1, v));
@@ -150,16 +151,15 @@ export default function Home() {
         const dx = clamp((e.clientX - (r.left + r.width / 2)) / (window.innerWidth / 2));
         const dy = clamp((e.clientY - (r.top + r.height / 2)) / (window.innerHeight / 2));
         setTilt(-dy * 7, dx * 10);
-        /* background parallax: -1..1 across the window */
-        hero.style.setProperty("--mx", ((e.clientX / window.innerWidth - 0.5) * 2).toFixed(3));
-        hero.style.setProperty("--my", ((e.clientY / window.innerHeight - 0.5) * 2).toFixed(3));
+        page.style.setProperty("--mx", ((e.clientX / window.innerWidth - 0.5) * 2).toFixed(3));
+        page.style.setProperty("--my", ((e.clientY / window.innerHeight - 0.5) * 2).toFixed(3));
       });
     }
     function onLeave() {
       cancelAnimationFrame(frame);
       setTilt(0, 0);
-      hero.style.setProperty("--mx", "0");
-      hero.style.setProperty("--my", "0");
+      page.style.setProperty("--mx", "0");
+      page.style.setProperty("--my", "0");
     }
 
     window.addEventListener("pointermove", onMove, { passive: true });
@@ -199,7 +199,28 @@ export default function Home() {
   }, []);
 
   return (
-    <div className={styles.page}>
+    <div className={styles.page} ref={pageRef}>
+      <div className={styles.ambient} aria-hidden="true">
+        <div className={styles.stars} />
+        <div className={`${styles.orb} ${styles.orbA}`} />
+        <div className={`${styles.orb} ${styles.orbB}`} />
+        <div className={`${styles.orb} ${styles.orbC}`} />
+        {BOKEH.map(([x, y, size, o], i) => (
+          <span
+            key={i}
+            className={styles.bokeh}
+            style={{
+              left: `${x}%`,
+              top: `${y}%`,
+              width: size,
+              height: size,
+              opacity: o,
+              "--t": `${3 + (i % 5)}s`,
+              "--td": `${-(i * 0.7)}s`,
+            }}
+          />
+        ))}
+      </div>
       <header className={`${styles.header} ${scrolled ? styles.headerScrolled : ""}`}>
         <Link href="/" className={styles.brand}>
           <span className={styles.logo} aria-hidden="true">H</span>
@@ -233,29 +254,7 @@ export default function Home() {
       <main>
         {/* ================= HERO ================= */}
         <section className={styles.hero} ref={heroRef}>
-          {/* animated background layers */}
-          <div className={styles.stars} aria-hidden="true" />
-          <div className={`${styles.orb} ${styles.orbA}`} aria-hidden="true" />
-          <div className={`${styles.orb} ${styles.orbB}`} aria-hidden="true" />
-          <div className={`${styles.orb} ${styles.orbC}`} aria-hidden="true" />
-
-          {/* soft out-of-focus light dots */}
-          {BOKEH.map(([x, y, size, o], i) => (
-            <span
-              key={i}
-              className={styles.bokeh}
-              aria-hidden="true"
-              style={{
-                left: `${x}%`,
-                top: `${y}%`,
-                width: size,
-                height: size,
-                opacity: o,
-                "--t": `${3 + (i % 5)}s`,
-                "--td": `${-(i * 0.7)}s`,
-              }}
-            />
-          ))}
+          
 
           {/* curved strands behind the dashboard */}
           <svg
@@ -362,9 +361,6 @@ export default function Home() {
 
         {/* ================= MODULES ================= */}
         <section id="modules" className={styles.modulesWrap}>
-          <div className={`${styles.orb} ${styles.orbD}`} aria-hidden="true" />
-          <div className={`${styles.orb} ${styles.orbE}`} aria-hidden="true" />
-
           <div className={styles.modules}>
             <p className={`${styles.eyebrow} ${styles.reveal}`} data-reveal>
               One platform. Every workflow.
