@@ -2,6 +2,11 @@ jest.mock('../lib/auth/session',() =>({
     createSession: jest.fn(),
 }));
 
+const { createSession } = require("@/lib/auth/session");
+const {POST} = require("../app/api/auth/login/route");
+const users = require("./test-users.json");
+
+
 function mockNextRequest(bodyData){
     return {
         json: async() => bodyData,
@@ -9,7 +14,6 @@ function mockNextRequest(bodyData){
 }
 
 test("Returns 400 when one or more fields are empty",async () =>{
-    const {POST} = require("../app/api/auth/login/route");
     const mockRequest = mockNextRequest({});
     const response = await POST(mockRequest);
     const body = await response.json();
@@ -22,7 +26,6 @@ test("Returns 400 when one or more fields are empty",async () =>{
 });
 
 test("Returns 401 when email is unknown",async () =>{
-    const {POST} = require("../app/api/auth/login/route");
     const mockRequest = mockNextRequest({
           firstName:"Test",
           lastName:"User",
@@ -40,11 +43,10 @@ test("Returns 401 when email is unknown",async () =>{
 });
 
 test("Returns 401 when password is wrong",async () =>{
-    const {POST} = require("../app/api/auth/login/route");
     const mockRequest = mockNextRequest({
-          firstName:"Test",
+          firstName:"Regular",
           lastName:"User",
-          email:"user@domain.com", 
+          email:"seed.user@domain.com", 
           password:"@ValidPass",
     });
     const response = await POST(mockRequest);
@@ -61,7 +63,7 @@ test("Returns 403 if user is blocked.", async () =>{
     const mockRequest = mockNextRequest({
           firstName:"Blocked",
           lastName:"User",
-          email:"blocked_user@domain.com", 
+          email: "seed.blocked_user@example.com", 
           password:"@ValidPass1",
     });
     const response = await POST(mockRequest);
@@ -76,10 +78,17 @@ test("Returns 403 if user is blocked.", async () =>{
 
 test("Returns 200 when login is successful", async() => {
     const mockRequest = mockNextRequest({
-      firstName:"Test",
+      firstName:"Regular",
       lastName:"User",
-      email:"user@domain.com", 
+      email:"seed.user@example.com", 
       password:"@ValidPass1",
     });
+    const response = await POST(mockRequest);
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body.redirect).toBe("/dashboard");
+    expect(createSession).toHaveBeenCalledTimes(1);
+    expect(createSession.mock.calls[0][0].role).toBe("User");
 })
 

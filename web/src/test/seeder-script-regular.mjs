@@ -2,9 +2,9 @@ import { createClient } from "@supabase/supabase-js";
 import bcrypt from "bcryptjs";
 import { readFileSync } from "node:fs";
 
-const users = JSON.parse(readFileSync("./test-users.json", "utf8"));
+const users = JSON.parse(readFileSync(new URL("./test-users.json",import.meta.url), "utf8"));
 
-const url = process.env.NEXT_PUBLIC_SUPABASE_URL; // copy the exact names from lib/supabase/admin
+const url = process.env.SUPABASE_URL; // copy the exact names from lib/supabase/admin
 const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 if (!url || !key) throw new Error("Missing Supabase env vars. Run with .env.test loaded.");
@@ -15,11 +15,8 @@ if (process.env.ALLOW_SEED !== "true") {
 const supabase = createClient(url, key);
 
 for (const u of Object.values(users)) {
+  console.log(u);
   const email = u.email.toLowerCase(); // the login route lowercases input
-
-  const { data: role, error: roleErr } = await supabase
-    .from("role").select("role_id").eq("role_name", u.roleName).maybeSingle();
-  if (roleErr || !role) throw new Error(`Role not found: ${u.roleName}`);
 
   // No user_id, created_at or updated_at: the database generates them
   const row = {
@@ -27,9 +24,9 @@ for (const u of Object.values(users)) {
     last_name: u.lastName,
     email,
     password_hash: await bcrypt.hash(u.password, 12),
-    role_id: role.role_id,
+    role_id: u.role_id,
     account_status: "active", // confirm this is the value for an approved account
-    is_blocked: false,
+    is_blocked: u.is_blocked,
   };
 
   const { data: existing, error: lookupErr } = await supabase
