@@ -1,10 +1,44 @@
 import {PASSWORD_RULES_MESSAGE} from "@/lib/auth/password";
+
+const mockUserLookup = jest.fn();
+const mockInsert = jest.fn();
+
+jest.mock("@/lib/supabase/admin", () => ({
+  supabaseAdmin: {
+    from: (table) =>
+      table === "app_user"
+        ? {
+            select: () => ({
+              ilike: () => ({
+                limit: () => ({ maybeSingle: () => mockUserLookup() }),
+              }),
+            }),
+            insert: (row) => mockInsert(row),
+          }
+        : {
+            select: () => ({
+              eq: () => ({
+                maybeSingle: async () => ({ data: { role_id: 1 }, error: null }),
+              }),
+            }),
+          },
+  },
+}));
+
+const { POST } = require("../app/api/register/route");
+
 function mockNextRequest(bodyData){
     return {
         json: async() => bodyData,
     };
 }
-const {POST} = require("../app/api/register/route");
+
+beforeEach(() => {
+  jest.clearAllMocks();
+  mockUserLookup.mockResolvedValue({data: null, error: null});
+  mockInsert.mockResolvedValue({error: null});
+});
+
 test("Returns 400 when one or more fields are empty",async () =>{
     const mockRequest = mockNextRequest({});
     const response = await POST(mockRequest);
@@ -36,11 +70,14 @@ test("Returns 400 when one or more fields are empty",async () =>{
     expect(body.message).toBe("Please enter a valid email address.");
   });
 
+  // Mock Test
   test("Returns 409 when email already exists", async() =>{
+    mockUserLookup.mockResolvedValue({data: {user_id: 1}, error: null});
+
     const mockRequest = mockNextRequest({
-      firstName:"Chesca",
-      lastName:"Ramirez",
-      email:"chesca@hope.erp", 
+      firstName:"Test",
+      lastName:"User",
+      email:"taken@domain.com", 
       password: "@ValidPass1",
     });
     const response = await POST(mockRequest);
@@ -48,6 +85,7 @@ test("Returns 400 when one or more fields are empty",async () =>{
 
     expect(response.status).toBe(409);
     expect(body.message).toBe("This email is already registered. Please sign in instead.");
+    expect(mockInsert).not.toHaveBeenCalled();
   });
 
   test.each([
@@ -70,7 +108,7 @@ test("Returns 400 when one or more fields are empty",async () =>{
     expect(body.message).toBe(PASSWORD_RULES_MESSAGE);
 })
 
-// Registers a real account
+// Mock Test
 test("Succesful register", async() =>{
   const mockRequest = mockNextRequest({
       firstName:"Test",
@@ -85,4 +123,6 @@ test("Succesful register", async() =>{
 
     expect(response.status).toBe(201);
     expect(body.message).toBe("Registration successful! Your account is waiting for Superadmin approval.");
-})
+    expect(mockInsert).toHaveBeenCalledTimes(1);
+    expect(mockInsert.mock.calls[0][0].password_hash).not.toBe("@ValidPass1");
+});

@@ -3,6 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "seed:user":"dotenv -e .env.test -- node ../src/test/seeder-script-regular.mjs",
+    "pretest":"npm run seed:user",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",

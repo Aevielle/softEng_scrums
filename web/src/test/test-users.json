@@ -1,0 +1,26 @@
+{
+  "regularUser": {
+    "label": "Regular User",
+    "roleId": 3,
+    "firstName": "Regular",
+    "lastName": "User",
+    "email": "seed.user@example.com",
+    "password": "@ValidPass1"
+  },
+  "admin": {
+    "label": "Admin",
+    "roleId": 2,
+    "firstName": "Admin",
+    "lastName": "User",
+    "email": "seed.admin@example.com",
+    "password": "@ValidPass1"
+  },
+  "superadmin": {
+    "label": "Superadmin",
+    "roleId": 1,
+    "firstName": "Super",
+    "lastName": "Admin",
+    "email": "seed.superadmin@example.com",
+    "password": "@ValidPass1"
+  }
+}
