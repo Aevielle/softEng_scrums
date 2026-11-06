@@ -9,6 +9,7 @@ const EMAIL_RE = /^\S+@\S+\.\S+$/;
 
 const CODE_LENGTH = 6;
 const CODE_SECONDS = 180; // 03:00
+const RESEND_SECONDS = 30; // cooldown before Resend is allowed
 
 // Demo only: a real app would generate + send this from the server.
 function makeCode() {
@@ -106,6 +107,7 @@ export default function LoginPage({
   const [pending, setPending] = useState(null); // { info, code }
   const [digits, setDigits] = useState(Array(CODE_LENGTH).fill(""));
   const [seconds, setSeconds] = useState(CODE_SECONDS);
+  const [resendSeconds, setResendSeconds] = useState(RESEND_SECONDS);
   const [codeTried, setCodeTried] = useState(false);
   const boxRefs = useRef([]);
 
@@ -120,11 +122,12 @@ export default function LoginPage({
     return () => clearTimeout(timer);
   }, [error]);
 
-  // Countdown for the verification code
+  // Countdown for the verification and resend codes
   useEffect(() => {
     if (!pending) return;
     const timer = setInterval(() => {
       setSeconds((s) => (s > 0 ? s - 1 : 0));
+      setResendSeconds((s) => (s > 0 ? s - 1 : 0));
     }, 1000);
     return () => clearInterval(timer);
   }, [pending]);
@@ -141,14 +144,16 @@ export default function LoginPage({
     setPending({ info, code: makeCode() });
     setDigits(Array(CODE_LENGTH).fill(""));
     setSeconds(CODE_SECONDS);
+    setResendSeconds(RESEND_SECONDS);
     setCodeTried(false);
   }
 
   function resendCode() {
-    if (!pending) return;
+    if (!pending || resendSeconds > 0) return;
     setPending({ ...pending, code: makeCode() });
     setDigits(Array(CODE_LENGTH).fill(""));
     setSeconds(CODE_SECONDS);
+    setResendSeconds(RESEND_SECONDS);
     setCodeTried(false);
     setError(null);
     boxRefs.current[0]?.focus();
@@ -441,9 +446,15 @@ export default function LoginPage({
               </>
             )}
             {" · "}
-            <button type="button" className={styles.linkButton} onClick={resendCode}>
-              Resend
-            </button>
+            {resendSeconds > 0 ? (
+              <>
+                Resend in <strong>{formatTime(resendSeconds)}</strong>
+              </>
+            ) : (
+              <button type="button" className={styles.linkButton} onClick={resendCode}>
+                Resend
+              </button>
+            )}
           </p>
 
           <button type="submit" className={styles.submit}>
