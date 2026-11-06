@@ -61,9 +61,9 @@ const STRANDS = Array.from({ length: 11 }, (_, i) => {
    Placed to match the mockup (one near the buttons, one under the dashboard's
    right edge, one wide tile at the lower right). */
 const TILES = [
-  [3, 2, 1, 1],
-  [9, 3, 1, 1],
-  [11, 6, 2, 1],
+  [5, 2, 1, 1],
+  [12, 4, 1, 1],
+  [15, 7, 2, 1],
 ];
 
 /* soft out-of-focus light dots, positions in % of the hero */

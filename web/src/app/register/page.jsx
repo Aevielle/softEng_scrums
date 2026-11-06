@@ -21,6 +21,15 @@ function EyeIcon({ off }) {
   );
 }
 
+function UserIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <circle cx="12" cy="8" r="4" />
+      <path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1" />
+    </svg>
+  );
+}
+
 export default function RegisterPage({
   modal = false,
   onClose,
@@ -37,6 +46,7 @@ export default function RegisterPage({
 
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [createdEmail, setCreatedEmail] = useState(null);
 
   // Toast: { type: "error" | "success", title, message }
   const [notice, setNotice] = useState(null);
@@ -135,13 +145,7 @@ export default function RegisterPage({
         return;
       }
 
-      setNotice({
-        type: "success",
-        title: "Account Created",
-        message:
-          result.message ||
-          "Registration successful! Your account is waiting for approval.",
-      });
+      setCreatedEmail(email.trim().toLowerCase());
 
       setFirstName("");
       setLastName("");
@@ -191,7 +195,43 @@ export default function RegisterPage({
       )}
 
       <section className={styles.card}>
+        {createdEmail ? (
+          <div className={styles.successView} role="status">
+            {modal ? (
+              <button type="button" className={styles.closeButton} onClick={onClose} aria-label="Close">×</button>
+            ) : (
+              <Link href="/" className={styles.closeButton} aria-label="Close">×</Link>
+            )}
 
+            <span className={styles.successAvatar}><UserIcon /></span>
+            <span className={styles.successBadge}>Account Created</span>
+
+            <h1 className={styles.successTitle}>Sign up successful</h1>
+            <p className={styles.successText}>
+              Your account is ready. New accounts start as User.
+            </p>
+
+            <dl className={styles.successDetails}>
+              <div className={styles.detailRow}>
+                <dt>Email</dt>
+                <dd>{createdEmail}</dd>
+              </div>
+              <div className={styles.detailRow}>
+                <dt>Role</dt>
+                <dd>User</dd>
+              </div>
+            </dl>
+
+            {modal ? (
+              <button type="button" className={styles.successButton} onClick={onSwitchToLogin}>
+                Go to sign in
+              </button>
+            ) : (
+              <Link href="/login" className={styles.successButton}>Go to sign in</Link>
+            )}
+          </div>
+        ) : (
+          <>
         {/* Header */}
         <header className={styles.header}>
           <div>
@@ -386,7 +426,8 @@ export default function RegisterPage({
             <Link href="/login">Sign in.</Link>
           )}
         </p>
-
+        </>
+        )}
       </section>
     </main>
   );

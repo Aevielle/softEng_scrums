@@ -17,8 +17,8 @@
   --orb-1: rgba(38, 86, 255, 0.28);
   --orb-2: rgba(70, 60, 255, 0.2);
   --orb-3: rgba(30, 140, 255, 0.16);
-  --grid-line: rgba(60, 110, 240, 0.42);
-  --grid-line-2: rgba(60, 110, 240, 0.42);
+  --grid-line: rgba(70, 125, 255, 0.58);
+  --grid-line-2: rgba(70, 125, 255, 0.58);
   --star: rgba(255, 255, 255, 0.5);
 
   color-scheme: dark;
@@ -302,7 +302,7 @@
   left: 0;
   right: 0;
   top: 412px;
-  bottom: 0;
+  height: 720px;
   z-index: -1;
   overflow: hidden;
   perspective: 420px;
@@ -315,8 +315,8 @@
   position: absolute;
   left: -60%;
   right: -60%;
-  bottom: -12%;
-  height: 170%;
+  bottom: -86px;
+  height: 1224px;
   transform-origin: 50% 100%;
   transform: rotateX(62deg);
   background-image:
@@ -325,22 +325,30 @@
   background-size: var(--cw) var(--ch);
 }
 
-/* ceiling: the same grid mirrored at the top, much fainter */
+/* ceiling: the grid mirrored at the top. Denser, a bit brighter and softly blurred */
 .ceiling {
+  --cw: 170px;
+  --ch: 90px;
   position: absolute;
   left: 0;
   right: 0;
   top: 0;
-  height: 28%;
+  height: 350px;               /* was 270px: reaches down to the horizontal line */
   z-index: -1;
   overflow: hidden;
   perspective: 420px;
   perspective-origin: 50% 0%;
   pointer-events: none;
-  opacity: 0.9;
+  opacity: 1;                  /* was 0.85 */
+  filter: blur(1.6px) brightness(1.3);   /* was blur(0.8px) brightness(1.15) */
   transform: scaleY(-1);
-  -webkit-mask-image: linear-gradient(to top, #000 0%, rgba(0,0,0,0.5) 60%, transparent 100%);
-  mask-image: linear-gradient(to top, #000 0%, rgba(0,0,0,0.5) 60%, transparent 100%);
+  /* fade now ends at 20% instead of 0%, so the lines stay visible lower down */
+  -webkit-mask-image: linear-gradient(to top, #000 0%, rgba(0,0,0,0.75) 55%, rgba(0,0,0,0.2) 100%);
+  mask-image: linear-gradient(to top, #000 0%, rgba(0,0,0,0.75) 55%, rgba(0,0,0,0.2) 100%);
+}
+.ceiling .gridPlane {
+  bottom: -40px;
+  height: 560px;               /* was 460px, so the grid fills the taller box */
 }
 
 /* shaded grid tiles (sit exactly on the grid cells) */
@@ -503,7 +511,7 @@
 }
 
 /* ---------- mouse-follow parallax (driven by --mx / --my set on .hero) ---------- */
-.hero { --mx: 0; --my: 0; --cw: 280px; --ch: 150px; }
+.hero { --mx: 0; --my: 0; --cw: 200px; --ch: 110px; }
 
 /* curved strands: each bundle moves/turns at its own depth */
 .waves {
@@ -835,8 +843,8 @@
   --orb-1: rgba(90, 130, 255, 0.35);
   --orb-2: rgba(150, 120, 255, 0.28);
   --orb-3: rgba(90, 190, 255, 0.28);
-  --grid-line: rgba(52, 100, 230, 0.2);
-  --grid-line-2: rgba(52, 100, 230, 0.16);
+  --grid-line: rgba(52, 100, 230, 0.3);
+  --grid-line-2: rgba(52, 100, 230, 0.26);
   --star: rgba(60, 100, 220, 0.55);
 }
 
