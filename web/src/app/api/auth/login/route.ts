@@ -14,6 +14,11 @@ export async function POST(req: Request) {
       { code: 'EMPTY', message: 'Please fill out the forms.' }, { status: 400 });
   }
 
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+  return NextResponse.json(
+    { code: 'FORMAT', message: 'Enter valid email address.' }, { status: 400 });
+  }
+
   const { data: user } = await supabaseAdmin
     .from('app_user')
     .select('user_id, email, password_hash, is_blocked, account_status, must_change_password, role:role_id(role_name)')
@@ -21,7 +26,7 @@ export async function POST(req: Request) {
     .maybeSingle();
 
   const ok = await bcrypt.compare(password, user?.password_hash ?? DUMMY_HASH);
-
+  
   // One general error for unknown email OR wrong password
   if (!user || !ok) {
     return NextResponse.json(
