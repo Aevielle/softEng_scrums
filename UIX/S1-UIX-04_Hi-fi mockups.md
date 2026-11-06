@@ -1,4 +1,4 @@
-Hope, Inc. ERP - Design System (S1-UIX-04)
+# Hope, Inc. ERP - Hifi Mockups (S1-UIX-04)
 
 This document contains the hi-fi mockups for the login, register, main page, User Management, Rights dialog. 
 
