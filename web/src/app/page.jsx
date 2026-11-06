@@ -50,23 +50,25 @@ const MODULES = [
 
 const BARS = [28, 40, 34, 52, 44, 62, 72];
 
-/* Bundles of fine curved strands (the swooshes behind the dashboard).
-   Strands converge at one point and fan out, like twisted ribbons. */
-const STRANDS_A = Array.from({ length: 26 }, (_, i) => {
-  const k = i - 13;
-  return `M-40,${318 + k * 3.2} C320,${282 + k * 1.1} 620,${262 - k * 2.6} 900,${196 + k * 0.5} S1290,${128 - k * 1.7} 1480,${96 + k * 2.8}`;
+/* One thin bundle of strands passing behind the dashboard:
+   tight on the left, fanning out to the right (viewBox is 1920 x 400). */
+const STRANDS = Array.from({ length: 11 }, (_, i) => {
+  const k = i - 5;
+  return `M-40,${300 + k * 0.5} C200,${265 + k * 0.5} 420,${215 + k * 0.4} 590,${178 + k * 0.4} S900,${205 + k * 0.6} 1340,${205 + k * 0.8} S1700,${120 + k * 2} 1960,${60 + k * 3.5}`;
 });
-const STRANDS_B = Array.from({ length: 18 }, (_, i) => {
-  const k = i - 9;
-  return `M-40,${300 + k * 2.4} C240,${290 + k * 1.6} 520,${236 - k * 2} 820,${268 + k * 0.7} S1220,${320 - k * 1.2} 1480,${258 + k * 2}`;
-});
+
+/* shaded floor tiles: [column, row, width, height] in grid cells.
+   Placed to match the mockup (one near the buttons, one under the dashboard's
+   right edge, one wide tile at the lower right). */
+const TILES = [
+  [3, 2, 1, 1],
+  [9, 3, 1, 1],
+  [11, 6, 2, 1],
+];
 
 /* soft out-of-focus light dots, positions in % of the hero */
 const BOKEH = [
-  [14, 20, 10, 0.55], [22, 33, 5, 0.5], [31, 12, 7, 0.45], [47, 6, 5, 0.5],
-  [68, 18, 6, 0.5], [78, 24, 14, 0.35], [88, 12, 6, 0.5], [92, 40, 9, 0.4],
-  [8, 46, 5, 0.5], [42, 44, 4, 0.5], [60, 50, 5, 0.45], [84, 62, 12, 0.35],
-  [18, 70, 6, 0.4], [95, 74, 5, 0.45],
+  [27, 14, 12, 0.22], [16, 27, 9, 0.2], [79, 24, 12, 0.2], [90, 46, 9, 0.18], [61, 12, 8, 0.18],
 ];
 
 const AUTH_LABELS = {
@@ -147,7 +149,7 @@ export default function Home() {
         const r = el.getBoundingClientRect();
         const dx = clamp((e.clientX - (r.left + r.width / 2)) / (window.innerWidth / 2));
         const dy = clamp((e.clientY - (r.top + r.height / 2)) / (window.innerHeight / 2));
-        setTilt(-dy * 12, dx * 18);
+        setTilt(-dy * 7, dx * 10);
         /* background parallax: -1..1 across the window */
         hero.style.setProperty("--mx", ((e.clientX / window.innerWidth - 0.5) * 2).toFixed(3));
         hero.style.setProperty("--my", ((e.clientY / window.innerHeight - 0.5) * 2).toFixed(3));
@@ -255,38 +257,40 @@ export default function Home() {
             />
           ))}
 
-          {/* dim diagonal light beams */}
-          <div className={`${styles.beam} ${styles.beamL}`} aria-hidden="true" />
-          <div className={`${styles.beam} ${styles.beamR}`} aria-hidden="true" />
-
-          {/* curved strand bundles behind the dashboard */}
+          {/* curved strands behind the dashboard */}
           <svg
             className={styles.waves}
-            viewBox="0 0 1440 360"
+            viewBox="0 0 1920 400"
             preserveAspectRatio="none"
             aria-hidden="true"
           >
             <defs>
               <linearGradient id="waveGrad" x1="0" y1="0" x2="1" y2="0">
                 <stop offset="0%" className={styles.waveStopA} />
-                <stop offset="55%" className={styles.waveStopB} />
+                <stop offset="30%" className={styles.waveStopB} />
                 <stop offset="100%" className={styles.waveStopA} />
               </linearGradient>
             </defs>
-            <g className={`${styles.bundle} ${styles.bundleA}`}>
-              {STRANDS_A.map((d, i) => (
-                <path key={i} className={styles.strand} d={d} style={{ "--i": i }} />
-              ))}
-            </g>
-            <g className={`${styles.bundle} ${styles.bundleB}`}>
-              {STRANDS_B.map((d, i) => (
-                <path key={i} className={styles.strand} d={d} style={{ "--i": i }} />
+            <g className={styles.bundle}>
+              {STRANDS.map((d, i) => (
+                <path key={i} className={styles.strand} d={d} />
               ))}
             </g>
           </svg>
 
-          <div className={styles.floor} aria-hidden="true">
+          <div className={styles.ceiling} aria-hidden="true">
             <div className={styles.gridPlane} />
+          </div>
+          <div className={styles.floor} aria-hidden="true">
+            <div className={styles.gridPlane}>
+              {TILES.map(([c, r, w, h], i) => (
+                <span
+                  key={i}
+                  className={styles.tileShade}
+                  style={{ "--c": c, "--r": r, "--w": w, "--h": h }}
+                />
+              ))}
+            </div>
           </div>
 
           {/* content */}

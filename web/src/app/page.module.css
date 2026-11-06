@@ -14,12 +14,12 @@
   --accent-b: #8fb0ff;
   --wave-a: rgba(80, 130, 255, 0.02);
   --wave-b: rgba(130, 175, 255, 0.9);
-  --orb-1: rgba(38, 86, 255, 0.34);
-  --orb-2: rgba(70, 60, 255, 0.26);
-  --orb-3: rgba(30, 140, 255, 0.2);
-  --grid-line: rgba(52, 100, 230, 0.34);
-  --grid-line-2: rgba(52, 100, 230, 0.27);
-  --star: rgba(255, 255, 255, 0.9);
+  --orb-1: rgba(38, 86, 255, 0.28);
+  --orb-2: rgba(70, 60, 255, 0.2);
+  --orb-3: rgba(30, 140, 255, 0.16);
+  --grid-line: rgba(60, 110, 240, 0.42);
+  --grid-line-2: rgba(60, 110, 240, 0.42);
+  --star: rgba(255, 255, 255, 0.5);
 
   color-scheme: dark;
   min-height: 100vh;
@@ -266,33 +266,20 @@
   position: absolute;
   z-index: -1;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(170, 195, 255, 0.95) 0%, rgba(120, 160, 255, 0.35) 55%, transparent 72%);
-  filter: blur(1.2px);
+  background: radial-gradient(circle, rgba(150, 180, 255, 0.8) 0%, rgba(110, 150, 255, 0.25) 55%, transparent 72%);
+  filter: blur(2.5px);
   pointer-events: none;
   animation: twinkle var(--t, 4s) ease-in-out var(--td, 0s) infinite alternate;
 }
 
-/* dim light beams */
-.beam {
-  position: absolute;
-  z-index: -1;
-  height: 64px;
-  pointer-events: none;
-  filter: blur(5px);
-  background: linear-gradient(90deg, transparent, rgba(110, 150, 255, 0.24), transparent);
-  transform: skewX(-38deg) rotate(-5deg);
-}
-.beamL { width: 460px; left: 6%; top: 60%; }
-.beamR { width: 520px; right: 2%; top: 69%; transform: skewX(38deg) rotate(6deg); }
-
-/* curved strand bundles */
+/* thin curved strand bundle behind the dashboard */
 .waves {
   position: absolute;
   left: 0;
   right: 0;
-  bottom: 15%;
+  top: 455px;
   width: 100%;
-  height: 360px;
+  height: 400px;
   z-index: -1;
   pointer-events: none;
 }
@@ -301,27 +288,28 @@
 .strand {
   fill: none;
   stroke: url(#waveGrad);
-  stroke-width: 0.9;
-  opacity: 0.8;
+  stroke-width: 1;
+  opacity: 0.85;
 }
-.bundle { transform-origin: center; }
-.bundleA { animation: bundleSway 14s ease-in-out infinite alternate; filter: drop-shadow(0 0 5px rgba(110, 160, 255, 0.5)); }
-.bundleB { animation: bundleSway 18s ease-in-out -6s infinite alternate-reverse; opacity: 0.55; translate: 0 70px; }
+.bundle {
+  filter: drop-shadow(0 0 4px rgba(110, 160, 255, 0.45));
+  animation: bundleSway 16s ease-in-out infinite alternate;
+}
 
 /* moving perspective grid floor */
 .floor {
   position: absolute;
   left: 0;
   right: 0;
+  top: 412px;
   bottom: 0;
-  height: 58%;
   z-index: -1;
   overflow: hidden;
   perspective: 420px;
   perspective-origin: 50% 0%;
   pointer-events: none;
-  -webkit-mask-image: linear-gradient(to top, #000 35%, transparent 100%);
-  mask-image: linear-gradient(to top, #000 35%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to top, #000 0%, rgba(0,0,0,0.8) 65%, rgba(0,0,0,0.5) 100%);
+  mask-image: linear-gradient(to top, #000 0%, rgba(0,0,0,0.8) 65%, rgba(0,0,0,0.5) 100%);
 }
 .gridPlane {
   position: absolute;
@@ -334,8 +322,35 @@
   background-image:
     linear-gradient(var(--grid-line) 1px, transparent 1px),
     linear-gradient(90deg, var(--grid-line-2) 1px, transparent 1px);
-  background-size: 70px 40px;
-  animation: gridFlow 2.6s linear infinite;
+  background-size: var(--cw) var(--ch);
+}
+
+/* ceiling: the same grid mirrored at the top, much fainter */
+.ceiling {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 28%;
+  z-index: -1;
+  overflow: hidden;
+  perspective: 420px;
+  perspective-origin: 50% 0%;
+  pointer-events: none;
+  opacity: 0.9;
+  transform: scaleY(-1);
+  -webkit-mask-image: linear-gradient(to top, #000 0%, rgba(0,0,0,0.5) 60%, transparent 100%);
+  mask-image: linear-gradient(to top, #000 0%, rgba(0,0,0,0.5) 60%, transparent 100%);
+}
+
+/* shaded grid tiles (sit exactly on the grid cells) */
+.tileShade {
+  position: absolute;
+  left: calc(var(--c) * var(--cw));
+  top: calc(var(--r) * var(--ch));
+  width: calc(var(--w) * var(--cw));
+  height: calc(var(--h) * var(--ch));
+  background: linear-gradient(180deg, rgba(90, 135, 255, 0.2), rgba(90, 135, 255, 0.1));
 }
 
 /* hero content */
@@ -488,30 +503,26 @@
 }
 
 /* ---------- mouse-follow parallax (driven by --mx / --my set on .hero) ---------- */
-.hero { --mx: 0; --my: 0; }
+.hero { --mx: 0; --my: 0; --cw: 280px; --ch: 150px; }
 
 /* curved strands: each bundle moves/turns at its own depth */
 .waves {
-  translate: calc(var(--mx) * 46px) calc(var(--my) * 18px);
-  rotate: calc(var(--mx) * 1.6deg);
+  translate: calc(var(--mx) * 22px) calc(var(--my) * 8px);
+  rotate: calc(var(--mx) * 0.6deg);
   transition: translate 0.35s ease-out, rotate 0.35s ease-out;
 }
-.bundleA { translate: calc(var(--mx) * 34px) calc(var(--my) * -12px); transition: translate 0.4s ease-out; }
-.bundleB { translate: calc(var(--mx) * -38px) calc(70px + var(--my) * 16px); transition: translate 0.4s ease-out; }
 
 /* tiled floor: perspective stays fixed (no rotate / no forward motion),
    the grid only slides left / right with the cursor */
 .gridPlane {
-  transform: rotateX(62deg) translateX(calc(var(--mx) * -90px));
+  transform: rotateX(62deg) translateX(calc(var(--mx) * -45px));
   transition: transform 0.35s ease-out;
 }
 
 /* glows, dots and beams drift at different depths */
-.orb { translate: calc(var(--mx) * -34px) calc(var(--my) * -22px); transition: translate 0.5s ease-out; }
-.bokeh { translate: calc(var(--mx) * 18px) calc(var(--my) * 12px); transition: translate 0.4s ease-out; }
-.stars { translate: calc(var(--mx) * -10px) calc(var(--my) * -6px); transition: translate 0.5s ease-out; }
-.beamL { translate: calc(var(--mx) * 40px) calc(var(--my) * 10px); transition: translate 0.4s ease-out; }
-.beamR { translate: calc(var(--mx) * -50px) calc(var(--my) * 12px); transition: translate 0.4s ease-out; }
+.orb { translate: calc(var(--mx) * -14px) calc(var(--my) * -9px); transition: translate 0.5s ease-out; }
+.bokeh { translate: calc(var(--mx) * 8px) calc(var(--my) * 5px); transition: translate 0.4s ease-out; }
+.stars { translate: calc(var(--mx) * -5px) calc(var(--my) * -3px); transition: translate 0.5s ease-out; }
 
 /* ---------- modules ---------- */
 .modulesWrap {
@@ -703,11 +714,11 @@
 }
 @keyframes orbDrift {
   from { transform: translate3d(0, 0, 0) scale(1); }
-  to   { transform: translate3d(60px, -40px, 0) scale(1.15); }
+  to   { transform: translate3d(28px, -18px, 0) scale(1.07); }
 }
 @keyframes bundleSway {
-  from { transform: translateX(-30px) scaleY(1); }
-  to   { transform: translateX(30px) scaleY(1.12); }
+  from { transform: translateX(-14px) scaleY(1); }
+  to   { transform: translateX(14px) scaleY(1.06); }
 }
 @keyframes waveSway {
   from { transform: translateX(-36px) translateY(0) scaleY(1); }
@@ -715,7 +726,7 @@
 }
 @keyframes gridFlow {
   from { background-position: 0 0; }
-  to   { background-position: 0 40px; }
+  to   { background-position: 0 110px; }
 }
 @keyframes shine {
   from { background-position: 0% 50%; }
@@ -723,7 +734,7 @@
 }
 @keyframes previewFloat {
   0%, 100% { transform: translateY(0) rotateX(8deg) rotateY(-3deg); }
-  50%      { transform: translateY(-14px) rotateX(5deg) rotateY(-1deg); }
+  50%      { transform: translateY(-7px) rotateX(6.5deg) rotateY(-2deg); }
 }
 @keyframes glowPulse {
   0%, 100% { opacity: 0.45; transform: scaleX(0.92); }
@@ -910,10 +921,10 @@
               box-shadow 0.35s ease;
 }
 .preview:hover {
-  translate: 0 -8px;
-  scale: 1.04;
+  translate: 0 -4px;
+  scale: 1.02;
   border-color: #3b64d8;
-  box-shadow: 0 40px 80px rgba(0, 0, 0, 0.5), 0 0 40px rgba(60, 110, 255, 0.35),
+  box-shadow: 0 40px 80px rgba(0, 0, 0, 0.5), 0 0 28px rgba(60, 110, 255, 0.25),
               inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 .preview:hover .bars span { filter: brightness(1.35); }

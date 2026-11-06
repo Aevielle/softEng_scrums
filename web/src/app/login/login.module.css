@@ -908,3 +908,77 @@
 @media (prefers-reduced-motion: reduce) {
   .avatar { animation: none; }
 }
+
+/* =====================================
+   VERIFICATION CODE STEP
+===================================== */
+
+.channel {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 6px 0 2px;
+  padding: 4px 10px;
+  border-radius: 8px;
+  background: #102968;
+  color: #c4d2f5;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.channelDot {
+  width: 8px;
+  height: 8px;
+  border: 1.5px solid currentColor;
+  border-radius: 50%;
+}
+
+.otp {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
+  margin: 6px 0 4px;
+}
+
+.card .otp input.otpBox {
+  width: 100%;
+  min-width: 0;
+  height: 58px;
+  padding: 0;
+  text-align: center;
+  font-size: 22px;
+  font-weight: 700;
+  border-radius: 10px;
+  caret-color: #3972ff;
+}
+
+.codeMeta {
+  margin: 4px 0 6px;
+  color: #aab8d8;
+  font-size: 12px;
+}
+
+.codeMeta strong { color: #f1f4ff; }
+.codeMeta .linkButton { font-size: 12px; }
+.expired { color: #ff7b86; font-weight: 600; }
+
+.safety {
+  margin: 4px 0 0;
+  color: #9aaddb;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.safety strong { color: #f1f4ff; letter-spacing: 0.04em; }
+
+:global(html[data-theme="light"]) .channel { background: #eaf0ff; color: #2858c5; }
+:global(html[data-theme="light"]) .codeMeta { color: #647294; }
+:global(html[data-theme="light"]) .codeMeta strong,
+:global(html[data-theme="light"]) .safety strong { color: #17233f; }
+:global(html[data-theme="light"]) .safety { color: #647294; }
+
+@media (max-width: 420px) {
+  .otp { gap: 6px; }
+  .card .otp input.otpBox { height: 50px; font-size: 20px; }
+}
