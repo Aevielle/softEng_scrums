@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import styles from "./page.module.css";
 import ThemeToggle from "./ThemeToggle";
@@ -50,6 +50,25 @@ const MODULES = [
 
 const BARS = [28, 40, 34, 52, 44, 62, 72];
 
+/* Bundles of fine curved strands (the swooshes behind the dashboard).
+   Strands converge at one point and fan out, like twisted ribbons. */
+const STRANDS_A = Array.from({ length: 26 }, (_, i) => {
+  const k = i - 13;
+  return `M-40,${318 + k * 3.2} C320,${282 + k * 1.1} 620,${262 - k * 2.6} 900,${196 + k * 0.5} S1290,${128 - k * 1.7} 1480,${96 + k * 2.8}`;
+});
+const STRANDS_B = Array.from({ length: 18 }, (_, i) => {
+  const k = i - 9;
+  return `M-40,${300 + k * 2.4} C240,${290 + k * 1.6} 520,${236 - k * 2} 820,${268 + k * 0.7} S1220,${320 - k * 1.2} 1480,${258 + k * 2}`;
+});
+
+/* soft out-of-focus light dots, positions in % of the hero */
+const BOKEH = [
+  [14, 20, 10, 0.55], [22, 33, 5, 0.5], [31, 12, 7, 0.45], [47, 6, 5, 0.5],
+  [68, 18, 6, 0.5], [78, 24, 14, 0.35], [88, 12, 6, 0.5], [92, 40, 9, 0.4],
+  [8, 46, 5, 0.5], [42, 44, 4, 0.5], [60, 50, 5, 0.45], [84, 62, 12, 0.35],
+  [18, 70, 6, 0.4], [95, 74, 5, 0.45],
+];
+
 const AUTH_LABELS = {
   login: "Sign in to Hope ERP",
   register: "Create your account",
@@ -71,6 +90,8 @@ export default function Home() {
   const [authModal, setAuthModal] = useState(null);
   const [infoModal, setInfoModal] = useState(null); // "privacy" | "support" | null
   const [scrolled, setScrolled] = useState(false);
+  const tiltRef = useRef(null);
+  const heroRef = useRef(null);
 
   /* Lock scroll + close on Escape while any modal is open */
   useEffect(() => {
@@ -103,6 +124,51 @@ export default function Home() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  /* Dashboard preview tilts toward the cursor from ANYWHERE on screen
+     (far left / far right still rotates it in 3D) */
+  useEffect(() => {
+    const el = tiltRef.current;
+    const hero = heroRef.current;
+    if (!el || !hero) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    const clamp = (v) => Math.max(-1, Math.min(1, v));
+    let frame = 0;
+
+    function setTilt(rx, ry) {
+      el.style.setProperty("--rx", `${rx.toFixed(2)}deg`);
+      el.style.setProperty("--ry", `${ry.toFixed(2)}deg`);
+    }
+
+    function onMove(e) {
+      if (e.pointerType && e.pointerType !== "mouse") return;
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        const r = el.getBoundingClientRect();
+        const dx = clamp((e.clientX - (r.left + r.width / 2)) / (window.innerWidth / 2));
+        const dy = clamp((e.clientY - (r.top + r.height / 2)) / (window.innerHeight / 2));
+        setTilt(-dy * 12, dx * 18);
+        /* background parallax: -1..1 across the window */
+        hero.style.setProperty("--mx", ((e.clientX / window.innerWidth - 0.5) * 2).toFixed(3));
+        hero.style.setProperty("--my", ((e.clientY / window.innerHeight - 0.5) * 2).toFixed(3));
+      });
+    }
+    function onLeave() {
+      cancelAnimationFrame(frame);
+      setTilt(0, 0);
+      hero.style.setProperty("--mx", "0");
+      hero.style.setProperty("--my", "0");
+    }
+
+    window.addEventListener("pointermove", onMove, { passive: true });
+    document.documentElement.addEventListener("pointerleave", onLeave);
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener("pointermove", onMove);
+      document.documentElement.removeEventListener("pointerleave", onLeave);
+    };
+  }, []);
+
   /* Scroll-reveal for anything marked with data-reveal */
   useEffect(() => {
     const items = document.querySelectorAll("[data-reveal]");
@@ -112,12 +178,14 @@ export default function Home() {
       return;
     }
 
+    /* Toggle on enter AND leave so the reveal replays every time it scrolls into view */
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             entry.target.dataset.in = "true";
-            observer.unobserve(entry.target);
+          } else {
+            delete entry.target.dataset.in;
           }
         });
       },
@@ -162,13 +230,36 @@ export default function Home() {
 
       <main>
         {/* ================= HERO ================= */}
-        <section className={styles.hero}>
+        <section className={styles.hero} ref={heroRef}>
           {/* animated background layers */}
           <div className={styles.stars} aria-hidden="true" />
           <div className={`${styles.orb} ${styles.orbA}`} aria-hidden="true" />
           <div className={`${styles.orb} ${styles.orbB}`} aria-hidden="true" />
           <div className={`${styles.orb} ${styles.orbC}`} aria-hidden="true" />
 
+          {/* soft out-of-focus light dots */}
+          {BOKEH.map(([x, y, size, o], i) => (
+            <span
+              key={i}
+              className={styles.bokeh}
+              aria-hidden="true"
+              style={{
+                left: `${x}%`,
+                top: `${y}%`,
+                width: size,
+                height: size,
+                opacity: o,
+                "--t": `${3 + (i % 5)}s`,
+                "--td": `${-(i * 0.7)}s`,
+              }}
+            />
+          ))}
+
+          {/* dim diagonal light beams */}
+          <div className={`${styles.beam} ${styles.beamL}`} aria-hidden="true" />
+          <div className={`${styles.beam} ${styles.beamR}`} aria-hidden="true" />
+
+          {/* curved strand bundles behind the dashboard */}
           <svg
             className={styles.waves}
             viewBox="0 0 1440 360"
@@ -178,14 +269,20 @@ export default function Home() {
             <defs>
               <linearGradient id="waveGrad" x1="0" y1="0" x2="1" y2="0">
                 <stop offset="0%" className={styles.waveStopA} />
-                <stop offset="50%" className={styles.waveStopB} />
+                <stop offset="55%" className={styles.waveStopB} />
                 <stop offset="100%" className={styles.waveStopA} />
               </linearGradient>
             </defs>
-            <path className={`${styles.wave} ${styles.wave1}`} d="M-40,250 C220,170 460,330 720,240 S1200,150 1480,220" />
-            <path className={`${styles.wave} ${styles.wave2}`} d="M-40,270 C240,200 480,330 740,260 S1180,180 1480,245" />
-            <path className={`${styles.wave} ${styles.wave3}`} d="M-40,230 C200,150 500,300 700,220 S1220,130 1480,200" />
-            <path className={`${styles.wave} ${styles.wave4}`} d="M-40,290 C260,230 460,340 760,285 S1160,210 1480,270" />
+            <g className={`${styles.bundle} ${styles.bundleA}`}>
+              {STRANDS_A.map((d, i) => (
+                <path key={i} className={styles.strand} d={d} style={{ "--i": i }} />
+              ))}
+            </g>
+            <g className={`${styles.bundle} ${styles.bundleB}`}>
+              {STRANDS_B.map((d, i) => (
+                <path key={i} className={styles.strand} d={d} style={{ "--i": i }} />
+              ))}
+            </g>
           </svg>
 
           <div className={styles.floor} aria-hidden="true">
@@ -218,6 +315,7 @@ export default function Home() {
           </div>
 
           <div className={`${styles.previewWrap} ${styles.rise}`} style={{ "--d": "0.7s" }}>
+            <div className={styles.previewTilt} ref={tiltRef}>
               <div
               className={styles.preview}
               role="button"
@@ -254,6 +352,7 @@ export default function Home() {
                 ))}
               </div>
             </div>
+            </div>
           </div>
         </section>
 
@@ -269,14 +368,14 @@ export default function Home() {
             <h2
               className={`${styles.sectionTitle} ${styles.reveal}`}
               data-reveal
-              style={{ transitionDelay: "0.08s" }}
+              style={{ "--rd": "0.08s" }}
             >
               Everything your team needs to work from one source.
             </h2>
             <p
               className={`${styles.sectionText} ${styles.reveal}`}
               data-reveal
-              style={{ transitionDelay: "0.16s" }}
+              style={{ "--rd": "0.16s" }}
             >
               Replace disconnected spreadsheets with an ERP that keeps every
               record linked, every role clear, and every report ready.
@@ -288,7 +387,7 @@ export default function Home() {
                   key={m.title}
                   className={`${styles.card} ${styles.reveal}`}
                   data-reveal
-                  style={{ transitionDelay: `${0.12 + i * 0.12}s` }}
+                  style={{ "--rd": `${0.12 + i * 0.12}s` }}
                   role="button"
                   tabIndex={0}
                   onClick={() => setAuthModal("login")}
@@ -324,7 +423,7 @@ export default function Home() {
         <span
           className={`${styles.brand} ${styles.slideLeft}`}
           data-reveal
-          style={{ transitionDelay: "0.15s" }}
+          style={{ "--rd": "0.15s" }}
         >
           <span className={styles.logo} aria-hidden="true">H</span>
           Hope, Inc.
@@ -332,7 +431,7 @@ export default function Home() {
         <span
           className={`${styles.footerLinks} ${styles.slideRight}`}
           data-reveal
-          style={{ transitionDelay: "0.3s" }}
+          style={{ "--rd": "0.3s" }}
         >
           <span className={styles.note}>© 2026 Hope, Inc. ERP</span>
           <button type="button" className={styles.footLink} onClick={() => setInfoModal("privacy")}>
