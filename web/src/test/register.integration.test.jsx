@@ -7,6 +7,7 @@ afterAll(async () => {
   await supabaseAdmin.from("app_user").delete().eq("email", email);
 });
 
+// API to Database
 test("Registers a real account as pending", async () => {
   const response = await POST({
     json: async () => ({ firstName: "Test", lastName: "User", email, password: "@ValidPass1" }),
