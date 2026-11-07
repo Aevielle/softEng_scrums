@@ -52,3 +52,5 @@ web/.env.*.local
 web/.next/
 web/node_modules/
 web/out/
+
+create-bug-issues.sh
