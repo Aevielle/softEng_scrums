@@ -1,4 +1,4 @@
-# Test Plan for Sprint 1
+# Test Cases for Sprint 1
 
 ## Test Setup
 ### Tester
