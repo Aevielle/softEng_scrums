@@ -1,0 +1,70 @@
+/* [project]/web/src/app/globals.css [app-client] (css) */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  color: #172033;
+  background: #f4f7fb;
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.home {
+  place-items: center;
+  min-height: 100vh;
+  padding: 24px;
+  display: grid;
+}
+
+.card {
+  background: #fff;
+  border: 1px solid #dce3ed;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 620px;
+  padding: 40px;
+  box-shadow: 0 12px 32px #14233c14;
+}
+
+.eyebrow {
+  color: #2563eb;
+  letter-spacing: .14em;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+h1 {
+  margin-bottom: 12px;
+  font-size: clamp(28px, 5vw, 40px);
+}
+
+.card > p:not(.eyebrow) {
+  color: #526078;
+  line-height: 1.7;
+}
+
+.status {
+  align-items: center;
+  gap: 10px;
+  margin: 24px 0;
+  font-size: 14px;
+  display: flex;
+}
+
+.dot {
+  background: #16a34a;
+  border-radius: 50%;
+  width: 10px;
+  height: 10px;
+}
+
+.card a {
+  color: #1d4ed8;
+  text-underline-offset: 4px;
+  font-weight: 600;
+  text-decoration: underline;
+  display: inline-block;
+}
+
+/*# sourceMappingURL=web_src_app_globals_css_1igg3k2-ikub5._.single.css.map*/
