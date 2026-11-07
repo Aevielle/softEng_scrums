@@ -15,7 +15,6 @@ if (process.env.ALLOW_SEED !== "true") {
 const supabase = createClient(url, key);
 
 for (const u of Object.values(users)) {
-  console.log(u);
   const email = u.email.toLowerCase(); // the login route lowercases input
 
   // No user_id, created_at or updated_at: the database generates them
