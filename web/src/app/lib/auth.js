@@ -1,22 +1,25 @@
-import { loginLocal } from "./localAuth";
-
-const DEMO_EMAILS = ["superadmin@hope.com", "admin@hope.com", "user@hope.com"];
-
-export async function loginUser(email, password, remember) {
-  const res = await fetch('/api/auth/login', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, password, remember }),
-  });
-  const data = await res.json().catch(() => ({}));
-  return res.ok ? { ok: true, ...data } : { ok: false, ...data };
-}
-
-export async function registerUser(data) {
-  const res = await fetch("/api/auth/register", {
+async function postJson(url, payload) {
+  const res = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
+    body: JSON.stringify(payload),
   });
-  return res.json();
+  // An HTML error page or empty body becomes {} instead of throwing
+  const data = await res.json().catch(() => ({}));
+  return { res, data };
+}
+
+export async function loginUser(email, password, remember) {
+  const { res, data } = await postJson("/api/auth/login", { email, password, remember });
+  return res.ok
+    ? { ...data, ok: true }
+    : { ...data, ok: false, message: data.message || "Something went wrong. Please try again." };
+}
+
+export async function registerUser(payload) {
+  const { res, data } = await postJson("/api/auth/register", payload);
+  return {
+    ok: res.ok,
+    message: data.message || (res.ok ? "" : "Registration failed. Please try again."),
+  };
 }
