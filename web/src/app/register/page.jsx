@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import styles from "./register.module.css";
-import { registerLocal } from "../lib/localAuth";
+import { registerUser } from "../lib/auth";
 
 function EyeIcon({ off }) {
   return off ? (
@@ -130,7 +130,7 @@ export default function RegisterPage({
     setLoading(true);
 
     try {
-            const result = registerLocal({
+        const result = await registerUser({
         firstName: firstName.trim(),
         lastName: lastName.trim(),
         email: email.trim().toLowerCase(),
