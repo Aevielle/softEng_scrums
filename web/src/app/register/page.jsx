@@ -53,8 +53,11 @@ export default function RegisterPage({
 
   const validEmail = /^\S+@\S+\.\S+$/.test(email.trim());
   const hasMinimumLength = password.length >= 8;
-  const hasLettersAndNumbers =
-    /[A-Za-z]/.test(password) && /\d/.test(password);
+  const hasUppercase = /[A-Z]/.test(password);
+  const hasLowercase = /[a-z]/.test(password);
+  const hasNumber = /\d/.test(password);
+  const hasSpecial = /[^A-Za-z0-9\s]/.test(password);
+  const hasStrongMix = hasUppercase && hasLowercase && hasNumber && hasSpecial;
   const passwordsMatch =
     password.length > 0 && password === confirmPassword;
 
@@ -63,7 +66,7 @@ export default function RegisterPage({
   const badLast = submitted && !lastName.trim();
   const badEmail = submitted && (!email.trim() || !validEmail);
   const badPassword =
-    submitted && (!password || !hasMinimumLength || !hasLettersAndNumbers);
+    submitted && (!password || !hasMinimumLength || !hasStrongMix);
   const badConfirm = submitted && (!confirmPassword || !passwordsMatch);
 
   // Toast closes itself after a few seconds.
@@ -113,10 +116,10 @@ export default function RegisterPage({
     }
 
     // Password validation
-    if (!hasMinimumLength || !hasLettersAndNumbers) {
+    if (!hasMinimumLength || !hasStrongMix) {
       showError(
         "Password too weak",
-        "Use 8+ characters with letters and numbers."
+        "Use 8+ characters with uppercase, lowercase, numbers, and special characters."
       );
       return;
     }
@@ -389,9 +392,9 @@ export default function RegisterPage({
               At least 8 characters
             </p>
 
-            <p className={hasLettersAndNumbers ? styles.requirementMet : ""}>
-              <span>{hasLettersAndNumbers ? "✓" : "○"}</span>
-              Includes letters, numbers, and special characters
+            <p className={hasStrongMix ? styles.requirementMet : ""}>
+              <span>{hasStrongMix ? "✓" : "○"}</span>
+              Includes letters (both uppercase and lowercase), numbers, and special characters
             </p>
 
             <p className={passwordsMatch ? styles.requirementMet : ""}>
