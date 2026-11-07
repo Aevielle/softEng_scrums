@@ -208,7 +208,7 @@ export default function RegisterPage({
 
             <h1 className={styles.successTitle}>Sign up successful</h1>
             <p className={styles.successText}>
-              Your account is ready. New accounts start as User.
+              Your account is waiting for Superadmin approval. New accounts start as User.
             </p>
 
             <dl className={styles.successDetails}>
@@ -391,7 +391,7 @@ export default function RegisterPage({
 
             <p className={hasLettersAndNumbers ? styles.requirementMet : ""}>
               <span>{hasLettersAndNumbers ? "✓" : "○"}</span>
-              Includes letters and numbers
+              Includes letters, numbers, and special characters
             </p>
 
             <p className={passwordsMatch ? styles.requirementMet : ""}>

@@ -24,11 +24,12 @@ function formatTime(total) {
 
 const TITLES = {
   EMPTY: "Empty Field",
-  WRONG_EMAIL: "Wrong Email",
+  WRONG_EMAIL: "Incorrect Email",
   NOT_FOUND: "Account not Found",
   INVALID: "Sign in failed",
   BLOCKED: "Account Blocked",
   PENDING: "Account Pending",
+  SERVER: "Server Error",
 };
 
 function toastTitle(error) {
