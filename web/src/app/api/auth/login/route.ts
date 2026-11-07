@@ -9,6 +9,13 @@ const DUMMY_HASH = '$2a$10$CwTycUXWue0Thq9StjUM0uJ8.5G3b6dZlZk1X9F7sZ0vYQ3m8pYqe
 const fail = (code: string, message: string, status: number) =>
   NextResponse.json({ code, message }, { status });
 
+// Demo accounts: any password works, but ONLY when DEMO_LOGIN=true
+const DEMO_ACCOUNTS: Record<string, { firstName: string; role: string }> = {
+  'superadmin@hope.com': { firstName: 'Superadmin', role: 'Superadmin' },
+  'admin@hope.com': { firstName: 'Admin', role: 'Admin' },
+  'user@hope.com': { firstName: 'User', role: 'User' },
+};
+
 export async function POST(req: Request) {
   try {
     let body: { email?: string; password?: string; remember?: boolean };
@@ -28,6 +35,20 @@ export async function POST(req: Request) {
 
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
       return fail('WRONG_EMAIL', 'Enter valid email address.', 400);
+    }
+
+    const demo = process.env.DEMO_LOGIN === 'true' ? DEMO_ACCOUNTS[cleanEmail] : undefined;
+
+    if (demo) {
+      await createSession(
+        { sub: `demo-${demo.role.toLowerCase()}`, role: demo.role, mustChange: false },
+        !!remember
+      );
+
+      return NextResponse.json({
+        redirect: '/dashboard',
+        user: { firstName: demo.firstName, email: cleanEmail, role: demo.role },
+      });
     }
 
     const { data: user, error } = await supabaseAdmin
