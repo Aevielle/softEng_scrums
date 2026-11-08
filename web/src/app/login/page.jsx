@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import styles from "./login.module.css";
@@ -67,7 +68,12 @@ function describeUser(data, email) {
         ? "Admin"
         : "User";
 
-  return { name: name || "there", email: person.email || email, role };
+  return {
+    name: name || "there",
+    email: person.email || email,
+    role,
+    redirect: data?.redirect || "/dashboard",
+  };
 }
 
 function EyeIcon({ off }) {
@@ -92,6 +98,9 @@ export default function LoginPage({
   onSwitchToRegister,
   onSwitchToForgot,
 }) {
+  const router = useRouter();
+  const [navigating, setNavigating] = useState(false);
+
   const [form, setForm] = useState({
     email: "",
     password: "",
@@ -293,6 +302,12 @@ export default function LoginPage({
     setError(null);
   }
 
+  function goToDashboard() {
+    if (navigating) return;
+    setNavigating(true);
+    router.push(welcome?.redirect || "/dashboard");
+  }
+
   function handlePasswordChange(e) {
     setForm((previous) => ({
       ...previous,
@@ -343,8 +358,13 @@ export default function LoginPage({
             </div>
           </div>
 
-          <button type="button" className={styles.comingSoon} disabled>
-            Dashboard coming soon
+          <button
+            type="button"
+            className={styles.proceedButton}
+            onClick={goToDashboard}
+            disabled={navigating}
+          >
+            {navigating ? "Opening dashboard..." : "Proceed to Dashboard"}
           </button>
 
           {modal ? (

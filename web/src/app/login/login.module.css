@@ -852,18 +852,38 @@
   overflow-wrap: anywhere;
 }
 
-.comingSoon {
+.proceedButton {
   width: 100%;
   min-height: 48px;
-  border: none;
+  border: 1px solid #315ed2;
   border-radius: 10px;
-  background: #2858d1;
+  background: linear-gradient(100deg, #1945bb, #2858d1);
   color: #ffffff;
   font: inherit;
   font-size: 14px;
   font-weight: 700;
-  opacity: 0.5;
-  cursor: not-allowed;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(40, 89, 213, 0.3);
+  transition: transform 0.2s ease, filter 0.2s ease, box-shadow 0.2s ease;
+}
+
+.proceedButton:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 26px rgba(40, 89, 213, 0.45);
+}
+
+.proceedButton:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.proceedButton:focus-visible {
+  outline: 2px solid #8fb0ff;
+  outline-offset: 2px;
+}
+
+.proceedButton:disabled {
+  opacity: 0.6;
+  cursor: wait;
 }
 
 .backLink {
