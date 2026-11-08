@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import styles from "./login.module.css";
-import { loginLocal } from "../lib/localAuth";
+import { loginUser } from "../lib/auth";
 
 const EMAIL_RE = /^\S+@\S+\.\S+$/;
 
@@ -256,7 +256,7 @@ export default function LoginPage({
     setLoading(true);
 
     try {
-      const result = loginLocal(form.email.trim(), form.password);
+      const result = await loginUser(form.email.trim(), form.password);
 
       if (!result.ok) {
         setError(result);
