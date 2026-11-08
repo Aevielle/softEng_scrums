@@ -17,9 +17,12 @@ export async function POST(req: Request) {
     const weak = validatePassword(password);
     if (weak) return NextResponse.json({ message: weak }, { status: 400 });
 
-    // Only enforce confirm when the client sends it
-    if (confirm !== undefined && password !== confirm) {
-      return NextResponse.json({ message: 'Passwords do not match.' }, { status: 400 });
+    // confirm is required and must match. Checked before hashing or any DB write.
+    if (typeof confirm !== 'string' || password !== confirm) {
+      return NextResponse.json(
+        { code: 'MISMATCH', message: 'Passwords do not match.' },
+        { status: 400 },
+      );
     }
 
     const hash = await bcrypt.hash(password, 12);
