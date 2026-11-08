@@ -3,10 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "seed:user":"dotenv -e .env.test -- node src/test/seeder-script-regular.mjs",
-    "pretest":"npm run seed:user",
+    "seed:user": "dotenv -e .env.test -- node src/test/seeder-script-regular.mjs",
+    "pretest": "npm run seed:user",
     "dev": "next dev",
-    "dev:test":"dotenv -e .env.test -- next",
+    "dev:test": "dotenv -e .env.test -- next",
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
@@ -14,7 +14,6 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.118.0",
-    "bcryptjs": "^3.0.3",
     "bcryptjs": "^3.0.3",
     "jose": "^6.2.15",
     "next": "16.4.3",
@@ -24,16 +23,15 @@
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
-    "@types/bcryptjs": "^2.4.6",
-    "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
+    "@types/node": "^20.19.43",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
     "dotenv": "^18.0.9",
     "dotenv-cli": "^11.1.0",
     "eslint": "^9",
     "eslint-config-next": "16.4.3",
     "jest": "^30.5.2",
-    "typescript": "^5"
+    "typescript": "^5.9.3"
   },
   "allowScripts": {
     "unrs-resolver@1.12.2": true
