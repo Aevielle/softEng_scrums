@@ -69,6 +69,9 @@ With the development server running, visit:
 
 A successful response confirms that the application can perform the configured read-only database test. If the test fails, verify the environment variables, table name, Supabase API access, and database permissions.
 
+## landing page
+ http://localhost:3000
+
 ### To check the CREATE YOUR ACC
 http://localhost:3000/register
 
