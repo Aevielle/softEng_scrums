@@ -70,8 +70,17 @@ async function grantedKeysForUser(userId: number): Promise<ModuleKey[]> {
     .select('module:module_id(module_name)')
     .eq('user_id', userId);
 
+  let warnedMissingRightsTable = false; // put this above the function
+
   if (error) {
-    console.error('[permissions] rights lookup failed:', error.message, error.code);
+    if (error.code === 'PGRST205') {
+      if (!warnedMissingRightsTable) {
+        console.warn('[permissions] rights table not found; using temporary default rights');
+        warnedMissingRightsTable = true;
+      }
+    } else {
+      console.error('[permissions] rights lookup failed:', error.message, error.code);
+    }
     return [];
   }
 
