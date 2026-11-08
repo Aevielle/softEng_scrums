@@ -53,7 +53,7 @@ export async function POST(req: Request) {
 
     const { data: user, error } = await supabaseAdmin
       .from('app_user')
-      .select('user_id, first_name, email, password_hash, is_blocked, account_status, role:role_id(role_name)')
+      .select('user_id, first_name, email, password_hash, is_blocked, account_status, must_change_password, role:role_id(role_name)')
       .eq('email', cleanEmail)
       .maybeSingle();
 
@@ -79,10 +79,13 @@ export async function POST(req: Request) {
     const roleObj = Array.isArray(user.role) ? user.role[0] : user.role;
     const roleName = roleObj?.role_name ?? 'User';
 
-    await createSession({ sub: String(user.user_id), role: roleName, mustChange: false }, !!remember);
+    await createSession(
+      { sub: String(user.user_id), role: roleName, mustChange: !!user.must_change_password },
+      !!remember
+    );
 
     return NextResponse.json({
-      redirect: '/dashboard',
+      redirect: user.must_change_password ? '/set-password' : '/dashboard',
       user: { firstName: user.first_name, email: user.email, role: roleName },
     });
   } catch (err) {

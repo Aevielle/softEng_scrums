@@ -1,19 +1,26 @@
-import { SignJWT } from 'jose';
+import { SignJWT, jwtVerify } from 'jose';
 import { cookies } from 'next/headers';
 
-type SessionPayload = { sub: string; role: string; mustChange: boolean };
+export type SessionPayload = { sub: string; role: string; mustChange: boolean };
 
-export async function createSession(payload: SessionPayload, remember: boolean) {
+function getKey() {
   const secret = process.env.SESSION_SECRET;
   if (!secret) throw new Error('SESSION_SECRET is not set');
+  return new TextEncoder().encode(secret);
+}
 
+export async function createSession(payload: SessionPayload, remember = false) {
   const maxAge = remember ? 60 * 60 * 24 * 30 : 60 * 60 * 8; // 30 days or 8 hours
 
-  const token = await new SignJWT({ ...payload })
+  const token = await new SignJWT({
+    sub: payload.sub,
+    role: payload.role,
+    mustChange: payload.mustChange,
+  })
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
     .setExpirationTime(`${maxAge}s`)
-    .sign(new TextEncoder().encode(secret));
+    .sign(getKey());
 
   const store = await cookies();
   store.set('session', token, {
@@ -23,4 +30,21 @@ export async function createSession(payload: SessionPayload, remember: boolean) 
     path: '/',
     maxAge,
   });
+}
+
+export async function getSession(): Promise<SessionPayload | null> {
+  const store = await cookies();
+  const token = store.get('session')?.value;
+  if (!token) return null;
+
+  try {
+    const { payload } = await jwtVerify(token, getKey());
+    return {
+      sub: String(payload.sub),
+      role: String(payload.role ?? 'User'),
+      mustChange: !!payload.mustChange,
+    };
+  } catch {
+    return null; // expired or tampered
+  }
 }
