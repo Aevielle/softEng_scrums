@@ -1,6 +1,6 @@
 # Database Setup Instructions
 
-Follow these steps to set up your local database and run migrations without using Docker:
+Follow these steps to set up your local database, configure environment variables, and run migrations without using Docker.
 
 1. Environment Setup (.env)
 
@@ -40,9 +40,22 @@ Follow these steps to set up your local database and run migrations without usin
 
 Note: The migration script is fully idempotent. You can re-run it multiple times safely without encountering database errors.
 
-## User & Permissions Schema (`002_user_permissions_setup.sql`)
-- **`role`**: Defines user roles across the system.
-- **`app_user`**: Stores user authentication data (first_name, last_name, unique email, password_hash, role_id, and is_blocked flag).
-- **`module`**: Tracks system modules for access control.
-- **`rights_catalogue`**: Stores permission rights associated with system modules.
-- **`user_permission`**: Maps users to specific rights with **soft delete** support (`is_deleted` and `deleted_at`).
+## Summary of Database Setup
+
+### 1. S1-DBA-02: HOPE Base Tables & Sample Data (`005_hope_base_tables_and_sample_data.sql`)
+- **What it does:** Builds the core HOPE system tables (`employee`, `department`, `job`, `jobHistory`, `customer`, `sales`, `salesDetail`, `product`, `payment`, and `priceHist`) and populates the initial sample data.
+- **Idempotency:** The original `HopeDB_audit.sql` contained `DROP TABLE` statements that would wipe data if re-executed. This script has been modified to handle existing tables safely so running it multiple times will not delete or duplicate existing data.
+- **Audit Logging Scope:** The original audit log functionality from Sir's SQL script was extracted and is managed separately under S1-DBA-06.
+
+### 2. S1-DBA-03: User Accounts & Permissions (`002_user_permissions_setup.sql`)
+- **What it does:** Creates the authentication and permission tables (`app_user`, `role`, `module`, rights catalogue, and `user_permission`).
+- **Key Features:**
+  - `app_user` contains fields for first name, last name, unique email, password hash, role, and a `blocked` flag.
+  - `user_permission` implements **soft delete** functionality (marking records as inactive rather than permanently removing rows).
+- **Idempotency:** Safe to run multiple times without corrupting existing structures.
+
+### 3. S1-DBA-06: Audit Logging & User Tracking System (`006_s1_dba_06_audit_log.sql`)
+- **What it does:** Tracks table modifications (`ADD`, `EDIT`, `DELETE`) and logs *who* performed each action via the `audit_user()` session function and `trg_audit_log` triggers.
+- **Session User Context:** Reads the user ID from `app.current_user_id`. When testing triggers manually in the Supabase SQL Editor, set the current session user beforehand:
+  ```sql
+  SET LOCAL app.current_user_id = '1';
