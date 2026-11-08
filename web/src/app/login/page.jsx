@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import styles from "./login.module.css";
-import { loginLocal } from "../lib/localAuth";
+import { loginUser } from "../lib/auth";
 
 const EMAIL_RE = /^\S+@\S+\.\S+$/;
 
@@ -24,11 +24,12 @@ function formatTime(total) {
 
 const TITLES = {
   EMPTY: "Empty Field",
-  WRONG_EMAIL: "Wrong Email",
+  WRONG_EMAIL: "Incorrect Email",
   NOT_FOUND: "Account not Found",
   INVALID: "Sign in failed",
   BLOCKED: "Account Blocked",
   PENDING: "Account Pending",
+  SERVER: "Server Error",
 };
 
 function toastTitle(error) {
@@ -256,7 +257,7 @@ export default function LoginPage({
     setLoading(true);
 
     try {
-      const result = loginLocal(form.email.trim(), form.password);
+      const result = await loginUser(form.email.trim(), form.password);
 
       if (!result.ok) {
         setError(result);
