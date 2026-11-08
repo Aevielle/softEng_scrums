@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { supabaseAdmin } from "@/lib/supabase/admin";
+import { validatePassword } from "@/lib/auth/password";
 
 export const runtime = "nodejs";
 
@@ -209,22 +210,12 @@ export async function POST(request: Request) {
       );
     }
 
-    // 3. Password strength
-    // Minimum 8 characters, including uppercase, lowercase,
-    // a number, and a special character.
-    const strongPassword =
-      password.length >= 8 &&
-      /[a-z]/.test(password) &&
-      /[A-Z]/.test(password) &&
-      /\d/.test(password) &&
-      /[^A-Za-z0-9]/.test(password);
+    // 3. Password strength (shared rules)
+    const passwordError = validatePassword(password);
 
-    if (!strongPassword) {
+    if (passwordError) {
       return NextResponse.json(
-        {
-          message:
-            "Password must be at least 8 characters and include uppercase, lowercase, a number, and a special character.",
-        },
+        { message: passwordError },
         { status: 400 }
       );
     }

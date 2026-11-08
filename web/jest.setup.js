@@ -1,0 +1,1 @@
+console.log("SETUP RAN:", process.env.SUPABASE_TEST_TABLE);

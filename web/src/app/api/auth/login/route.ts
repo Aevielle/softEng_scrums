@@ -14,14 +14,19 @@ export async function POST(req: Request) {
       { code: 'EMPTY', message: 'Please fill out the forms.' }, { status: 400 });
   }
 
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+  return NextResponse.json(
+    { code: 'FORMAT', message: 'Enter valid email address.' }, { status: 400 });
+  }
+
   const { data: user } = await supabaseAdmin
     .from('app_user')
-    .select('id, email, password_hash, status, must_change_password, role')
+    .select('user_id, email, password_hash, is_blocked, account_status, must_change_password, role:role_id(role_name)')
     .eq('email', email.trim().toLowerCase())
     .maybeSingle();
 
   const ok = await bcrypt.compare(password, user?.password_hash ?? DUMMY_HASH);
-
+  
   // One general error for unknown email OR wrong password
   if (!user || !ok) {
     return NextResponse.json(
@@ -30,15 +35,23 @@ export async function POST(req: Request) {
   }
 
   // Checked only after the password is correct, so status isn't leaked to strangers
-  if (user.status === 'blocked') {
-    return NextResponse.json(
-      { code: 'BLOCKED', message: 'Your account is blocked. Please contact your administrator.' },
-      { status: 403 });
+  if (user.is_blocked) {
+  return NextResponse.json(
+    { code: 'BLOCKED', message: 'Your account is blocked. Please contact your administrator.' },
+    { status: 403 });
   }
+  
+  if (user.account_status === 'pending') {
+  return NextResponse.json(
+    { code: 'PENDING', message: 'Your account is waiting for Superadmin approval.' },
+    { status: 403 });
+  }
+  
+  const roleObj = Array.isArray(user.role) ? user.role[0] : user.role;
 
   await createSession(
-    { sub: user.id, role: user.role, mustChange: !!user.must_change_password },
-    !!remember
+    { sub: String(user.user_id), role: roleObj?.role_name ?? 'User', mustChange: !!user.must_change_password },
+  !!remember
   );
 
   return NextResponse.json({

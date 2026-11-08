@@ -1,0 +1,5 @@
+.center { text-align: center; align-items: stretch; }
+.icon { width: 64px; height: 64px; border-radius: 50%; background: #d9d9d9; display: grid; place-items: center; font-size: 28px; margin: 8px auto 0; }
+.pill { align-self: center; font-size: 11px; font-weight: 700; color: #555; background: #d9d9d9; padding: 4px 12px; border-radius: 6px; }
+.center h1 { font-size: 30px; }
+.success { color: #1b7a3d; font-weight: 700; }

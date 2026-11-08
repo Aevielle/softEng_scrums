@@ -1,0 +1,38 @@
+{
+  "blockedUser": {
+    "label":"Blocked User",
+    "role_id": 3,
+    "firstName": "Blocked",
+    "lastName": "User",
+    "email": "seed.blocked_user@hope.erp.com",
+    "password": "@ValidPass1",
+    "is_blocked": true
+  },
+  "regularUser": {
+    "label": "Regular User",
+    "role_id": 3,
+    "firstName": "Regular",
+    "lastName": "User",
+    "email": "seed.user@hope.erp.com",
+    "password": "@ValidPass1",
+    "is_blocked": false
+  },
+  "admin": {
+    "label": "Admin",
+    "role_id": 2,
+    "firstName": "Admin",
+    "lastName": "User",
+    "email": "seed.admin@hope.erp.com",
+    "password": "@ValidPass1",
+    "is_blocked": false
+  },
+  "superadmin": {
+    "label": "Superadmin",
+    "role_id": 1,
+    "firstName": "Super",
+    "lastName": "Admin",
+    "email": "seed.superadmin@hope.erp.com",
+    "password": "@ValidPass1",
+    "is_blocked": false
+  }
+}
