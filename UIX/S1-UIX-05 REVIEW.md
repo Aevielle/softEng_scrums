@@ -4,7 +4,7 @@ This document is to confirm that I have reviewed every screen that's built and m
 
 Please click this link to view the fix list:
 https://drive.google.com/file/d/1Prpnh4w7NpFQigxpuqVhPAruibCvn74O/view?usp=sharing
-
+git switch <your-branch-name>
 
 
 
