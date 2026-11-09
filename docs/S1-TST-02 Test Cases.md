@@ -77,7 +77,7 @@ Tests run at the API and route level. Scenarios that describe UI behavior ("the 
 2. **The login route ignores the query's `error`.** A schema problem shows up as "Invalid email or password" instead of a 500, which hides this bug.
 3. **The set-password route ignores `confirm`.** A mismatch is accepted.
 4. **No runtime role check.** Nothing separates User, Admin and Superadmin.
-5. **Reset flow consumes the token before updating the user.** If the update fails, the link is burned (the message tells the user to request a new one, so this may be intentional).
+5. **Reset flow consumes the token before updating the user.** If the update fails, the link is burned.
 
 ## Test Accounts
 |Account|Use|How To Create|
