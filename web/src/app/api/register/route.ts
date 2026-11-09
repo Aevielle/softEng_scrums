@@ -3,8 +3,6 @@ import bcrypt from "bcryptjs";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { validatePassword } from "@/lib/auth/password";
 
-export const runtime = "nodejs";
-
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 // "pending" = needs Superadmin approval, "active" = can sign in immediately
