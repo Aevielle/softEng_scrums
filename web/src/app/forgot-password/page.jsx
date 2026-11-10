@@ -6,22 +6,52 @@ import styles from "./forgot-password.module.css";
 import { forgotLocal } from "../lib/localAuth";
 
 const COOLDOWN_MS = 30_000;
-const DEFAULT_EXPIRY_SECONDS = 180; // 3:00
+const DEFAULT_EXPIRY_SECONDS = 180; // 3:00 (demo accounts)
 const EMAIL_RE = /^\S+@\S+\.\S+$/;
+
+// These three never send email: they use the browser-only demo flow.
+const DEMO_EMAILS = ["superadmin@hope.com", "admin@hope.com", "user@hope.com"];
 
 const fmt = (ms) => {
   const s = Math.max(0, Math.ceil(ms / 1000));
   return `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
 };
 
-// Unknown email: "Wrong Email" (local part matches) / "Account not Found" (otherwise).
-// The server decides which one applies; we only choose the toast title.
+const TITLES = {
+  EMPTY: "Empty Field",
+  FORMAT: "Wrong Email",
+  WRONG_EMAIL: "Wrong Email",
+  NOT_FOUND: "Account not Found",
+  SERVER: "Server Error",
+};
+
 function serverErrorTitle(data) {
   if (data?.title) return data.title;
-  if (data?.code === "NOT_FOUND" || /not found/i.test(data?.message || "")) {
-    return "Account not Found";
-  }
+  if (TITLES[data?.code]) return TITLES[data.code];
+  if (/not found/i.test(data?.message || "")) return "Account not Found";
   return "Wrong Email";
+}
+
+// uppercase + lowercase + number + special character
+const strongMix = (pw) =>
+  /[A-Z]/.test(pw) && /[a-z]/.test(pw) && /\d/.test(pw) && /[^A-Za-z0-9\s]/.test(pw);
+
+// Demo accounts: browser-only. Everyone else: the real API (emails a link).
+async function requestReset(email) {
+  if (DEMO_EMAILS.includes(email.toLowerCase())) {
+    return { ...forgotLocal(email), demo: true };
+  }
+
+  const res = await fetch("/api/auth/forgot-password", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email }),
+  });
+  const data = await res.json().catch(() => ({}));
+
+  return res.ok
+    ? { ...data, ok: true }
+    : { ...data, ok: false, message: data.message || "Something went wrong. Please try again." };
 }
 
 function EyeIcon({ off }) {
@@ -48,8 +78,17 @@ function CheckIcon() {
   );
 }
 
+function MailIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <rect x="3" y="5" width="18" height="14" rx="2.5" />
+      <path d="m3.5 7 8.5 6.5L20.5 7" />
+    </svg>
+  );
+}
+
 // Classroom prototype: demo accounts accept any password, so only registered
-// accounts (kept in this browser's localStorage) need their password updated.
+// accounts kept in this browser's localStorage need their password updated.
 function savePassword(email, password) {
   try {
     const list = JSON.parse(localStorage.getItem("hope_users"));
@@ -62,12 +101,14 @@ function savePassword(email, password) {
   }
 }
 
-function MailIcon() {
+function Rule({ ok, children }) {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <rect x="3" y="5" width="18" height="14" rx="2.5" />
-      <path d="m3.5 7 8.5 6.5L20.5 7" />
-    </svg>
+    <li className={ok ? styles.ruleOk : ""}>
+      <span className={styles.ruleDot} aria-hidden="true">
+        {ok ? <CheckIcon /> : null}
+      </span>
+      {children}
+    </li>
   );
 }
 
@@ -77,13 +118,13 @@ export default function ForgotPasswordPage({
   onSwitchToLogin,
 }) {
   const [email, setEmail] = useState("");
-  const [sent, setSent] = useState(null); // { email, expiresAt, resendAt, again, link }
+  const [sent, setSent] = useState(null); // { email, expiresAt, resendAt, again, demo }
   const [now, setNow] = useState(0);
-  const [error, setError] = useState(null); // { title, message, empty? }
+  const [error, setError] = useState(null); // { title, message }
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
-  // Step 2 / Step 3 (reset link opened -> new password -> done)
+  // Step 2 / Step 3 (demo accounts only)
   const [stage, setStage] = useState("request"); // "request" | "reset" | "done"
   const [pw, setPw] = useState("");
   const [pw2, setPw2] = useState("");
@@ -95,20 +136,18 @@ export default function ForgotPasswordPage({
 
   const rules = {
     length: pw.length >= 8,
-    mix: /[A-Za-z]/.test(pw) && /\d/.test(pw),
+    mix: strongMix(pw),
     match: pw.length > 0 && pw === pw2,
   };
 
   const badEmail = submitted && !EMAIL_RE.test(email.trim());
 
-  // Tick once a second while the "sent" view is showing
   useEffect(() => {
     if (!sent) return;
     const t = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(t);
   }, [sent]);
 
-  // Toast closes itself after a few seconds
   useEffect(() => {
     if (!error) return;
     const t = setTimeout(() => setError(null), 6000);
@@ -123,13 +162,11 @@ export default function ForgotPasswordPage({
     setSubmitted(true);
     setError(null);
 
-    // Required field
     if (!target) {
       setError({ title: "Empty Field", message: "Please fill out the forms." });
       return;
     }
 
-    // Email format
     if (!EMAIL_RE.test(target)) {
       setError({ title: "Wrong Email", message: "Enter valid email address." });
       return;
@@ -138,7 +175,7 @@ export default function ForgotPasswordPage({
     setLoading(true);
 
     try {
-      const data = forgotLocal(target);
+      const data = await requestReset(target);
 
       if (!data.ok) {
         setError({
@@ -155,15 +192,7 @@ export default function ForgotPasswordPage({
         expiresAt: t + (data.expiresIn ?? DEFAULT_EXPIRY_SECONDS) * 1000,
         resendAt: t + COOLDOWN_MS,
         again: !!sent,
-        // Demo only: if the API hands back the reset link, offer it.
-        link:
-          data.resetUrl ||
-          data.resetLink ||
-          data.link ||
-          data.url ||
-          (data.token
-            ? `/reset-password?token=${encodeURIComponent(data.token)}`
-            : null),
+        demo: !!data.demo,
       });
     } catch {
       setError({
@@ -200,7 +229,10 @@ export default function ForgotPasswordPage({
       return;
     }
     if (!rules.mix) {
-      setError({ title: "Weak password", message: "Include both letters and numbers." });
+      setError({
+        title: "Weak password",
+        message: "Use uppercase, lowercase, a number, and a special character.",
+      });
       return;
     }
     if (!rules.match) {
@@ -222,24 +254,14 @@ export default function ForgotPasswordPage({
         <strong>{error.title}</strong>
         <p>{error.message}</p>
       </div>
-      <button
-        type="button"
-        className={styles.toastClose}
-        onClick={() => setError(null)}
-        aria-label="Close"
-      >
+      <button type="button" className={styles.toastClose} onClick={() => setError(null)} aria-label="Close">
         ×
       </button>
     </div>
   );
 
   const closeButton = modal ? (
-    <button
-      type="button"
-      className={styles.closeButton}
-      onClick={onClose}
-      aria-label="Close"
-    >
+    <button type="button" className={styles.closeButton} onClick={onClose} aria-label="Close">
       ×
     </button>
   ) : (
@@ -260,7 +282,7 @@ export default function ForgotPasswordPage({
 
   const wrapClass = `${styles.wrap} ${modal ? styles.modalWrap : ""}`;
 
-  /* ---------- Step 3: password updated ---------- */
+  /* ---------- Step 3: password updated (demo) ---------- */
   if (stage === "done" && doneInfo) {
     return (
       <main className={wrapClass}>
@@ -278,8 +300,7 @@ export default function ForgotPasswordPage({
           <h1 className={styles.sentTitle}>Password updated</h1>
 
           <p className={styles.sentText}>
-            Your new password has been saved. You can now return to sign in
-            securely.
+            Your new password has been saved. You can now return to sign in securely.
           </p>
 
           <div className={styles.details}>
@@ -307,17 +328,8 @@ export default function ForgotPasswordPage({
     );
   }
 
-  /* ---------- Step 2: set a new password ---------- */
+  /* ---------- Step 2: set a new password (demo) ---------- */
   if (stage === "reset" && sent) {
-    const Rule = ({ ok, children }) => (
-      <li className={ok ? styles.ruleOk : ""}>
-        <span className={styles.ruleDot} aria-hidden="true">
-          {ok ? <CheckIcon /> : null}
-        </span>
-        {children}
-      </li>
-    );
-
     return (
       <main className={wrapClass}>
         {toast}
@@ -388,7 +400,7 @@ export default function ForgotPasswordPage({
 
           <ul className={styles.rules}>
             <Rule ok={rules.length}>At least 8 characters</Rule>
-            <Rule ok={rules.mix}>Includes letters and numbers</Rule>
+            <Rule ok={rules.mix}>Includes letters, numbers, and special characters</Rule>
             <Rule ok={rules.match}>Passwords match</Rule>
           </ul>
 
@@ -432,8 +444,19 @@ export default function ForgotPasswordPage({
           <h1 className={styles.sentTitle}>Reset link sent</h1>
 
           <p className={styles.sentText}>
-            We sent {sent.again ? "another" : "a"} secure reset password link to{" "}
-            <span className={styles.emailText}>{sent.email}</span>.
+            {sent.demo ? (
+              <>
+                We sent {sent.again ? "another" : "a"} secure reset password link to{" "}
+                <span className={styles.emailText}>{sent.email}</span>.
+              </>
+            ) : (
+              <>
+                If an account exists for{" "}
+                <span className={styles.emailText}>{sent.email}</span>, we sent{" "}
+                {sent.again ? "another" : "a"} secure reset link. Open it from your
+                inbox (check spam too).
+              </>
+            )}
             <span className={styles.expiry}>
               {expires > 0 ? (
                 <>
@@ -451,24 +474,18 @@ export default function ForgotPasswordPage({
             onClick={send}
             disabled={loading || cooldown > 0}
           >
-            {loading
-              ? "Sending…"
-              : cooldown > 0
-                ? `Resend in ${fmt(cooldown)}`
-                : "Resend Link"}
+            {loading ? "Sending…" : cooldown > 0 ? `Resend in ${fmt(cooldown)}` : "Resend Link"}
           </button>
 
           <p className={styles.links}>
             {signInLink}
-            <span className={styles.dot} aria-hidden="true">·</span>
-            {sent.link ? (
-              <a href={sent.link} className={styles.linkButton}>
-                Open reset link (demo)
-              </a>
-            ) : (
-              <button type="button" className={styles.linkButton} onClick={openResetLink}>
-                Open reset link (demo)
-              </button>
+            {sent.demo && (
+              <>
+                <span className={styles.dot} aria-hidden="true">·</span>
+                <button type="button" className={styles.linkButton} onClick={openResetLink}>
+                  Open reset link (demo)
+                </button>
+              </>
             )}
           </p>
         </section>
@@ -507,11 +524,7 @@ export default function ForgotPasswordPage({
           autoComplete="email"
           autoFocus
           className={`${styles.input} ${badEmail ? styles.bad : ""}`}
-          placeholder={
-            submitted && !email.trim()
-              ? "Please fill out this form"
-              : "Enter your email"
-          }
+          placeholder={submitted && !email.trim() ? "Please fill out this form" : "Enter your email"}
           value={email}
           aria-invalid={badEmail}
           onChange={(e) => {

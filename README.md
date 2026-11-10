@@ -1,6 +1,6 @@
 # Hope, Inc. ERP
 
-A small, database-driven business system for the fictitious company Hope, Inc. It keeps customers, products, employees and sales in one place, with role-based access, soft delete and an audit trail.
+A small web-based ERP for the fictitious company Hope, Inc. It keeps customers, products, employees and sales in **one shared database**, with role-based access, soft delete and an audit trail.
 
 **Live demo:** https://soft-eng-scrums-djix8tfji-group-4-7285.vercel.app/
 **Next presentation:** December 7, 2026
@@ -18,13 +18,17 @@ A small, database-driven business system for the fictitious company Hope, Inc. I
 - [Links](#links)
 
 ## About the project
-Companies often keep each department's data in separate spreadsheets. In Hope, Inc. ERP, every module reads and writes the **same database**, so the data always matches. We are Group 4, and we're building it for our Software Engineering class.
+Companies often keep each department's data in separate spreadsheets, so the numbers drift apart and nobody knows which copy is right. Hope, Inc. ERP fixes this by giving every module the **same database**: when Sales records an order, the Customers and Products screens already match it.<br>The system is for the staff of Hope, Inc. Each person signs in and sees only the parts of the system that their role and rights allow. We are Group 4, and we are building it for our Software Engineering class, one sprint at a time.
 
-What makes it different from a plain list of records:
-- **Role-based access:** what you see and what you can do depends on your role and your rights.
-- **Soft delete:** deleting a record marks it as Inactive instead of removing it, so an Admin can restore it and the links to other records stay intact.
-- **Audit trail:** every record keeps the latest action, who did it, and when.
-- **Reports:** read-only summaries that you can print or save as PDF.
+**What makes it different from a plain list of records:**
+- **Role-based access:** This is what you see and what you can do depends on your role (Superadmin, Admin, User) and on the rights an Admin gave you.
+- **Checked on the server:** It is more than just hiding a button. Every single page and API route checks the user's rights again, so typing a URL by hand does not get around it.
+- **Account approval:** A new sign-up starts as a User and waits until an Admin or Superadmin approves it inside the app.
+- **Email:** A confirmation email after registering and an emailed link to reset a forgotten password.
+- **Safe passwords and sessions:** Passwords are displayed as  hashed (never stored as plain text), and the login cookie is signed and cannot be read by page scripts.
+- **Soft delete:** Deleting a record marks it as Inactive rather than removing it, so an Admin can restore it and the links to other records stay intact.
+- **Audit trail:** Every record keeps the latest action, who did it, and when.
+- **Reports:** Read-only summaries that you can print or save as PDF.
 
 ## Modules
 | Module | What it does | Sprint |
@@ -43,13 +47,13 @@ What makes it different from a plain list of records:
 | Admin | Manager | Manages most modules and user rights, but can't see or change Superadmin accounts |
 | User | Staff | Only the modules and actions an Admin gave them (rights) |
 
-New accounts start as a User and wait for approval.
+The dashboard menu follows a crucial role: A Superadmin sees every module plus User Management and System Settings, an Admin sees every module plus User Management, and a User sees only the modules they were granted.<br>New accounts start as a User and wait for approval.
 
 ## Progress
 - [x] Project setup, Supabase database and user tables
 - [x] Landing page
 - [x] Register and Sign in
-- [ ] Forgot password with an emailed link
+- [x] Forgot password with an emailed link
 - [ ] Confirmation email after registering
 - [ ] Approve users inside the app (Superadmin)
 - [ ] User Management and Rights screens
@@ -62,13 +66,18 @@ The full task list is in our Planned Tasks sheet, and each task is one pull requ
 ## Tech stack
 - **Next.js** (React) and **Node.js** for the app
 - **Supabase** (PostgreSQL) for the database
+- **bcryptjs** for password hashing and jose for signed session cookies
+- **Nodemailer with Brevo** (SMTP) for sending email
+- **Jest** for tests
 - **Vercel** for the live demo
 
 ## Getting started
 
 ### What you need
-- Node.js (LTS version) and npm
-- Access to the team's Supabase project (ask Geliz to invite you)
+- **Git**
+- **Node.js 20.9+** (LTS version) and npm. Check with `node -v`
+- Access to the team's Supabase project (ask Geliz to invite you). Use the **test** project only, never production data.
+- A free **Brevo** account, only if you want to send real emails (see Email setup). The app still runs without it, but the emails will not be sent.
 
 ### Run the app on your laptop
 1. Clone the repository.
@@ -89,11 +98,12 @@ The full task list is in our Planned Tasks sheet, and each task is one pull requ
    copy .env.example .env.local
    ```
 5. Open `.env.local` and fill in the team's Supabase Project URL, publishable key, and the name of an existing database table. **Never commit this file or share the real keys.**
-6. Start the app:
+6. Set up the Database (see Database)
+7. Start the app:
    ```
    npm run dev
    ```
-7. Open http://localhost:3000 in your browser.
+8. Open http://localhost:3000 in your browser.
 
 ### Pages to try
 | Page | Address |
