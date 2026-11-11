@@ -1,10 +1,11 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import styles from "./login.module.css";
 import { loginUser } from "../lib/auth";
+import OAuthButtons, { OrDivider } from "@/components/OAuthButtons";
 
 const EMAIL_RE = /^\S+@\S+\.\S+$/;
 
@@ -31,6 +32,40 @@ const TITLES = {
   BLOCKED: "Account Blocked",
   PENDING: "Account Pending",
   SERVER: "Server Error",
+};
+
+// Shown when Google / GitHub sends the user back to /login?oauth=...
+const OAUTH_NOTICES = {
+  created: {
+    code: "PENDING",
+    title: "Account Created",
+    message: "Your account is waiting for approval from an Admin.",
+  },
+  pending: {
+    code: "PENDING",
+    message: "Your account is waiting for approval from an Admin.",
+  },
+  blocked: {
+    code: "BLOCKED",
+    message: "Your account is blocked. Please contact your administrator.",
+  },
+  notfound: {
+    code: "NOT_FOUND",
+    message:
+      "We couldn't find an account with that email. Use the Google or GitHub account that has the same email as your Hope, Inc. ERP account.",
+  },
+  unverified: {
+    title: "Email not verified",
+    message: "The email on that Google or GitHub account is not verified.",
+  },
+  cancelled: {
+    title: "Sign-in cancelled",
+    message: "You cancelled the sign-in.",
+  },
+  failed: {
+    code: "SERVER",
+    message: "Something went wrong. Please try again.",
+  },
 };
 
 function toastTitle(error) {
@@ -72,6 +107,7 @@ function describeUser(data, email) {
     name: name || "there",
     email: person.email || email,
     role,
+    // Where the "Proceed" button goes: /dashboard, or /set-password if required
     redirect: data?.redirect || "/dashboard",
   };
 }
@@ -111,7 +147,7 @@ export default function LoginPage({
   const [show, setShow] = useState(false);
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const [welcome, setWelcome] = useState(null); // { name, email, role }
+  const [welcome, setWelcome] = useState(null); // { name, email, role, redirect }
 
   // Verification step for admin / superadmin accounts
   const [pending, setPending] = useState(null); // { info, code }
@@ -131,6 +167,23 @@ export default function LoginPage({
     const timer = setTimeout(() => setError(null), 6000);
     return () => clearTimeout(timer);
   }, [error]);
+
+  // Result of a Google / GitHub sign-in: /login?oauth=created|pending|blocked|...
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get("oauth");
+    if (!code) return;
+
+    setError(OAUTH_NOTICES[code] || OAUTH_NOTICES.failed);
+
+    params.delete("oauth");
+    const rest = params.toString();
+    window.history.replaceState(
+      null,
+      "",
+      window.location.pathname + (rest ? `?${rest}` : "")
+    );
+  }, []);
 
   // Countdown for the verification and resend codes
   useEffect(() => {
@@ -266,7 +319,11 @@ export default function LoginPage({
     setLoading(true);
 
     try {
-      const result = await loginUser(form.email.trim(), form.password);
+      const result = await loginUser(
+        form.email.trim(),
+        form.password,
+        form.remember
+      );
 
       if (!result.ok) {
         setError(result);
@@ -280,7 +337,7 @@ export default function LoginPage({
       if (/admin/i.test(info.role)) {
         startVerification(info);
       } else {
-        // No dashboard yet: confirm the sign in in the popup.
+        // Confirm the sign in in the popup, then "Proceed to Dashboard".
         setWelcome(info);
       }
     } catch {
@@ -294,18 +351,18 @@ export default function LoginPage({
     }
   }
 
+  function goToDashboard() {
+    if (navigating) return;
+    setNavigating(true);
+    router.push(welcome?.redirect || "/dashboard");
+  }
+
   function handleEmailChange(e) {
     setForm((previous) => ({
       ...previous,
       email: e.target.value,
     }));
     setError(null);
-  }
-
-  function goToDashboard() {
-    if (navigating) return;
-    setNavigating(true);
-    router.push(welcome?.redirect || "/dashboard");
   }
 
   function handlePasswordChange(e) {
@@ -637,6 +694,10 @@ export default function LoginPage({
         >
           {loading ? "Signing in..." : "Sign in"}
         </button>
+
+        {/* Google / GitHub */}
+        <OrDivider>or</OrDivider>
+        <OAuthButtons intent="signin" />
 
         {/* Register Link */}
         <p className={styles.signUpText}>
