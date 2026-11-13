@@ -4,7 +4,7 @@ import { supabaseAdmin } from "@/lib/supabase/admin";
 import { validatePassword } from "@/lib/auth/password";
 import { sendRegistrationEmail } from "@/lib/auth/mailer";
 
-export const runtime = "nodejs";
+
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
