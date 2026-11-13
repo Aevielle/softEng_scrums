@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import styles from "./register.module.css";
 import { registerUser } from "../lib/auth";
 
@@ -35,6 +36,8 @@ export default function RegisterPage({
   onClose,
   onSwitchToLogin,
 }) {
+  const router = useRouter();
+
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
@@ -47,6 +50,7 @@ export default function RegisterPage({
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [createdEmail, setCreatedEmail] = useState(null);
+  const [emailSent, setEmailSent] = useState(null); // true | false | null (unknown)
 
   // Toast: { type: "error" | "success", title, message }
   const [notice, setNotice] = useState(null);
@@ -68,6 +72,15 @@ export default function RegisterPage({
   const badPassword =
     submitted && (!password || !hasMinimumLength || !hasStrongMix);
   const badConfirm = submitted && (!confirmPassword || !passwordsMatch);
+
+  // The standalone /register route IS the popup on the landing page:
+  // send the visitor there so the popup opens.
+  useEffect(() => {
+    if (modal) return;
+    const params = new URLSearchParams(window.location.search);
+    params.set("auth", "register");
+    router.replace(`/?${params.toString()}`);
+  }, [modal, router]);
 
   // Toast closes itself after a few seconds.
   useEffect(() => {
@@ -133,7 +146,7 @@ export default function RegisterPage({
     setLoading(true);
 
     try {
-        const result = await registerUser({
+      const result = await registerUser({
         firstName: firstName.trim(),
         lastName: lastName.trim(),
         email: email.trim().toLowerCase(),
@@ -149,6 +162,7 @@ export default function RegisterPage({
       }
 
       setCreatedEmail(email.trim().toLowerCase());
+      setEmailSent(typeof result.emailSent === "boolean" ? result.emailSent : null);
 
       setFirstName("");
       setLastName("");
@@ -165,6 +179,9 @@ export default function RegisterPage({
       setLoading(false);
     }
   }
+
+  // Standalone /register: nothing to draw while the redirect above runs
+  if (!modal) return null;
 
   return (
     <main className={`${styles.page} ${modal ? styles.modalPage : ""}`}>
@@ -211,7 +228,11 @@ export default function RegisterPage({
 
             <h1 className={styles.successTitle}>Sign up successful</h1>
             <p className={styles.successText}>
-              Your account is waiting for Superadmin approval. New accounts start as User.
+              {emailSent === true
+                ? "We sent a confirmation email to your inbox (check spam too). Your account is waiting for approval from an Admin."
+                : emailSent === false
+                  ? "Your account was created and is waiting for approval from an Admin. We couldn't send the confirmation email right now."
+                  : "Your account was created and is waiting for approval from an Admin."}
             </p>
 
             <dl className={styles.successDetails}>
@@ -222,6 +243,10 @@ export default function RegisterPage({
               <div className={styles.detailRow}>
                 <dt>Role</dt>
                 <dd>User</dd>
+              </div>
+              <div className={styles.detailRow}>
+                <dt>Status</dt>
+                <dd>Pending approval</dd>
               </div>
             </dl>
 
