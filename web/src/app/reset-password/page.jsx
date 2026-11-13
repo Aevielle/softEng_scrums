@@ -1,10 +1,20 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import styles from "./register.module.css";
-import { registerUser } from "../lib/auth";
+import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import styles from '../forgot-password/forgot-password.module.css';
+import shell from '../set-password/set-password.module.css';
+
+// uppercase + lowercase + number + special character (same rule as the server)
+const strongMix = (pw) =>
+  /[A-Z]/.test(pw) && /[a-z]/.test(pw) && /\d/.test(pw) && /[^A-Za-z0-9\s]/.test(pw);
+
+const TITLES = {
+  INVALID_LINK: 'Invalid link',
+  WEAK: 'Weak password',
+  MISMATCH: "Passwords don't match",
+  SERVER: 'Server Error',
+};
 
 function EyeIcon({ off }) {
   return off ? (
@@ -22,441 +32,258 @@ function EyeIcon({ off }) {
   );
 }
 
-function UserIcon() {
+function CheckIcon() {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <circle cx="12" cy="8" r="4" />
-      <path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1" />
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M5 12.5l4.5 4.5L19 7.5" />
     </svg>
   );
 }
 
-export default function RegisterPage({
-  modal = false,
-  onClose,
-  onSwitchToLogin,
-}) {
-  const router = useRouter();
+function Rule({ ok, children }) {
+  return (
+    <li className={ok ? styles.ruleOk : ''}>
+      <span className={styles.ruleDot} aria-hidden="true">
+        {ok ? <CheckIcon /> : null}
+      </span>
+      {children}
+    </li>
+  );
+}
 
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+export default function ResetPasswordPage() {
+  const [token, setToken] = useState(null); // null = not read yet, '' = no token in the link
+  const [pw, setPw] = useState('');
+  const [pw2, setPw2] = useState('');
+  const [showPw, setShowPw] = useState(false);
+  const [showPw2, setShowPw2] = useState(false);
+  const [tried, setTried] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState(null); // { title, message }
+  const [done, setDone] = useState(false);
 
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const rules = {
+    length: pw.length >= 8,
+    mix: strongMix(pw),
+    match: pw.length > 0 && pw === pw2,
+  };
 
-  const [loading, setLoading] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
-  const [createdEmail, setCreatedEmail] = useState(null);
-  const [emailSent, setEmailSent] = useState(null); // true | false | null (unknown)
-
-  // Toast: { type: "error" | "success", title, message }
-  const [notice, setNotice] = useState(null);
-
-  const validEmail = /^\S+@\S+\.\S+$/.test(email.trim());
-  const hasMinimumLength = password.length >= 8;
-  const hasUppercase = /[A-Z]/.test(password);
-  const hasLowercase = /[a-z]/.test(password);
-  const hasNumber = /\d/.test(password);
-  const hasSpecial = /[^A-Za-z0-9\s]/.test(password);
-  const hasStrongMix = hasUppercase && hasLowercase && hasNumber && hasSpecial;
-  const passwordsMatch =
-    password.length > 0 && password === confirmPassword;
-
-  // Highlight fields only after the first submit attempt.
-  const badFirst = submitted && !firstName.trim();
-  const badLast = submitted && !lastName.trim();
-  const badEmail = submitted && (!email.trim() || !validEmail);
-  const badPassword =
-    submitted && (!password || !hasMinimumLength || !hasStrongMix);
-  const badConfirm = submitted && (!confirmPassword || !passwordsMatch);
-
-  // The standalone /register route IS the popup on the landing page:
-  // send the visitor there so the popup opens.
+  // Read the token from the emailed link
   useEffect(() => {
-    if (modal) return;
     const params = new URLSearchParams(window.location.search);
-    params.set("auth", "register");
-    router.replace(`/?${params.toString()}`);
-  }, [modal, router]);
+    setToken(params.get('token') || '');
+  }, []);
 
-  // Toast closes itself after a few seconds.
   useEffect(() => {
-    if (!notice) return;
-    const timer = setTimeout(
-      () => setNotice(null),
-      notice.type === "success" ? 8000 : 6000
-    );
-    return () => clearTimeout(timer);
-  }, [notice]);
+    if (!error) return;
+    const t = setTimeout(() => setError(null), 6000);
+    return () => clearTimeout(t);
+  }, [error]);
 
-  function showError(title, message) {
-    setNotice({ type: "error", title, message });
-  }
+  async function submit(e) {
+    e.preventDefault();
+    setTried(true);
+    setError(null);
 
-  // Typing clears an error toast.
-  function change(setter) {
-    return (event) => {
-      setter(event.target.value);
-      if (notice?.type === "error") setNotice(null);
-    };
-  }
-
-  async function handleRegister(event) {
-    event.preventDefault();
-
-    setSubmitted(true);
-    setNotice(null);
-
-    // Required fields
-    if (
-      !firstName.trim() ||
-      !lastName.trim() ||
-      !email.trim() ||
-      !password ||
-      !confirmPassword
-    ) {
-      showError("Empty Field", "Please fill out the forms.");
-      return;
+    if (!pw || !pw2) {
+      return setError({ title: 'Empty Field', message: 'Please fill out the forms.' });
     }
-
-    // Email validation
-    if (!validEmail) {
-      showError("Wrong Email", "Enter valid email address.");
-      return;
+    if (!rules.length) {
+      return setError({ title: 'Password too short', message: 'Use at least 8 characters.' });
     }
-
-    // Password validation
-    if (!hasMinimumLength || !hasStrongMix) {
-      showError(
-        "Password too weak",
-        "Use 8+ characters with uppercase, lowercase, numbers, and special characters."
-      );
-      return;
-    }
-
-    // Confirm password validation
-    if (!passwordsMatch) {
-      showError("Passwords do not match", "Re-enter the same password.");
-      return;
-    }
-
-    setLoading(true);
-
-    try {
-      const result = await registerUser({
-        firstName: firstName.trim(),
-        lastName: lastName.trim(),
-        email: email.trim().toLowerCase(),
-        password,
+    if (!rules.mix) {
+      return setError({
+        title: 'Weak password',
+        message: 'Use uppercase, lowercase, a number, and a special character.',
       });
+    }
+    if (!rules.match) {
+      return setError({
+        title: "Passwords don't match",
+        message: 'Re-type the same password in both fields.',
+      });
+    }
 
-      if (!result.ok) {
-        showError(
-          "Registration Failed",
-          result.message || "Registration failed."
-        );
+    setBusy(true);
+    try {
+      const res = await fetch('/api/auth/reset-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token, password: pw, confirm: pw2 }),
+      });
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        setError({
+          title: TITLES[data.code] || 'Reset failed',
+          message: data.message || 'Could not update password. Please request a new link.',
+        });
         return;
       }
 
-      setCreatedEmail(email.trim().toLowerCase());
-      setEmailSent(typeof result.emailSent === "boolean" ? result.emailSent : null);
-
-      setFirstName("");
-      setLastName("");
-      setEmail("");
-      setPassword("");
-      setConfirmPassword("");
-      setSubmitted(false);
-    } catch (err) {
-      showError(
-        "Connection Error",
-        "Unable to connect. Please check your internet connection and try again."
-      );
+      setPw('');
+      setPw2('');
+      setDone(true);
+    } catch {
+      setError({ title: 'Network error', message: 'Please check your connection and try again.' });
     } finally {
-      setLoading(false);
+      setBusy(false);
     }
   }
 
-  // Standalone /register: nothing to draw while the redirect above runs
-  if (!modal) return null;
+  const toast = error && (
+    <div className={styles.toast} role="alert">
+      <span className={styles.toastIcon} aria-hidden="true">!</span>
+      <div>
+        <strong>{error.title}</strong>
+        <p>{error.message}</p>
+      </div>
+      <button type="button" className={styles.toastClose} onClick={() => setError(null)} aria-label="Close">
+        ×
+      </button>
+    </div>
+  );
 
-  return (
-    <main className={`${styles.page} ${modal ? styles.modalPage : ""}`}>
+  const closeButton = (
+    <Link href="/" className={styles.closeButton} aria-label="Close">
+      ×
+    </Link>
+  );
 
-      {/* Error / success notification */}
-      {notice && (
-        <div
-          className={`${styles.toast} ${
-            notice.type === "success" ? styles.toastSuccess : ""
-          }`}
-          role={notice.type === "success" ? "status" : "alert"}
-        >
-          <span className={styles.toastIcon} aria-hidden="true">
-            {notice.type === "success" ? "✓" : "!"}
-          </span>
+  // The popup frame (a plain function, not a component, so inputs never remount)
+  const frame = (children) => (
+    <div className={shell.backdrop}>
+      {toast}
+      <div className={shell.dialog}>
+        <main className={`${styles.wrap} ${styles.modalWrap}`}>{children}</main>
+      </div>
+    </div>
+  );
 
-          <div>
-            <strong>{notice.title}</strong>
-            <p>{notice.message}</p>
-          </div>
+  if (token === null) return null;
 
-          <button
-            type="button"
-            className={styles.toastClose}
-            onClick={() => setNotice(null)}
-            aria-label="Close notification"
-          >
-            ×
-          </button>
-        </div>
-      )}
-
-      <section className={styles.card}>
-        {createdEmail ? (
-          <div className={styles.successView} role="status">
-            {modal ? (
-              <button type="button" className={styles.closeButton} onClick={onClose} aria-label="Close">×</button>
-            ) : (
-              <Link href="/" className={styles.closeButton} aria-label="Close">×</Link>
-            )}
-
-            <span className={styles.successAvatar}><UserIcon /></span>
-            <span className={styles.successBadge}>Account Created</span>
-
-            <h1 className={styles.successTitle}>Sign up successful</h1>
-            <p className={styles.successText}>
-              {emailSent === true
-                ? "We sent a confirmation email to your inbox (check spam too). Your account is waiting for approval from an Admin."
-                : emailSent === false
-                  ? "Your account was created and is waiting for approval from an Admin. We couldn't send the confirmation email right now."
-                  : "Your account was created and is waiting for approval from an Admin."}
-            </p>
-
-            <dl className={styles.successDetails}>
-              <div className={styles.detailRow}>
-                <dt>Email</dt>
-                <dd>{createdEmail}</dd>
-              </div>
-              <div className={styles.detailRow}>
-                <dt>Role</dt>
-                <dd>User</dd>
-              </div>
-              <div className={styles.detailRow}>
-                <dt>Status</dt>
-                <dd>Pending approval</dd>
-              </div>
-            </dl>
-
-            {modal ? (
-              <button type="button" className={styles.successButton} onClick={onSwitchToLogin}>
-                Go to sign in
-              </button>
-            ) : (
-              <Link href="/login" className={styles.successButton}>Go to sign in</Link>
-            )}
-          </div>
-        ) : (
-          <>
-        {/* Header */}
-        <header className={styles.header}>
-          <div>
-            <h1>Create your account</h1>
-            <p>New accounts start as User.</p>
-          </div>
-
-          {modal ? (
-            <button
-              type="button"
-              className={styles.closeButton}
-              onClick={onClose}
-              aria-label="Close registration"
-            >
-              ×
-            </button>
-          ) : (
-            <Link
-              href="/"
-              className={styles.closeButton}
-              aria-label="Close registration"
-            >
-              ×
-            </Link>
-          )}
-        </header>
-
-        <form onSubmit={handleRegister} noValidate>
-
-          {/* First Name */}
-          <div className={styles.field}>
-            <label htmlFor="firstName">First name</label>
-            <input
-              id="firstName"
-              type="text"
-              className={badFirst ? styles.bad : ""}
-              placeholder={
-                badFirst ? "Please fill out this form" : "Enter your first name"
-              }
-              value={firstName}
-              onChange={change(setFirstName)}
-              autoComplete="given-name"
-              aria-invalid={badFirst}
-            />
-          </div>
-
-          {/* Last Name */}
-          <div className={styles.field}>
-            <label htmlFor="lastName">Last name</label>
-            <input
-              id="lastName"
-              type="text"
-              className={badLast ? styles.bad : ""}
-              placeholder={
-                badLast ? "Please fill out this form" : "Enter your last name"
-              }
-              value={lastName}
-              onChange={change(setLastName)}
-              autoComplete="family-name"
-              aria-invalid={badLast}
-            />
-          </div>
-
-          {/* Email */}
-          <div className={styles.field}>
-            <label htmlFor="email">Email</label>
-            <input
-              id="email"
-              type="email"
-              className={badEmail ? styles.bad : ""}
-              placeholder={
-                submitted && !email.trim()
-                  ? "Please fill out this form"
-                  : "Enter your email"
-              }
-              value={email}
-              onChange={change(setEmail)}
-              autoComplete="email"
-              aria-invalid={badEmail}
-            />
-          </div>
-
-          {/* Password */}
-          <div className={styles.field}>
-            <label htmlFor="password">Password</label>
-
-            <div className={styles.passwordWrapper}>
-              <input
-                id="password"
-                type={showPassword ? "text" : "password"}
-                className={badPassword ? styles.bad : ""}
-                placeholder={
-                  submitted && !password
-                    ? "Please fill out this form"
-                    : "Create a password"
-                }
-                value={password}
-                onChange={change(setPassword)}
-                autoComplete="new-password"
-                aria-invalid={badPassword}
-              />
-
-              <button
-                type="button"
-                className={styles.showPassword}
-                onClick={() => setShowPassword(!showPassword)}
-                aria-label={showPassword ? "Hide password" : "Show password"}
-              >
-                <EyeIcon off={showPassword} />
-              </button>
-            </div>
-          </div>
-
-          {/* Confirm Password */}
-          <div className={styles.field}>
-            <label htmlFor="confirmPassword">Confirm password</label>
-
-            <div className={styles.passwordWrapper}>
-              <input
-                id="confirmPassword"
-                type={showConfirmPassword ? "text" : "password"}
-                className={badConfirm ? styles.bad : ""}
-                placeholder={
-                  submitted && !confirmPassword
-                    ? "Please fill out this form"
-                    : "Confirm your password"
-                }
-                value={confirmPassword}
-                onChange={change(setConfirmPassword)}
-                autoComplete="new-password"
-                aria-invalid={badConfirm}
-              />
-
-              <button
-                type="button"
-                className={styles.showPassword}
-                onClick={() =>
-                  setShowConfirmPassword(!showConfirmPassword)
-                }
-                aria-label={
-                  showConfirmPassword
-                    ? "Hide confirm password"
-                    : "Show confirm password"
-                }
-              >
-                <EyeIcon off={showConfirmPassword} />
-              </button>
-            </div>
-          </div>
-
-          {/* Password Requirements */}
-          <div className={styles.passwordRequirements}>
-            <p className={hasMinimumLength ? styles.requirementMet : ""}>
-              <span>{hasMinimumLength ? "✓" : "○"}</span>
-              At least 8 characters
-            </p>
-
-            <p className={hasStrongMix ? styles.requirementMet : ""}>
-              <span>{hasStrongMix ? "✓" : "○"}</span>
-              Includes letters (both uppercase and lowercase), numbers, and special characters
-            </p>
-
-            <p className={passwordsMatch ? styles.requirementMet : ""}>
-              <span>{passwordsMatch ? "✓" : "○"}</span>
-              Passwords match
-            </p>
-          </div>
-
-          {/* Register Button */}
-          <button
-            type="submit"
-            className={styles.registerButton}
-            disabled={loading}
-          >
-            {loading ? "Creating account..." : "Create Account"}
-          </button>
-        </form>
-
-        {/* Sign In */}
-        <p className={styles.signInText}>
-          Have an account?{" "}
-
-          {modal ? (
-            <button
-              type="button"
-              className={styles.modalLink}
-              onClick={onSwitchToLogin}
-            >
-              Sign in.
-            </button>
-          ) : (
-            <Link href="/login">Sign in.</Link>
-          )}
+  /* ---------- No token in the link ---------- */
+  if (!token) {
+    return frame(
+      <section className={`${styles.card} ${styles.center}`}>
+        {closeButton}
+        <h1 className={styles.sentTitle}>Link not valid</h1>
+        <p className={styles.sentText}>
+          This reset link is invalid, expired, or already used. Request a new one from the sign-in screen.
         </p>
-        </>
-        )}
+        <Link href="/login" className={`${styles.submit} ${styles.submitLink}`}>
+          Return to sign in
+        </Link>
       </section>
-    </main>
+    );
+  }
+
+  /* ---------- Password updated ---------- */
+  if (done) {
+    return frame(
+      <section className={`${styles.card} ${styles.center}`}>
+        {closeButton}
+
+        <span className={`${styles.mailIcon} ${styles.successIcon}`} aria-hidden="true">
+          <CheckIcon />
+        </span>
+
+        <span className={styles.pill}>Step 3 · Return to Sign in</span>
+
+        <h1 className={styles.sentTitle}>Password updated</h1>
+
+        <p className={styles.sentText}>
+          Your new password has been saved. You can now return to sign in securely.
+        </p>
+
+        <Link href="/login" className={`${styles.submit} ${styles.submitLink}`}>
+          Return to sign in
+        </Link>
+      </section>
+    );
+  }
+
+  /* ---------- Set a new password ---------- */
+  return frame(
+    <form className={styles.card} onSubmit={submit} noValidate>
+      {closeButton}
+
+      <header className={styles.header}>
+        <h1>Set a new password</h1>
+      </header>
+
+      <span className={`${styles.pill} ${styles.pillLeft}`}>Step 2 · Reset password</span>
+
+      <p className={styles.stepText}>
+        Identity verified. Choose a password you haven&apos;t used before.
+      </p>
+
+      <label className={styles.label} htmlFor="newPassword">
+        New password
+      </label>
+      <div className={styles.pwField}>
+        <input
+          id="newPassword"
+          type={showPw ? 'text' : 'password'}
+          autoComplete="new-password"
+          autoFocus
+          className={`${styles.input} ${tried && !pw ? styles.bad : ''}`}
+          value={pw}
+          onChange={(e) => {
+            setPw(e.target.value);
+            setError(null);
+          }}
+        />
+        <button
+          type="button"
+          className={styles.eye}
+          onClick={() => setShowPw(!showPw)}
+          aria-label={showPw ? 'Hide password' : 'Show password'}
+        >
+          <EyeIcon off={showPw} />
+        </button>
+      </div>
+
+      <label className={styles.label} htmlFor="confirmPassword">
+        Confirm new password
+      </label>
+      <div className={styles.pwField}>
+        <input
+          id="confirmPassword"
+          type={showPw2 ? 'text' : 'password'}
+          autoComplete="new-password"
+          className={`${styles.input} ${tried && !pw2 ? styles.bad : ''}`}
+          value={pw2}
+          onChange={(e) => {
+            setPw2(e.target.value);
+            setError(null);
+          }}
+        />
+        <button
+          type="button"
+          className={styles.eye}
+          onClick={() => setShowPw2(!showPw2)}
+          aria-label={showPw2 ? 'Hide password' : 'Show password'}
+        >
+          <EyeIcon off={showPw2} />
+        </button>
+      </div>
+
+      <ul className={styles.rules}>
+        <Rule ok={rules.length}>At least 8 characters</Rule>
+        <Rule ok={rules.mix}>Includes letters, numbers, and special characters</Rule>
+        <Rule ok={rules.match}>Passwords match</Rule>
+      </ul>
+
+      <button type="submit" className={styles.submit} disabled={busy}>
+        {busy ? 'Saving…' : 'Save new password'}
+      </button>
+
+      <p className={styles.foot}>
+        <Link href="/login" className={styles.linkButton}>
+          Return to sign in →
+        </Link>
+      </p>
+    </form>
   );
 }
