@@ -2,7 +2,7 @@
 
 A small web-based ERP for the fictitious company Hope, Inc. It keeps customers, products, employees and sales in **one shared database**, with role-based access, soft delete and an audit trail.
 
-**Live demo:** https://soft-eng-scrums-djix8tfji-group-4-7285.vercel.app/
+**Live demo:** https://soft-eng-scrums.vercel.app/
 **Next presentation:** December 7, 2026
 
 ## Contents
