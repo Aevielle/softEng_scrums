@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import styles from "./forgot-password.module.css";
 import { forgotLocal } from "../lib/localAuth";
 
@@ -118,6 +119,8 @@ export default function ForgotPasswordPage({
   onClose,
   onSwitchToLogin,
 }) {
+  const router = useRouter();
+
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState(null); // { email, expiresAt, resendAt, again, demo }
   const [now, setNow] = useState(0);
@@ -142,6 +145,15 @@ export default function ForgotPasswordPage({
   };
 
   const badEmail = submitted && !EMAIL_RE.test(email.trim());
+
+  // The standalone /forgot-password route IS the popup on the landing page:
+  // send the visitor there so the popup opens.
+  useEffect(() => {
+    if (modal) return;
+    const params = new URLSearchParams(window.location.search);
+    params.set("auth", "forgot");
+    router.replace(`/?${params.toString()}`);
+  }, [modal, router]);
 
   // Tick once a second while the "sent" view is showing
   useEffect(() => {
@@ -249,6 +261,9 @@ export default function ForgotPasswordPage({
     setPw2("");
     setStage("done");
   }
+
+  // Standalone /forgot-password: nothing to draw while the redirect above runs
+  if (!modal) return null;
 
   const toast = error && (
     <div className={styles.toast} role="alert">
