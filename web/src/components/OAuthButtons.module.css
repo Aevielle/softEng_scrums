@@ -1,0 +1,23 @@
+.group { display: grid; gap: 10px; margin: 4px 0; }
+
+.btn {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  min-height: 46px; padding: 0 14px;
+  border: 1px solid #263e78; border-radius: 10px;
+  background: #0c2055; color: #eef2ff;
+  font: inherit; font-size: 14px; font-weight: 600; text-decoration: none;
+  transition: filter 0.2s ease, transform 0.2s ease;
+}
+.btn:hover { filter: brightness(1.15); transform: translateY(-1px); }
+.btn:focus-visible { outline: 2px solid #8fb0ff; outline-offset: 2px; }
+
+.icon { width: 18px; height: 18px; flex: none; }
+.githubIcon { fill: currentColor; }
+
+.or { display: flex; align-items: center; gap: 12px; margin: 6px 0; color: #93a5d0; font-size: 12px; }
+.or::before, .or::after { content: ""; flex: 1; height: 1px; background: #24396e; }
+
+:global(html[data-theme="light"]) .btn { background: #ffffff; border-color: #dce3ef; color: #17233f; }
+:global(html[data-theme="light"]) .or { color: #647294; }
+:global(html[data-theme="light"]) .or::before,
+:global(html[data-theme="light"]) .or::after { background: #dce3ef; }

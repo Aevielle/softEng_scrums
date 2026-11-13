@@ -4,26 +4,32 @@ import type { Transporter } from 'nodemailer';
 let transporter: Transporter | null = null;
 
 function settings() {
-  // Generic SMTP (Brevo, etc.), or the older Gmail variables
-  const host = process.env.SMTP_HOST?.trim() || (process.env.GMAIL_USER ? 'smtp.gmail.com' : '');
-  const port = Number(process.env.SMTP_PORT) || (process.env.GMAIL_USER ? 465 : 587);
-  const user = (process.env.SMTP_USER || process.env.GMAIL_USER)?.trim();
-  const pass = (process.env.SMTP_PASS || process.env.GMAIL_APP_PASSWORD)?.replace(/\s+/g, '');
-  const from = (process.env.MAIL_FROM || process.env.GMAIL_USER)?.trim();
+  // Gmail via OAuth2 (no password is stored)
+  const user = process.env.GMAIL_USER?.trim();
+  const clientId = process.env.GOOGLE_CLIENT_ID?.trim();
+  const clientSecret = process.env.GOOGLE_CLIENT_SECRET?.trim();
+  const refreshToken = process.env.GOOGLE_REFRESH_TOKEN?.trim();
+  const from = (process.env.MAIL_FROM || user)?.trim();
 
-  if (!host || !user || !pass || !from) {
-    throw new Error('Mail is not configured: set SMTP_HOST, SMTP_USER, SMTP_PASS and MAIL_FROM in .env.local');
+  if (!user || !clientId || !clientSecret || !refreshToken || !from) {
+    throw new Error(
+      'Mail is not configured: set GMAIL_USER, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET and GOOGLE_REFRESH_TOKEN in .env.local'
+    );
   }
-  return { host, port, user, pass, from };
+  return { user, clientId, clientSecret, refreshToken, from };
 }
 
 function getTransporter() {
   const s = settings();
   transporter ??= nodemailer.createTransport({
-    host: s.host,
-    port: s.port,
-    secure: s.port === 465,
-    auth: { user: s.user, pass: s.pass },
+    service: 'gmail',
+    auth: {
+      type: 'OAuth2',
+      user: s.user,
+      clientId: s.clientId,
+      clientSecret: s.clientSecret,
+      refreshToken: s.refreshToken,
+    },
   });
   return transporter;
 }
@@ -50,6 +56,43 @@ export async function sendResetEmail(to: string, name: string, link: string, min
       `<p><a href="${link}" style="display:inline-block;padding:12px 20px;background:#2858d1;color:#fff;` +
       `border-radius:8px;text-decoration:none;font-weight:bold">Set a new password</a></p>` +
       `<p style="color:#666;font-size:12px">If the button doesn't work, paste this into your browser:<br>${link}</p></div>`,
+  });
+
+  if (!info.accepted?.length) {
+    throw new Error(`Mail server rejected the recipient: ${JSON.stringify(info.rejected)}`);
+  }
+
+  console.log('[mail] sent to', info.accepted.join(', '), 'id:', info.messageId);
+}
+
+export async function sendRegistrationEmail(to: string, name: string, needsApproval: boolean) {
+  const t = getTransporter();
+  const { from } = settings();
+
+  const next = needsApproval
+    ? 'Your account is now waiting for approval by an Admin. You can sign in once it is approved.'
+    : 'Your account is ready. You can sign in now.';
+
+  const info = await t.sendMail({
+    from: `"Hope, Inc. ERP" <${from}>`,
+    to,
+    subject: 'We received your Hope, Inc. ERP registration',
+    text:
+      `Hi ${name},\n\nThanks for registering for Hope, Inc. ERP.\n\n` +
+      `Email: ${to}\nRole: User\n\n${next}\n\n` +
+      `If you didn't register, you can ignore this email.`,
+    html:
+      `<div style="font-family:Arial,sans-serif;max-width:480px">` +
+      `<h2>Thanks for registering</h2>` +
+      `<p>Hi ${esc(name)},</p>` +
+      `<p>We received your registration for Hope, Inc. ERP.</p>` +
+      `<table style="border-collapse:collapse;margin:12px 0">` +
+      `<tr><td style="padding:4px 16px 4px 0;color:#666">Email</td><td><b>${esc(to)}</b></td></tr>` +
+      `<tr><td style="padding:4px 16px 4px 0;color:#666">Role</td><td><b>User</b></td></tr>` +
+      `<tr><td style="padding:4px 16px 4px 0;color:#666">Status</td>` +
+      `<td><b>${needsApproval ? 'Waiting for approval' : 'Active'}</b></td></tr></table>` +
+      `<p>${esc(next)}</p>` +
+      `<p style="color:#666;font-size:12px">If you didn't register, you can ignore this email.</p></div>`,
   });
 
   if (!info.accepted?.length) {

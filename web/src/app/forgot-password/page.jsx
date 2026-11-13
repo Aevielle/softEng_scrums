@@ -4,12 +4,13 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import styles from "./forgot-password.module.css";
 import { forgotLocal } from "../lib/localAuth";
+import OAuthButtons, { OrDivider } from "@/components/OAuthButtons";
 
 const COOLDOWN_MS = 30_000;
 const DEFAULT_EXPIRY_SECONDS = 180; // 3:00 (demo accounts)
 const EMAIL_RE = /^\S+@\S+\.\S+$/;
 
-// These three never send email: they use the browser-only demo flow.
+// These three never use Google / GitHub: they keep the browser-only demo flow.
 const DEMO_EMAILS = ["superadmin@hope.com", "admin@hope.com", "user@hope.com"];
 
 const fmt = (ms) => {
@@ -17,18 +18,12 @@ const fmt = (ms) => {
   return `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
 };
 
-const TITLES = {
-  EMPTY: "Empty Field",
-  FORMAT: "Wrong Email",
-  WRONG_EMAIL: "Wrong Email",
-  NOT_FOUND: "Account not Found",
-  SERVER: "Server Error",
-};
-
+// Unknown email: "Wrong Email" (local part matches) / "Account not Found" (otherwise).
 function serverErrorTitle(data) {
   if (data?.title) return data.title;
-  if (TITLES[data?.code]) return TITLES[data.code];
-  if (/not found/i.test(data?.message || "")) return "Account not Found";
+  if (data?.code === "NOT_FOUND" || /not found/i.test(data?.message || "")) {
+    return "Account not Found";
+  }
   return "Wrong Email";
 }
 
@@ -36,22 +31,18 @@ function serverErrorTitle(data) {
 const strongMix = (pw) =>
   /[A-Z]/.test(pw) && /[a-z]/.test(pw) && /\d/.test(pw) && /[^A-Za-z0-9\s]/.test(pw);
 
-// Demo accounts: browser-only. Everyone else: the real API (emails a link).
+// Demo accounts: browser-only. Real accounts reset through Google or GitHub.
 async function requestReset(email) {
   if (DEMO_EMAILS.includes(email.toLowerCase())) {
     return { ...forgotLocal(email), demo: true };
   }
 
-  const res = await fetch("/api/auth/forgot-password", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email }),
-  });
-  const data = await res.json().catch(() => ({}));
-
-  return res.ok
-    ? { ...data, ok: true }
-    : { ...data, ok: false, message: data.message || "Something went wrong. Please try again." };
+  return {
+    ok: false,
+    title: "Use Google or GitHub",
+    message:
+      "Real accounts reset their password with Continue with Google or Continue with GitHub.",
+  };
 }
 
 function EyeIcon({ off }) {
@@ -87,8 +78,8 @@ function MailIcon() {
   );
 }
 
-// Classroom prototype: demo accounts accept any password, so only registered
-// accounts kept in this browser's localStorage need their password updated.
+// Classroom prototype: demo accounts accept any password, so only accounts kept
+// in this browser's localStorage need their password updated.
 function savePassword(email, password) {
   try {
     const list = JSON.parse(localStorage.getItem("hope_users"));
@@ -118,7 +109,7 @@ export default function ForgotPasswordPage({
   onSwitchToLogin,
 }) {
   const [email, setEmail] = useState("");
-  const [sent, setSent] = useState(null); // { email, expiresAt, resendAt, again, demo }
+  const [sent, setSent] = useState(null); // { email, expiresAt, resendAt, again } (demo accounts)
   const [now, setNow] = useState(0);
   const [error, setError] = useState(null); // { title, message }
   const [loading, setLoading] = useState(false);
@@ -142,12 +133,14 @@ export default function ForgotPasswordPage({
 
   const badEmail = submitted && !EMAIL_RE.test(email.trim());
 
+  // Tick once a second while the "sent" view is showing
   useEffect(() => {
     if (!sent) return;
     const t = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(t);
   }, [sent]);
 
+  // Toast closes itself after a few seconds
   useEffect(() => {
     if (!error) return;
     const t = setTimeout(() => setError(null), 6000);
@@ -192,7 +185,6 @@ export default function ForgotPasswordPage({
         expiresAt: t + (data.expiresIn ?? DEFAULT_EXPIRY_SECONDS) * 1000,
         resendAt: t + COOLDOWN_MS,
         again: !!sent,
-        demo: !!data.demo,
       });
     } catch {
       setError({
@@ -423,7 +415,7 @@ export default function ForgotPasswordPage({
     );
   }
 
-  /* ---------- Step 1: link sent ---------- */
+  /* ---------- Step 1: link sent (demo) ---------- */
   if (sent) {
     const cooldown = sent.resendAt - now;
     const expires = sent.expiresAt - now;
@@ -444,19 +436,8 @@ export default function ForgotPasswordPage({
           <h1 className={styles.sentTitle}>Reset link sent</h1>
 
           <p className={styles.sentText}>
-            {sent.demo ? (
-              <>
-                We sent {sent.again ? "another" : "a"} secure reset password link to{" "}
-                <span className={styles.emailText}>{sent.email}</span>.
-              </>
-            ) : (
-              <>
-                If an account exists for{" "}
-                <span className={styles.emailText}>{sent.email}</span>, we sent{" "}
-                {sent.again ? "another" : "a"} secure reset link. Open it from your
-                inbox (check spam too).
-              </>
-            )}
+            We sent {sent.again ? "another" : "a"} secure reset password link to{" "}
+            <span className={styles.emailText}>{sent.email}</span>.
             <span className={styles.expiry}>
               {expires > 0 ? (
                 <>
@@ -479,21 +460,17 @@ export default function ForgotPasswordPage({
 
           <p className={styles.links}>
             {signInLink}
-            {sent.demo && (
-              <>
-                <span className={styles.dot} aria-hidden="true">·</span>
-                <button type="button" className={styles.linkButton} onClick={openResetLink}>
-                  Open reset link (demo)
-                </button>
-              </>
-            )}
+            <span className={styles.dot} aria-hidden="true">·</span>
+            <button type="button" className={styles.linkButton} onClick={openResetLink}>
+              Open reset link (demo)
+            </button>
           </p>
         </section>
       </main>
     );
   }
 
-  /* ---------- Enter your email ---------- */
+  /* ---------- Start: Google / GitHub, or a demo email ---------- */
   return (
     <main className={wrapClass}>
       {toast}
@@ -504,10 +481,13 @@ export default function ForgotPasswordPage({
         <header className={styles.header}>
           <h1>Forgot password?</h1>
           <p>
-            Enter the email linked to your account to receive a secure reset
-            password link.
+            Verify it&apos;s you with Google or GitHub, then choose a new password.
+            Use the account that has the same email as your Hope, Inc. ERP account.
           </p>
         </header>
+
+        <OAuthButtons intent="reset" />
+        <OrDivider>demo accounts only</OrDivider>
 
         <div className={styles.demoNotice}>
           <p>Demo accounts:</p>
@@ -522,7 +502,6 @@ export default function ForgotPasswordPage({
           id="forgotEmail"
           type="email"
           autoComplete="email"
-          autoFocus
           className={`${styles.input} ${badEmail ? styles.bad : ""}`}
           placeholder={submitted && !email.trim() ? "Please fill out this form" : "Enter your email"}
           value={email}
