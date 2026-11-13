@@ -2,12 +2,13 @@ import { NextResponse, after } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase/admin';
 import { newToken, hashToken, RESET_TTL_MIN } from '@/lib/auth/reset';
 import { sendResetEmail } from '@/lib/auth/mailer';
+import { siteOrigin } from '@/lib/auth/origin';
 
-const GENERIC =
-  'If that email is registered, we sent a secure reset link. Check your inbox.';
+export const runtime = 'nodejs';
 
-const sent = () =>
-  NextResponse.json({ message: GENERIC, expiresIn: RESET_TTL_MIN * 60 });
+const GENERIC = 'If that email is registered, we sent a secure reset link. Check your inbox.';
+
+const sent = () => NextResponse.json({ message: GENERIC, expiresIn: RESET_TTL_MIN * 60 });
 
 const serverError = () =>
   NextResponse.json(
@@ -20,17 +21,23 @@ export async function POST(req: Request) {
     const body = await req.json().catch(() => ({}));
     const email = String(body.email ?? '').trim().toLowerCase();
 
-    if (!email)
+    if (!email) {
       return NextResponse.json(
-        { code: 'EMPTY', message: 'Please fill out the forms.' }, { status: 400 });
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+        { code: 'EMPTY', title: 'Empty Field', message: 'Please fill out the forms.' }, { status: 400 });
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       return NextResponse.json(
-        { code: 'FORMAT', message: 'Please enter a valid email address.' }, { status: 400 });
+        { code: 'FORMAT', title: 'Wrong Email', message: 'Enter valid email address.' }, { status: 400 });
+    }
+
+    // Case-insensitive; "_" and "%" are escaped so they can't act as wildcards
+    const pattern = email.replace(/[\\%_]/g, '\\$&');
 
     const { data: user, error: lookupError } = await supabaseAdmin
       .from('app_user')
       .select('user_id, first_name, email, is_blocked, account_status')
-      .eq('email', email)
+      .ilike('email', pattern)
+      .limit(1)
       .maybeSingle();
 
     // A failed lookup is a server problem, not "no such account"
@@ -73,18 +80,31 @@ export async function POST(req: Request) {
       return serverError();
     }
 
-    const base = (process.env.APP_URL ?? new URL(req.url).origin).replace(/\/$/, '');
-    const link = `${base}/reset-password?token=${token}`;
+    const link = `${siteOrigin(req)}/reset-password?token=${token}`;
+    const deliver = () => sendResetEmail(user.email, user.first_name || 'there', link, RESET_TTL_MIN);
 
-    // Runs after the response is sent, so response time doesn't reveal anything.
-    // Failures are logged in the terminal.
-    after(async () => {
+    if (process.env.NODE_ENV === 'development') {
+      // While developing, show a mail problem right away
       try {
-        await sendResetEmail(user.email, user.first_name || 'there', link, RESET_TTL_MIN);
+        await deliver();
       } catch (err) {
         console.error('[forgot-password] email failed:', err);
+        const reason = err instanceof Error ? err.message : String(err);
+        return NextResponse.json(
+          { code: 'EMAIL', title: 'Email not sent', message: `Email failed: ${reason}` },
+          { status: 502 }
+        );
       }
-    });
+    } else {
+      // Production: after the response, so response time doesn't reveal anything
+      after(async () => {
+        try {
+          await deliver();
+        } catch (err) {
+          console.error('[forgot-password] email failed:', err);
+        }
+      });
+    }
 
     return sent();
   } catch (err) {
