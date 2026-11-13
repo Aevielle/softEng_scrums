@@ -4,8 +4,6 @@ import { newToken, hashToken, RESET_TTL_MIN } from '@/lib/auth/reset';
 import { sendResetEmail } from '@/lib/auth/mailer';
 import { siteOrigin } from '@/lib/auth/origin';
 
-export const runtime = 'nodejs';
-
 const GENERIC = 'If that email is registered, we sent a secure reset link. Check your inbox.';
 
 const sent = () => NextResponse.json({ message: GENERIC, expiresIn: RESET_TTL_MIN * 60 });
