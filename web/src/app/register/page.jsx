@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import styles from "./register.module.css";
 import { registerUser } from "../lib/auth";
+import OAuthButtons, { OrDivider } from "@/components/OAuthButtons";
 
 function EyeIcon({ off }) {
   return off ? (
@@ -437,6 +438,10 @@ export default function RegisterPage({
             {loading ? "Creating account..." : "Create Account"}
           </button>
         </form>
+
+        {/* Google / GitHub */}
+        <OrDivider>or</OrDivider>
+        <OAuthButtons intent="signup" />
 
         {/* Sign In */}
         <p className={styles.signInText}>
