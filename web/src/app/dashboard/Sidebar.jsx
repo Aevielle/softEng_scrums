@@ -9,7 +9,7 @@ import styles from './dashboard.module.css';
 // person may not use is never sent to the browser. The server still re-checks on every page.
 const ACCOUNT = { heading: 'Account', items: [{ key: 'profile', href: '/profile', label: 'My Profile', icon: 'user' }] };
 
-export default function Sidebar({ groups }) {
+export default function Sidebar({ groups, active = 'dashboard' }) {
   const [mini, setMini] = useState(false);
   let i = 0; // drives the slide-in delay of each item
 
@@ -34,12 +34,12 @@ export default function Sidebar({ groups }) {
       </div>
 
       <nav aria-label="Main" className={styles.nav}>
-        {item('dashboard', '/dashboard', 'Dashboard', 'dashboard', true)}
+        {item('dashboard', '/dashboard', 'Dashboard', 'dashboard', active === 'dashboard')}
 
         {[...groups, ACCOUNT].map((g) => (
           <div key={g.heading}>
             <p className={`${styles.navHeading} ${styles.label}`}>{g.heading}</p>
-            {g.items.map((m) => item(m.key, m.href, m.label, m.icon || m.key, false))}
+            {g.items.map((m) => item(m.key, m.href, m.label, m.icon || m.key, active === m.key))}
           </div>
         ))}
       </nav>
