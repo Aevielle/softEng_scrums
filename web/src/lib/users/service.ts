@@ -143,15 +143,21 @@ function parseRole(raw: unknown): Role | undefined {
   return r;
 }
 
-/** 12 characters, letters and numbers, no look-alike characters; always passes Register's validatePassword. */
+/**
+ * 14 characters with an uppercase letter, a lowercase letter, a number and a special character
+ * (the rule the set-password page and the server enforce), no look-alike characters.
+ * Checked against validatePassword before it is used.
+ */
 function temporaryPassword(): string {
-  const L = 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ';
+  const LOWER = 'abcdefghjkmnpqrstuvwxyz';
+  const UPPER = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
   const D = '23456789';
-  const all = L + D;
+  const S = '!@#$%&*?';
+  const all = LOWER + UPPER + D + S;
   const pick = (s: string) => s[randomInt(s.length)];
   for (let attempt = 0; attempt < 10; attempt++) {
-    const chars = [pick(L), pick(D)];
-    while (chars.length < 12) chars.push(pick(all));
+    const chars = [pick(LOWER), pick(UPPER), pick(D), pick(S)];
+    while (chars.length < 14) chars.push(pick(all));
     for (let i = chars.length - 1; i > 0; i--) {
       const j = randomInt(i + 1);
       [chars[i], chars[j]] = [chars[j], chars[i]];
