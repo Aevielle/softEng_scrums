@@ -6,7 +6,7 @@ import { ROLE, STATUS } from "@/lib/users/rules";
 export async function requireSuperadminApi() {
   const session = await getSession();
   if (!session) {
-    return { error: NextResponse.json({ error: "Not signed in." }, { status: 401 }) };
+    return { error: NextResponse.json({ error: "Not signed in." }, { status: 401 }), me: null };
   }
 
   const { data: me } = await supabaseAdmin
@@ -19,7 +19,7 @@ export async function requireSuperadminApi() {
     me && me.role_id === ROLE.SUPERADMIN && me.account_status === STATUS.APPROVED && !me.is_blocked;
 
   if (!isActiveSuperadmin) {
-    return { error: NextResponse.json({ error: "Only a Superadmin can do this." }, { status: 403 }) };
+    return { error: NextResponse.json({ error: "Only a Superadmin can do this." }, { status: 403 }), me: null };
   }
-  return { me };
+  return { error: null, me };
 }
