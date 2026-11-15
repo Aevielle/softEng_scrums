@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase/admin"; // <-- adjust export name if different
 import { requireSuperadminApi } from "@/lib/auth/superadmin";
-import { ROLE, STATUS, LAST_SUPERADMIN_MESSAGE, isLastSuperadminError } from "@/lib/users/rules";
+import { ROLE_ID, STATUS, LAST_SUPERADMIN_MESSAGE, isLastSuperadminError } from "@/lib/users/approval";
 // import { sendApprovedEmail } from "@/lib/mailer"; // already exists per README notes
 
 type Body =
@@ -25,7 +25,7 @@ export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }>
       patch = { account_status: STATUS.APPROVED };
       break;
     case "set_role":
-      if (![ROLE.SUPERADMIN, ROLE.ADMIN, ROLE.USER].includes(body.role_id as 1 | 2 | 3)) {
+      if (![ROLE_ID.SUPERADMIN, ROLE_ID.ADMIN, ROLE_ID.USER].includes(body.role_id as 1 | 2 | 3)) {
         return NextResponse.json({ error: "Invalid role." }, { status: 400 });
       }
       patch = { role_id: body.role_id };
