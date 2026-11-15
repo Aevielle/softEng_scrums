@@ -1,48 +1,31 @@
-// Who may see / change whom. Pure functions, no server imports, so the screen (to decide which
-// buttons to draw) and the API (to refuse a request) use exactly the same rules.
+// Shared rules for S1-DEV-06. Keep role ids in sync with app_user.role_id.
+export const ROLE = { SUPERADMIN: 1, ADMIN: 2, USER: 3 } as const;
+export const STATUS = { PENDING: "pending", APPROVED: "approved" } as const;
 
-export type Role = 'superadmin' | 'admin' | 'user';
+export const LAST_SUPERADMIN_MESSAGE =
+  "This is the last remaining Superadmin. It cannot be removed, blocked, or demoted. Make another user a Superadmin first.";
 
-type Actor = { id: number | null; role: Role };
-type Target = { id: number; role: Role };
+export type SignInCheck = { ok: true } | { ok: false; status: number; message: string };
 
-export const ROLE_LABEL: Record<Role, string> = {
-  superadmin: 'Superadmin',
-  admin: 'Admin',
-  user: 'User',
-};
-
-/** Admins never see Superadmin accounts. */
-export function canSee(actor: Actor, target: Target): boolean {
-  return actor.role === 'superadmin' || target.role !== 'superadmin';
+/** Call in the login route AFTER the password is verified. Pending/blocked users must not get a session. */
+export function checkCanSignIn(user: {
+  account_status: string;
+  is_blocked?: boolean | null;
+}): SignInCheck {
+  if (user.account_status !== STATUS.APPROVED) {
+    return {
+      ok: false,
+      status: 403,
+      message: "Your account is waiting for approval by a Superadmin. You can sign in once it is approved.",
+    };
+  }
+  if (user.is_blocked) {
+    return { ok: false, status: 403, message: "Your account has been blocked. Please contact an administrator." };
+  }
+  return { ok: true };
 }
 
-/**
- * Block / Unblock / Edit.
- *  - nobody changes their own row (it shows a dash)
- *  - Superadmin manages everyone else
- *  - Admin manages Users only (other Admin rows show a dash, Superadmins are hidden)
- *  - User manages nobody
- */
-export function canManage(actor: Actor, target: Target): boolean {
-  if (actor.id !== null && actor.id === target.id) return false;
-  if (!canSee(actor, target)) return false;
-  if (actor.role === 'superadmin') return true;
-  if (actor.role === 'admin') return target.role === 'user';
-  return false;
-}
-
-/** Roles the actor may give to an account (Add User, and changing a role in Edit User). */
-export function assignableRoles(actor: Actor): Role[] {
-  return actor.role === 'superadmin' ? ['user', 'admin', 'superadmin'] : ['user'];
-}
-
-const ORDER: Record<Role, number> = { superadmin: 0, admin: 1, user: 2 };
-
-export function sortUsers<T extends { role: Role; firstName: string; lastName: string }>(rows: T[]): T[] {
-  return [...rows].sort(
-    (a, b) =>
-      ORDER[a.role] - ORDER[b.role] ||
-      `${a.firstName} ${a.lastName}`.localeCompare(`${b.firstName} ${b.lastName}`)
-  );
+/** Maps the DB trigger error to a friendly 409. */
+export function isLastSuperadminError(err: { message?: string } | null | undefined) {
+  return !!err?.message && err.message.includes("LAST_SUPERADMIN");
 }
