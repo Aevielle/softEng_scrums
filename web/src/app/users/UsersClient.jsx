@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { assignableRoles, canManage, ROLE_LABEL, sortUsers } from '@/lib/users/rules';
 import { validateUserInput } from '@/lib/users/validation';
 import styles from './users.module.css';
+import RightsDialog from './RightsDialog';
 
 const fullName = (u) => `${u.firstName} ${u.lastName}`.trim();
 
@@ -12,6 +13,7 @@ export default function UsersClient({ initial, actor, intro }) {
   const [form, setForm] = useState(null); // { mode: 'add' } | { mode: 'edit', row }
   const [toast, setToast] = useState(null); // { title, message, err }
   const [busyId, setBusyId] = useState(null);
+  const [rightsFor, setRightsFor] = useState(null); // the User row whose Rights dialog is open
 
   useEffect(() => {
     if (!toast) return;
@@ -140,8 +142,7 @@ export default function UsersClient({ initial, actor, intro }) {
                           <button
                             type="button"
                             className={`${styles.btn} ${styles.sm}`}
-                            disabled
-                            title="The Rights editor is a separate ticket"
+                            onClick={() => setRightsFor(u)}
                           >
                             Rights
                           </button>
@@ -168,6 +169,18 @@ export default function UsersClient({ initial, actor, intro }) {
           onClose={() => setForm(null)}
           onSaved={(row) => upsert(row)}
           notify={notify}
+        />
+      )}
+
+      {rightsFor && (
+        <RightsDialog
+          key={rightsFor.id}
+          userId={rightsFor.id}
+          onClose={() => setRightsFor(null)}
+          onSaved={(m) => {
+            setRightsFor(null);
+            notify(m.title, m.detail); // "Rights saved" / "<name> will see the change on next sign-in."
+          }}
         />
       )}
 
