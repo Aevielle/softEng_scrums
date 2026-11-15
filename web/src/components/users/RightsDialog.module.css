@@ -1,0 +1,188 @@
+/* Rilaneh Marie's mockup: dark pop-up, one card per module, two-column checkbox grid.
+   Colours use the app's CSS variables when they exist and fall back to the mockup values,
+   so rename the variables below to your theme's if they differ. */
+
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgba(2, 6, 28, 0.55);
+  backdrop-filter: blur(6px);
+}
+
+.dialog {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: min(580px, 100%);
+  max-height: min(830px, 100%);
+  padding: 24px 24px 20px;
+  color: var(--text, #e8edff);
+  background: var(--panel, #0a1648);
+  border: 1px solid var(--border, rgba(120, 150, 255, 0.22));
+  border-radius: 18px;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.55);
+}
+
+.x {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  border: 0;
+  background: transparent;
+  color: var(--muted, #9fb0e6);
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.title {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.sub {
+  margin: 6px 0 14px;
+  font-size: 15px;
+  line-height: 1.45;
+  color: var(--muted, #b4c0ee);
+}
+
+.body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-right: 6px;
+}
+
+.note {
+  margin: 8px 0;
+  color: var(--muted, #b4c0ee);
+}
+
+.module {
+  padding: 12px 16px 14px;
+  border: 1px solid var(--border, rgba(120, 150, 255, 0.28));
+  border-radius: 14px;
+  background: var(--panel-2, rgba(255, 255, 255, 0.02));
+}
+
+.moduleHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.moduleLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.quick {
+  display: flex;
+  gap: 8px;
+}
+
+.chip {
+  padding: 5px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border, rgba(120, 150, 255, 0.28));
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.chip:hover {
+  background: rgba(120, 150, 255, 0.14);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px 16px;
+}
+
+.right {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+/* Module not ticked: actions are greyed out and can't be changed (Figure 37, Human Resources). */
+.off {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.dialog input[type='checkbox'] {
+  width: 17px;
+  height: 17px;
+  margin: 0;
+  accent-color: var(--accent, #3b6cff);
+}
+
+.error {
+  margin: 12px 0 0;
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-size: 14px;
+  color: #ffd9d9;
+  background: rgba(220, 60, 60, 0.18);
+  border: 1px solid rgba(220, 60, 60, 0.45);
+}
+
+.footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.cancel,
+.save {
+  padding: 10px 20px;
+  border-radius: 10px;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.cancel {
+  color: inherit;
+  background: transparent;
+  border: 1px solid var(--border, rgba(120, 150, 255, 0.28));
+}
+
+.save {
+  color: #fff;
+  background: var(--accent, #2f5fe0);
+  border: 1px solid transparent;
+}
+.save:disabled,
+.cancel:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@media (max-width: 480px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
