@@ -22,24 +22,33 @@ export default function UsersClient({ initial, actor, intro }) {
   const notify = (title, message, err = false) => setToast({ title, message, err });
   const upsert = (row) => setRows((l) => sortUsers([...l.filter((x) => x.id !== row.id), row]));
 
-  async function toggleBlock(row) {
+  const isSuper = actor.role === 'superadmin';
+  const pending = rows.filter((u) => u.status === 'Pending');
+
+  // One helper for every one-click action. `title` builds the success toast from the updated row.
+  async function act(row, body, title) {
     setBusyId(row.id);
     try {
       const res = await fetch(`/api/users/${row.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ blocked: !row.blocked }),
+        body: JSON.stringify(body),
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) return notify(data.title || 'Not allowed', data.message || 'Could not change the status.', true);
+      // The "last Superadmin" explanation arrives here as data.title / data.message
+      if (!res.ok) return notify(data.title || 'Not allowed', data.message || 'Could not save the change.', true);
       upsert(data.user);
-      notify(data.user.blocked ? 'User blocked' : 'User unblocked', data.user.email);
+      notify(title(data.user), data.user.email);
     } catch {
       notify('No connection', 'Check your network and try again.', true);
     } finally {
       setBusyId(null);
     }
   }
+
+  const toggleBlock = (row) => act(row, { blocked: !row.blocked }, (u) => (u.blocked ? 'User blocked' : 'User unblocked'));
+  const approve = (row) => act(row, { approve: true }, () => 'User approved');
+  const makeAdmin = (row) => act(row, { setRole: 'admin' }, () => 'Now an Admin');
 
   return (
     <>
@@ -49,6 +58,39 @@ export default function UsersClient({ initial, actor, intro }) {
           + Add User
         </button>
       </div>
+
+      {isSuper && (
+        <div className={styles.tw}>
+          <h3>Pending requests ({pending.length})</h3>
+          {pending.length === 0 ? (
+            <p className={styles.empty}>No pending requests.</p>
+          ) : (
+            <table>
+              <thead>
+                <tr><th>Name</th><th>Email</th><th>Actions</th></tr>
+              </thead>
+              <tbody>
+                {pending.map((u) => (
+                  <tr key={u.id}>
+                    <td><b>{fullName(u)}</b></td>
+                    <td>{u.email}</td>
+                    <td className={styles.ac}>
+                      <button
+                        type="button"
+                        className={`${styles.btn} ${styles.sm} ${styles.pri}`}
+                        disabled={busyId === u.id}
+                        onClick={() => approve(u)}
+                      >
+                        Approve
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+      )}
 
       <div className={styles.tw}>
         <table>
@@ -84,6 +126,16 @@ export default function UsersClient({ initial, actor, intro }) {
                         <button type="button" className={`${styles.btn} ${styles.sm}`} onClick={() => setForm({ mode: 'edit', row: u })}>
                           Edit
                         </button>
+                        {isSuper && u.role === 'user' && u.status === 'Active' && (
+                          <button
+                            type="button"
+                            className={`${styles.btn} ${styles.sm}`}
+                            disabled={busyId === u.id}
+                            onClick={() => makeAdmin(u)}
+                          >
+                            Make Admin
+                          </button>
+                        )}
                         {u.role === 'user' && (
                           <button
                             type="button"

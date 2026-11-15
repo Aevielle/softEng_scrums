@@ -128,6 +128,40 @@ async function emailTaken(email: string, exceptId?: number): Promise<boolean> {
 const EMAIL_USED = () =>
   new ServiceError(409, 'EMAIL_USED', 'That email is already registered.', 'Email already used', ['email']);
 
+/** S1-DEV-06: the database trigger refuses to remove, block or demote the last active Superadmin. Show why. */
+const LAST_SUPERADMIN = () =>
+  new ServiceError(
+    409,
+    'LAST_SUPERADMIN',
+    'This is the last remaining Superadmin. It cannot be blocked or demoted. Make another user a Superadmin first.',
+    'Last Superadmin'
+  );
+
+function throwIfLastSuperadmin(error: { message?: string } | null) {
+  if (error?.message?.includes('LAST_SUPERADMIN')) throw LAST_SUPERADMIN();
+}
+
+/**
+ * App-level guard (works without the DB trigger): call before blocking or demoting `target`.
+ * Refuses when `target` is the only active, unblocked Superadmin.
+ */
+async function assertNotLastSuperadmin(target: UserRow) {
+  if (target.role !== 'superadmin' || target.blocked || target.status !== 'Active') return;
+  const { data, error } = await supabaseAdmin
+    .from('app_user')
+    .select('user_id, is_blocked, account_status, role:role_id(role_name)')
+    .neq('user_id', target.id);
+  if (error) {
+    console.error('[users] superadmin count failed:', error.message, error.code);
+    throw new ServiceError(500, 'SERVER_ERROR', 'Could not check the Superadmin accounts.');
+  }
+  const others = ((data ?? []) as unknown as DbRow[]).filter((r) => {
+    const roleObj = Array.isArray(r.role) ? r.role[0] : r.role;
+    return normalizeRole(roleObj?.role_name) === 'superadmin' && !r.is_blocked && (r.account_status ?? 'active') === 'active';
+  });
+  if (others.length === 0) throw LAST_SUPERADMIN();
+}
+
 function checked(input: Record<string, unknown>) {
   const v = validateUserInput(input);
   if (!v.ok) throw new ServiceError(400, 'INVALID', v.error.message, v.error.title, v.error.fields);
@@ -214,6 +248,7 @@ export async function updateUser(actor: Actor, id: number, input: Record<string,
     throw new ServiceError(403, 'FORBIDDEN', 'Only a Superadmin can change roles.');
   }
   if (await emailTaken(value.email, id)) throw EMAIL_USED();
+  if (role && role !== 'superadmin') await assertNotLastSuperadmin(target); // demoting
 
   const patch: Record<string, unknown> = {
     first_name: value.firstName,
@@ -225,6 +260,7 @@ export async function updateUser(actor: Actor, id: number, input: Record<string,
   const { data, error } = await supabaseAdmin.from('app_user').update(patch).eq('user_id', id).select(SELECT).single();
   if (error) {
     if (error.code === '23505') throw EMAIL_USED();
+    throwIfLastSuperadmin(error);
     console.error('[users] update failed:', error.message, error.code);
     throw new ServiceError(500, 'SERVER_ERROR', 'Could not save the user.');
   }
@@ -236,6 +272,7 @@ export async function setBlocked(actor: Actor, id: number, blocked: boolean) {
   if (!canManage({ id: actor.id, role: actor.role }, target)) {
     throw new ServiceError(403, 'FORBIDDEN', 'You do not have rights to change this account.');
   }
+  if (blocked) await assertNotLastSuperadmin(target);
   const { data, error } = await supabaseAdmin
     .from('app_user')
     .update({ is_blocked: blocked })
@@ -243,8 +280,56 @@ export async function setBlocked(actor: Actor, id: number, blocked: boolean) {
     .select(SELECT)
     .single();
   if (error) {
+    throwIfLastSuperadmin(error);
     console.error('[users] block failed:', error.message, error.code);
     throw new ServiceError(500, 'SERVER_ERROR', 'Could not change the status.');
+  }
+  return { user: toRow(data as unknown as DbRow) };
+}
+
+/** S1-DEV-06: a Superadmin approves a pending account so it can sign in. */
+export async function approveUser(actor: Actor, id: number) {
+  if (actor.role !== 'superadmin') {
+    throw new ServiceError(403, 'FORBIDDEN', 'Only a Superadmin can approve accounts.');
+  }
+  await getTarget(actor, id);
+  const { data, error } = await supabaseAdmin
+    .from('app_user')
+    .update({ account_status: 'active' })
+    .eq('user_id', id)
+    .eq('account_status', 'pending')
+    .select(SELECT)
+    .maybeSingle();
+  if (error) {
+    console.error('[users] approve failed:', error.message, error.code);
+    throw new ServiceError(500, 'SERVER_ERROR', 'Could not approve the account.');
+  }
+  if (!data) throw new ServiceError(409, 'NOT_PENDING', 'This account is not waiting for approval.', 'Not pending');
+  return { user: toRow(data as unknown as DbRow) };
+}
+
+/** S1-DEV-06: a Superadmin changes a user's role (for example, makes them an Admin). */
+export async function setRole(actor: Actor, id: number, rawRole: unknown) {
+  if (actor.role !== 'superadmin') {
+    throw new ServiceError(403, 'FORBIDDEN', 'Only a Superadmin can change roles.');
+  }
+  const role = parseRole(rawRole);
+  if (!role) throw new ServiceError(400, 'INVALID', 'Choose a valid role.', 'Wrong Role', ['role']);
+  const target = await getTarget(actor, id);
+  if (!canManage({ id: actor.id, role: actor.role }, target)) {
+    throw new ServiceError(403, 'FORBIDDEN', 'You do not have rights to change this account.');
+  }
+  if (role !== 'superadmin') await assertNotLastSuperadmin(target);
+  const { data, error } = await supabaseAdmin
+    .from('app_user')
+    .update({ role_id: await roleIdFor(role) })
+    .eq('user_id', id)
+    .select(SELECT)
+    .single();
+  if (error) {
+    throwIfLastSuperadmin(error);
+    console.error('[users] set role failed:', error.message, error.code);
+    throw new ServiceError(500, 'SERVER_ERROR', 'Could not change the role.');
   }
   return { user: toRow(data as unknown as DbRow) };
 }
