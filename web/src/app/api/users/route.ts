@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase/admin"; // <-- adjust export name if different
 import { requireSuperadminApi } from "@/lib/auth/superadmin";
-import { STATUS } from "@/lib/users/rules";
+import { STATUS } from "@/lib/users/approval";
 
 // GET /api/users?status=pending  -> list of users (never returns password_hash)
 // NOTE: if S1-DEV-05 already defines GET here, merge the `status` filter into it.
