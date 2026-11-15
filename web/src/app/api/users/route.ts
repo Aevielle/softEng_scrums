@@ -1,25 +1,27 @@
-import { NextResponse } from "next/server";
-import { supabaseAdmin } from "@/lib/supabase/admin"; // <-- adjust export name if different
-import { requireSuperadminApi } from "@/lib/auth/superadmin";
-import { STATUS } from "@/lib/users/approval";
+import { NextResponse } from 'next/server';
+import { authorizeApi } from '@/lib/auth/guard';
+import { createUser, fail, listUsers } from '@/lib/users/service';
 
-// GET /api/users?status=pending  -> list of users (never returns password_hash)
-// NOTE: if S1-DEV-05 already defines GET here, merge the `status` filter into it.
-export async function GET(req: Request) {
-  const guard = await requireSuperadminApi();
-  if (guard.error) return guard.error;
-
-  const status = new URL(req.url).searchParams.get("status");
-  let query = supabaseAdmin
-    .from("app_user")
-    .select("user_id, first_name, last_name, email, role_id, account_status, is_blocked, created_at")
-    .order("created_at", { ascending: true });
-
-  if (status === STATUS.PENDING || status === STATUS.APPROVED) {
-    query = query.eq("account_status", status);
+export async function GET() {
+  const auth = await authorizeApi('users');
+  if (!auth.ok) return auth.response;
+  try {
+    return NextResponse.json({ users: await listUsers(auth.user) });
+  } catch (e) {
+    return fail(e);
   }
+}
 
-  const { data, error } = await query;
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json({ users: data });
+export async function POST(req: Request) {
+  const auth = await authorizeApi('users');
+  if (!auth.ok) return auth.response;
+  const body = await req.json().catch(() => null);
+  if (!body || typeof body !== 'object') {
+    return NextResponse.json({ code: 'INVALID', message: 'Send the user as JSON.' }, { status: 400 });
+  }
+  try {
+    return NextResponse.json(await createUser(auth.user, body as Record<string, unknown>), { status: 201 });
+  } catch (e) {
+    return fail(e);
+  }
 }
