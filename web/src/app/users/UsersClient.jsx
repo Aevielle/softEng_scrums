@@ -14,6 +14,16 @@ export default function UsersClient({ initial, actor, intro }) {
   const [toast, setToast] = useState(null); // { title, message, err }
   const [busyId, setBusyId] = useState(null);
   const [rightsFor, setRightsFor] = useState(null); // the User row whose Rights dialog is open
+  const [declineFor, setDeclineFor] = useState(null); // the pending row waiting for "Decline this request?" confirmation
+
+  useEffect(() => {
+    if (!declineFor) return;
+    const onKey = (e) => {
+      if (e.key === 'Escape' && busyId !== declineFor.id) setDeclineFor(null);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [declineFor, busyId]);
 
   useEffect(() => {
     if (!toast) return;
@@ -52,6 +62,27 @@ export default function UsersClient({ initial, actor, intro }) {
   const approve = (row) => act(row, { approve: true }, () => 'User approved');
   const makeAdmin = (row) => act(row, { setRole: 'admin' }, () => 'Now an Admin');
 
+  // Decline a pending request: the account is marked Declined and can never sign in.
+  async function decline(row) {
+    setBusyId(row.id);
+    try {
+      const res = await fetch(`/api/users/${row.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ decline: true }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) return notify(data.title || 'Could not decline', data.message || 'Please try again.', true);
+      setRows((l) => l.map((x) => (x.id === row.id ? { ...x, status: 'Declined' } : x)));
+      setDeclineFor(null);
+      notify('Request declined', row.email);
+    } catch {
+      notify('No connection', 'Check your network and try again.', true);
+    } finally {
+      setBusyId(null);
+    }
+  }
+
   return (
     <>
       <div className={styles.bar}>
@@ -85,6 +116,14 @@ export default function UsersClient({ initial, actor, intro }) {
                       >
                         Approve
                       </button>
+                      <button
+                        type="button"
+                        className={`${styles.btn} ${styles.sm} ${styles.danger}`}
+                        disabled={busyId === u.id}
+                        onClick={() => setDeclineFor(u)}
+                      >
+                        Decline
+                      </button>
                     </td>
                   </tr>
                 ))}
@@ -113,7 +152,7 @@ export default function UsersClient({ initial, actor, intro }) {
                   <td><b>{fullName(u)}</b></td>
                   <td>{u.email}</td>
                   <td><span className={`${styles.rb} ${styles[u.role]}`}>{ROLE_LABEL[u.role].toUpperCase()}</span></td>
-                  <td><span className={`${styles.pill} ${u.blocked ? styles.x : ''}`}>{u.status}</span></td>
+                  <td><span className={`${styles.pill} ${u.blocked || u.status === 'Declined' ? styles.x : ''}`}>{u.status}</span></td>
                   <td className={styles.ac}>
                     {mine ? (
                       <>
@@ -182,6 +221,30 @@ export default function UsersClient({ initial, actor, intro }) {
             notify(m.title, m.detail); // "Rights saved" / "<name> will see the change on next sign-in."
           }}
         />
+      )}
+
+      {declineFor && (
+        <div className={styles.overlay} onClick={() => busyId !== declineFor.id && setDeclineFor(null)}>
+          <div className={styles.md} role="alertdialog" aria-modal="true" aria-labelledby="dc-title" onClick={(e) => e.stopPropagation()}>
+            <h3 id="dc-title">Decline this request?</h3>
+            <p className={styles.sub}>
+              <b>{fullName(declineFor)}</b> ({declineFor.email}) will not be able to sign in, and the request will leave Pending requests.
+            </p>
+            <div className={styles.row}>
+              <button type="button" className={styles.btn} onClick={() => setDeclineFor(null)} disabled={busyId === declineFor.id}>
+                Cancel
+              </button>
+              <button
+                type="button"
+                className={`${styles.btn} ${styles.dangerSolid}`}
+                onClick={() => decline(declineFor)}
+                disabled={busyId === declineFor.id}
+              >
+                {busyId === declineFor.id ? 'Declining...' : 'Decline'}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {toast && (

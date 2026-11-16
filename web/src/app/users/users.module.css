@@ -1,6 +1,6 @@
 /* Colours come from the .shell variables defined in ../dashboard/dashboard.module.css */
 
-.bar { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 14px; }
+.bar { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 22px; }
 .bar p { margin: 0; font-size: 13px; color: var(--muted); }
 
 .btn {
@@ -12,17 +12,27 @@
 .pri { border-color: transparent; background: linear-gradient(100deg, #1945bb, #2858d1); color: #fff; }
 .pri:hover:not(:disabled) { filter: brightness(1.12); }
 .sm { padding: 4px 10px; font-size: 12px; border-radius: 8px; }
+.danger { border-color: color-mix(in srgb, var(--er) 55%, var(--line)); color: var(--er); }
+.danger:hover:not(:disabled) { border-color: var(--er); background: color-mix(in srgb, var(--er) 12%, transparent); }
+.dangerSolid { border-color: transparent; background: var(--er); color: #fff; }
+.dangerSolid:hover:not(:disabled) { filter: brightness(1.1); }
 
 /* table */
 .tw { overflow-x: auto; border: 1px solid var(--line); border-radius: 22px; background: color-mix(in srgb, var(--card) 86%, transparent); }
 .tw table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
-.tw th { padding: 12px 14px; border-bottom: 1px solid var(--line); text-align: left; font-size: 12px; color: var(--muted); white-space: nowrap; }
-.tw td { padding: 12px 14px; border-bottom: 1px solid var(--line); }
+.tw th { padding: 12px 16px; border-bottom: 1px solid var(--line); text-align: left; font-size: 12px; color: var(--muted); white-space: nowrap; }
+.tw td { padding: 14px 16px; border-bottom: 1px solid var(--line); overflow-wrap: anywhere; }
 .tw tr:last-child td { border-bottom: 0; }
+
+/* Breathing room: text no longer hugs the rounded corners, and the Pending card no longer touches the users table */
+.tw + .tw { margin-top: 24px; }
+.tw > h3 { margin: 0; padding: 20px 20px 6px; font-size: 16px; }
+.tw th:first-child, .tw td:first-child { padding-left: 20px; }
+.tw th:last-child, .tw td:last-child { padding-right: 20px; }
 .tw tbody tr { transition: background .2s; }
 .tw tbody tr:hover { background: color-mix(in srgb, var(--hi) 60%, transparent); }
 .ac { display: flex; align-items: center; gap: 6px; min-height: 48px; white-space: nowrap; color: var(--muted); }
-.empty { margin: 0; padding: 18px; color: var(--muted); font-size: 13px; }
+.empty { margin: 0; padding: 6px 20px 20px; color: var(--muted); font-size: 13px; }
 
 .rb { display: inline-block; padding: 4px 10px; border-radius: 99px; font-size: 11px; font-weight: 800; letter-spacing: .06em; }
 .superadmin { background: #fff1c9; color: #8a5a00; }
