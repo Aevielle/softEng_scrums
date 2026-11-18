@@ -6,20 +6,23 @@
 
 .tabs { display: flex; gap: 4px; padding: 3px; border-radius: 10px; background: var(--hi); }
 .tabs button { padding: 5px 12px; border: 0; border-radius: 8px; background: none; color: var(--muted); font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; }
-.tabs .on { background: var(--card); color: var(--text); }
+.tabs .on { background: linear-gradient(100deg, #1945bb, #2858d1); color: #fff; }
 
 .search {
-  width: 220px; padding: 9px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--card); color: var(--text);
+  width: 220px; padding: 9px 12px; border: 1px solid #c9d6ff; border-radius: 10px;
+  background: #ffffff; color: #00072d;
   font: inherit; font-size: 13.5px; transition: border-color .2s, box-shadow .2s;
 }
-.search:focus { outline: 0; border-color: var(--ac); box-shadow: 0 0 0 3px color-mix(in srgb, var(--ac) 25%, transparent); }
+.search::placeholder { color: #5a6488; }
+.search:focus { outline: 0; border-color: #5b82ff; box-shadow: 0 0 0 3px rgba(91, 130, 255, .35); }
+
 
 .btn {
   padding: 9px 16px; border: 1px solid var(--line); border-radius: 10px; background: var(--card); color: var(--text);
   font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; transition: transform .2s, border-color .2s, filter .2s;
 }
 .btn:hover:not(:disabled) { transform: translateY(-1px); border-color: var(--ac); }
-.btn:disabled { opacity: .5; cursor: not-allowed; }
+.btn:disabled { opacity: .7; cursor: not-allowed; }
 .pri { border-color: transparent; background: linear-gradient(100deg, #1945bb, #2858d1); color: #fff; }
 .pri:hover:not(:disabled) { filter: brightness(1.12); }
 .sm { padding: 4px 10px; font-size: 12px; border-radius: 8px; }
@@ -43,7 +46,8 @@
 .empty { padding: 28px 20px; text-align: center; color: var(--muted); }
 .count { margin: 10px 4px 0; font-size: 12px; color: var(--muted); }
 
-.pill { display: inline-block; padding: 3px 10px; border-radius: 99px; background: color-mix(in srgb, var(--ok) 15%, transparent); color: var(--ok); font-size: 12px; font-weight: 700; }
+.pill { display: inline-block; white-space: nowrap; padding: 3px 10px; border-radius: 99px; background: color-mix(in srgb, var(--ok) 15%, transparent); color: var(--ok); font-size: 12px; font-weight: 700; }
+.tw td:has(> .pill) { white-space: nowrap; }
 .x { background: color-mix(in srgb, var(--er) 15%, transparent); color: var(--er); }
 
 @media (max-width: 700px) {
