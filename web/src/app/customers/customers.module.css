@@ -33,13 +33,21 @@
 .danger { color: var(--er); }
 .danger:hover:not(:disabled) { border-color: var(--er); }
 
-/* table: same gradient as the sidebar (--table-bg / --table-line come from dashboard.module.css) */
-.tw {
-  /* same blue gradient as the sidebar, with light text so it reads in light and dark mode */
+/* table: light mode uses the normal panel colours; dark mode uses the sidebar gradient */
+.tw { overflow-x: auto; border: 1px solid var(--table-line, var(--panel-line)); border-radius: 22px; background: var(--table-bg, var(--panel)); }
+
+/* dark mode only: same blue gradient as the sidebar */
+@media (prefers-color-scheme: dark) {
+  :global(:root:not([data-theme="light"])) .tw {
+    --table-bg: linear-gradient(180deg, #16278a 0%, #0a1450 55%, #060d38 100%);
+    --table-line: rgba(130, 160, 255, .18);
+    background-attachment: fixed;
+  }
+}
+:global(:root[data-theme="dark"]) .tw {
   --table-bg: linear-gradient(180deg, #16278a 0%, #0a1450 55%, #060d38 100%);
   --table-line: rgba(130, 160, 255, .18);
-  --text: #eef2ff; --muted: #a9b6e6; --hover: rgba(255, 255, 255, .08);
-  overflow-x: auto; border: 1px solid var(--table-line); border-radius: 22px; background: var(--table-bg); color: var(--text);
+  background-attachment: fixed;
 }
 .tw table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
 
@@ -54,7 +62,7 @@
 .tw tbody tr:last-child { border-bottom: 0; }
 
 /* alternating rows: paint the row, not the cells */
-.tw tbody tr:nth-child(even) { background: rgba(255, 255, 255, .07); }
+.tw tbody tr:nth-child(even) { background: color-mix(in srgb, var(--text) 6%, transparent); }
 .tw tbody tr:hover { background: var(--hover); }
 
 /* soft-deleted row: keep AFTER stripe and hover rules */
