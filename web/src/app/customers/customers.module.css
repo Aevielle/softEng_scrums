@@ -28,15 +28,15 @@
 .sm { padding: 4px 10px; font-size: 12px; border-radius: 8px; }
 
 /* table */
-.tw { overflow-x: auto; border: 1px solid var(--line); border-radius: 22px; background: color-mix(in srgb, var(--card) 86%, transparent); }
+.tw { overflow-x: auto; border: 1px solid var(--panel-line); border-radius: 22px; background: color-mix(in srgb, var(--panel) 92%, transparent); }
 .tw table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
-.tw th { padding: 12px 16px; border-bottom: 1px solid var(--line); text-align: left; font-size: 12px; color: var(--muted); white-space: nowrap; }
-.tw td { padding: 14px 16px; border-bottom: 1px solid var(--line); overflow-wrap: anywhere; }
+.tw th { padding: 12px 16px; border-bottom: 1px solid var(--panel-line); text-align: left; font-size: 12px; color: var(--muted); white-space: nowrap; }
+.tw td { padding: 14px 16px; border-bottom: 1px solid var(--panel-line); overflow-wrap: anywhere; }
 .tw tr:last-child td { border-bottom: 0; }
 .tw th:first-child, .tw td:first-child { padding-left: 20px; }
 .tw th:last-child, .tw td:last-child { padding-right: 20px; }
 .tw tbody tr { transition: background .2s; }
-.tw tbody tr:hover { background: color-mix(in srgb, var(--hi) 60%, transparent); }
+.tw tbody tr:hover { background: var(--hover); }
 
 /* soft-deleted row (Admin and Superadmin only) */
 .tw tbody tr.deleted td { background: color-mix(in srgb, var(--er) 7%, transparent); }
