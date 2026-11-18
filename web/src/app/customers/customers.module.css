@@ -34,7 +34,13 @@
 .danger:hover:not(:disabled) { border-color: var(--er); }
 
 /* table: same gradient as the sidebar (--table-bg / --table-line come from dashboard.module.css) */
-.tw { overflow-x: auto; border: 1px solid var(--table-line, var(--panel-line)); border-radius: 22px; background: var(--table-bg, var(--panel)); }
+.tw {
+  /* same blue gradient as the sidebar, with light text so it reads in light and dark mode */
+  --table-bg: linear-gradient(180deg, #16278a 0%, #0a1450 55%, #060d38 100%);
+  --table-line: rgba(130, 160, 255, .18);
+  --text: #eef2ff; --muted: #a9b6e6; --hover: rgba(255, 255, 255, .08);
+  overflow-x: auto; border: 1px solid var(--table-line); border-radius: 22px; background: var(--table-bg); color: var(--text);
+}
 .tw table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
 
 .tw th { padding: 12px 16px; text-align: left; font-size: 12px; color: var(--muted); white-space: nowrap; vertical-align: middle; }
@@ -48,7 +54,7 @@
 .tw tbody tr:last-child { border-bottom: 0; }
 
 /* alternating rows: paint the row, not the cells */
-.tw tbody tr:nth-child(even) { background: color-mix(in srgb, var(--text) 6%, transparent); }
+.tw tbody tr:nth-child(even) { background: rgba(255, 255, 255, .07); }
 .tw tbody tr:hover { background: var(--hover); }
 
 /* soft-deleted row: keep AFTER stripe and hover rules */
