@@ -59,3 +59,7 @@ Note: The migration script is fully idempotent. You can re-run it multiple times
 - **Session User Context:** Reads the user ID from `app.current_user_id`. When testing triggers manually in the Supabase SQL Editor, set the current session user beforehand:
   ```sql
   SET LOCAL app.current_user_id = '1';
+
+### 4. S2-DBA-01: Active Customer & Product Views & Indexes (`008_s2_dba_01_active_views_and_indexes.sql`)
+- **Views:** Added `public.v_active_customers` and `public.v_active_products` for customer and product list screens (used by `S2-DEV-01` and `S2-DEV-04`).
+- **Indexes:** Added search and filter indexes on `customer` (`custname`, `payterm`) and `product` (`description`, `unit`).

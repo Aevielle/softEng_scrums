@@ -96,6 +96,25 @@ export default function Home() {
   const heroRef = useRef(null);
   const pageRef = useRef(null);
 
+  /* NEW: open a popup from the address bar: /?auth=login | register | forgot.
+     The standalone /login page sends people here. Other parts of the query
+     (for example ?oauth=...) are left for the popup to read. */
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const wanted = params.get("auth");
+    if (!wanted || !AUTH_LABELS[wanted]) return;
+
+    setAuthModal(wanted);
+
+    params.delete("auth");
+    const rest = params.toString();
+    window.history.replaceState(
+      null,
+      "",
+      window.location.pathname + (rest ? `?${rest}` : "")
+    );
+  }, []);
+
   /* Lock scroll + close on Escape while any modal is open */
   useEffect(() => {
     if (!authModal && !infoModal) return;
@@ -254,7 +273,6 @@ export default function Home() {
       <main>
         {/* ================= HERO ================= */}
         <section className={styles.hero} ref={heroRef}>
-          
 
           {/* curved strands behind the dashboard */}
           <svg

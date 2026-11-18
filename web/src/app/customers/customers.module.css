@@ -1,0 +1,52 @@
+/* Colours come from the .shell variables defined in ../dashboard/dashboard.module.css */
+
+.bar { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 18px; }
+.heading { margin: 0; font-size: 18px; letter-spacing: -.02em; }
+.tools { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
+
+.tabs { display: flex; gap: 4px; padding: 3px; border-radius: 10px; background: var(--hi); }
+.tabs button { padding: 5px 12px; border: 0; border-radius: 8px; background: none; color: var(--muted); font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; }
+.tabs .on { background: var(--card); color: var(--text); }
+
+.search {
+  width: 220px; padding: 9px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--card); color: var(--text);
+  font: inherit; font-size: 13.5px; transition: border-color .2s, box-shadow .2s;
+}
+.search:focus { outline: 0; border-color: var(--ac); box-shadow: 0 0 0 3px color-mix(in srgb, var(--ac) 25%, transparent); }
+
+.btn {
+  padding: 9px 16px; border: 1px solid var(--line); border-radius: 10px; background: var(--card); color: var(--text);
+  font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; transition: transform .2s, border-color .2s, filter .2s;
+}
+.btn:hover:not(:disabled) { transform: translateY(-1px); border-color: var(--ac); }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+.pri { border-color: transparent; background: linear-gradient(100deg, #1945bb, #2858d1); color: #fff; }
+.pri:hover:not(:disabled) { filter: brightness(1.12); }
+.sm { padding: 4px 10px; font-size: 12px; border-radius: 8px; }
+
+/* table */
+.tw { overflow-x: auto; border: 1px solid var(--line); border-radius: 22px; background: color-mix(in srgb, var(--card) 86%, transparent); }
+.tw table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+.tw th { padding: 12px 16px; border-bottom: 1px solid var(--line); text-align: left; font-size: 12px; color: var(--muted); white-space: nowrap; }
+.tw td { padding: 14px 16px; border-bottom: 1px solid var(--line); overflow-wrap: anywhere; }
+.tw tr:last-child td { border-bottom: 0; }
+.tw th:first-child, .tw td:first-child { padding-left: 20px; }
+.tw th:last-child, .tw td:last-child { padding-right: 20px; }
+.tw tbody tr { transition: background .2s; }
+.tw tbody tr:hover { background: color-mix(in srgb, var(--hi) 60%, transparent); }
+
+/* soft-deleted row (Admin and Superadmin only) */
+.tw tbody tr.deleted td { background: color-mix(in srgb, var(--er) 7%, transparent); }
+
+.stamp { font-size: 12px; color: var(--muted); }
+.ac { display: flex; align-items: center; gap: 6px; min-height: 48px; white-space: nowrap; }
+.empty { padding: 28px 20px; text-align: center; color: var(--muted); }
+.count { margin: 10px 4px 0; font-size: 12px; color: var(--muted); }
+
+.pill { display: inline-block; padding: 3px 10px; border-radius: 99px; background: color-mix(in srgb, var(--ok) 15%, transparent); color: var(--ok); font-size: 12px; font-weight: 700; }
+.x { background: color-mix(in srgb, var(--er) 15%, transparent); color: var(--er); }
+
+@media (max-width: 700px) {
+  .bar { flex-direction: column; align-items: flex-start; }
+  .search { width: 100%; }
+}

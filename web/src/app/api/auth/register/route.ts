@@ -2,14 +2,15 @@ import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { validatePassword } from "@/lib/auth/password";
+import { sendRegistrationEmail } from "@/lib/auth/mailer";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-// "pending" = needs Superadmin approval, "active" = can sign in immediately
-const ACCOUNT_STATUS = "pending";
+// "pending" = needs Admin approval, "active" = can sign in immediately
+const ACCOUNT_STATUS: "pending" | "active" = "pending";
 
-const reply = (ok: boolean, message: string, status: number) =>
-  NextResponse.json({ ok, message }, { status });
+const reply = (ok: boolean, message: string, status: number, extra: Record<string, unknown> = {}) =>
+  NextResponse.json({ ok, message, ...extra }, { status });
 
 export async function POST(request: Request) {
   try {
@@ -80,12 +81,23 @@ export async function POST(request: Request) {
       return reply(false, "Registration failed. Please try again.", 500);
     }
 
+    // Confirmation email. The account already exists, so a mail failure must
+    // not turn a successful registration into an error: report it via emailSent.
+    let emailSent = false;
+    try {
+      await sendRegistrationEmail(email, firstName, ACCOUNT_STATUS === "pending");
+      emailSent = true;
+    } catch (mailError) {
+      console.error("[register] confirmation email failed:", mailError);
+    }
+
     return reply(
       true,
       ACCOUNT_STATUS === "pending"
-        ? "Registration successful! Your account is waiting for Superadmin approval."
+        ? "Registration successful! Your account is waiting for Admin approval."
         : "Registration successful!",
-      201
+      201,
+      { emailSent }
     );
   } catch (err) {
     console.error("[register] unexpected error:", err);

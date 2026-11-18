@@ -1,7 +1,8 @@
 import { supabaseAdmin } from '@/lib/supabase/admin';
 import { getSession } from '@/lib/auth/session';
+import { MODULE_ID_TO_KEY } from '@/lib/auth/rights-layout';
 
-export type ModuleKey = 'customers' | 'products' | 'hr' | 'sales' | 'users' | 'settings';
+export type ModuleKey = 'customers' | 'products' | 'hr' | 'sales' | 'reports' | 'users' | 'settings';
 export type Role = 'superadmin' | 'admin' | 'user';
 
 export type ModuleDef = {
@@ -17,6 +18,7 @@ export const MODULES: ModuleDef[] = [
   { key: 'products',  label: 'Products',         action: 'Manage Products', href: '/products',  section: 'modules' },
   { key: 'hr',        label: 'Human Resources',  action: 'Human Resources', href: '/hr',        section: 'modules' },
   { key: 'sales',     label: 'Sales',            action: 'Sales Pipeline',  href: '/sales',     section: 'modules' },
+  { key: 'reports',   label: 'Reports',          action: 'View Reports',    href: '/reports',   section: 'modules' },
   { key: 'users',     label: 'User Management',  action: 'Manage Users',    href: '/users',     section: 'admin' },
   { key: 'settings',  label: 'System Settings',  action: 'System Settings', href: '/settings',  section: 'admin' },
 ];
@@ -47,8 +49,9 @@ export function accessFor(role: Role, granted: ModuleKey[]): Set<ModuleKey> {
 // ---------------------------------------------------------------------------
 // TEMPORARY, for the Nov 9 demo only: until per-user rights are seeded,
 // a User with no rights rows gets the modules shown in Figure 8.
-// Set to false (or delete) as soon as rights are in the database.
-const USE_TEMP_DEFAULT_RIGHTS = true;
+// S1-DEV-07: rights now live in user_permission and are set from the Rights dialog,
+// so this MUST be false. Left on, un-ticking every right would still show these modules.
+const USE_TEMP_DEFAULT_RIGHTS = false;
 const TEMP_USER_MODULES: ModuleKey[] = ['customers', 'products', 'sales'];
 // ---------------------------------------------------------------------------
 
@@ -57,40 +60,33 @@ const KEY_ALIASES: Record<string, ModuleKey> = {
   product: 'products', products: 'products',
   hr: 'hr', humanresources: 'hr', humanresource: 'hr',
   sales: 'sales',
+  report: 'reports', reports: 'reports',
 };
 
 /**
- * ADAPT THIS QUERY to your rights tables.
- * Assumed: user_rights(user_id, module_id) -> module(module_id, module_name)
+ * A module is "on" for a User when they hold at least one active right in it
+ * (user_permission -> rights_catalogue.module_id). This is what the Rights dialog writes.
  * Returns module keys the user was granted. On error it returns [] (fail closed).
  */
 async function grantedKeysForUser(userId: number): Promise<ModuleKey[]> {
   const { data, error } = await supabaseAdmin
-    .from('user_rights')
-    .select('module:module_id(module_name)')
-    .eq('user_id', userId);
-
-  let warnedMissingRightsTable = false; // put this above the function
+    .from('user_permission')
+    .select('right:right_id(module_id)')
+    .eq('user_id', userId)
+    .eq('is_deleted', false);
 
   if (error) {
-    if (error.code === 'PGRST205') {
-      if (!warnedMissingRightsTable) {
-        console.warn('[permissions] rights table not found; using temporary default rights');
-        warnedMissingRightsTable = true;
-      }
-    } else {
-      console.error('[permissions] rights lookup failed:', error.message, error.code);
-    }
+    console.error('[permissions] rights lookup failed:', error.message, error.code);
     return [];
   }
 
-  const keys: ModuleKey[] = [];
+  const keys = new Set<ModuleKey>();
   for (const row of data ?? []) {
-    const mod = Array.isArray(row.module) ? row.module[0] : row.module;
-    const alias = String(mod?.module_name ?? '').toLowerCase().replace(/[^a-z]/g, '');
-    if (KEY_ALIASES[alias]) keys.push(KEY_ALIASES[alias]);
+    const right = Array.isArray(row.right) ? row.right[0] : row.right;
+    const key = MODULE_ID_TO_KEY[right?.module_id as keyof typeof MODULE_ID_TO_KEY];
+    if (key) keys.add(key);
   }
-  return keys;
+  return [...keys];
 }
 
 export type CurrentUser = {
