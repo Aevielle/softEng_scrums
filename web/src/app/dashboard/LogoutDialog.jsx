@@ -56,17 +56,17 @@ export default function LogoutDialog({ open, onClose }) {
         aria-labelledby="logout-title"
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 id="logout-title" className={styles.title}>Log out</h2>
-        <p className={styles.text}>You are logging out in this account. Are you sure?</p>
+        <h2 id="logout-title" className={styles.title}>Are you sure you want to log out?</h2>
+        <p className={styles.text}>You will need to sign in again to open Hope, Inc. ERP.</p>
 
         {error && <p className={styles.error} role="alert">{error}</p>}
 
         <div className={styles.actions}>
           <button type="button" className={styles.yes} onClick={logout} disabled={busy}>
-            {busy ? 'Logging out...' : 'Yes'}
+            {busy ? 'Logging out...' : 'Yes, log out'}
           </button>
           <button type="button" className={styles.no} onClick={onClose} disabled={busy} ref={noRef}>
-            No
+            No, stay
           </button>
         </div>
       </div>

@@ -230,10 +230,10 @@ export default function RegisterPage({
             <h1 className={styles.successTitle}>Sign up successful</h1>
             <p className={styles.successText}>
               {emailSent === true
-                ? "We sent a confirmation email to your inbox (check spam too). Your account is waiting for approval from an Admin."
+                ? "We sent a confirmation email to your inbox (check spam too). Your account is waiting for approval from a Superadmin."
                 : emailSent === false
-                  ? "Your account was created and is waiting for approval from an Admin. We couldn't send the confirmation email right now."
-                  : "Your account was created and is waiting for approval from an Admin."}
+                  ? "Your account was created and is waiting for approval from a Superadmin. We couldn't send the confirmation email right now."
+                  : "Your account was created and is waiting for approval from a Superadmin."}
             </p>
 
             <dl className={styles.successDetails}>

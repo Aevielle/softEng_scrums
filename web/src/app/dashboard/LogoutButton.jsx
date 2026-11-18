@@ -60,9 +60,9 @@ export default function LogoutButton() {
             aria-labelledby="logout-title"
             onClick={(e) => e.stopPropagation()}
           >
-            <h2 id="logout-title" className={styles.title}>Log out</h2>
+            <h2 id="logout-title" className={styles.title}>Are you sure you want to log out?</h2>
             <p className={styles.text}>
-              You are logging out in this account. Are you sure?
+              You will need to sign in again to open Hope, Inc. ERP.
             </p>
 
             {error && <p className={styles.error} role="alert">{error}</p>}
@@ -74,7 +74,7 @@ export default function LogoutButton() {
                 onClick={logout}
                 disabled={busy}
               >
-                {busy ? 'Logging out...' : 'Yes'}
+                {busy ? 'Logging out...' : 'Yes, log out'}
               </button>
               <button
                 type="button"
@@ -83,7 +83,7 @@ export default function LogoutButton() {
                 disabled={busy}
                 ref={noRef}
               >
-                No
+                No, stay
               </button>
             </div>
           </div>

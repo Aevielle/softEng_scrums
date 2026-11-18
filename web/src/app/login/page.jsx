@@ -39,11 +39,11 @@ const OAUTH_NOTICES = {
   created: {
     code: "PENDING",
     title: "Account Created",
-    message: "Your account is waiting for approval from an Admin.",
+    message: "Your account is waiting for approval from a Superadmin.",
   },
   pending: {
     code: "PENDING",
-    message: "Your account is waiting for approval from an Admin.",
+    message: "Your account is waiting for approval from a Superadmin.",
   },
   blocked: {
     code: "BLOCKED",
