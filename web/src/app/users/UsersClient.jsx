@@ -100,13 +100,15 @@ export default function UsersClient({ initial, actor, intro }) {
           ) : (
             <table>
               <thead>
-                <tr><th>Name</th><th>Email</th><th>Actions</th></tr>
+                <tr><th>First name</th><th>Last name</th><th>Email</th><th>Role</th><th>Actions</th></tr>
               </thead>
               <tbody>
                 {pending.map((u) => (
                   <tr key={u.id}>
-                    <td><b>{fullName(u)}</b></td>
+                    <td><b>{u.firstName || '—'}</b></td>
+                    <td><b>{u.lastName || '—'}</b></td>
                     <td>{u.email}</td>
+                    <td><span className={`${styles.rb} ${styles[u.role]}`}>{ROLE_LABEL[u.role].toUpperCase()}</span></td>
                     <td className={styles.ac}>
                       <button
                         type="button"
