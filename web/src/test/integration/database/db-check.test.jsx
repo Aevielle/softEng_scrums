@@ -7,3 +7,4 @@ test("Supabase connection is successful",async () =>{
     expect(response.status).toBe(200);
     expect(body.success).toBe(true);
 });
+

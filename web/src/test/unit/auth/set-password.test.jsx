@@ -1,7 +1,11 @@
 const mockUpdate = jest.fn();
 jest.mock("@/lib/supabase/admin", () => ({
   supabaseAdmin: {
-    from: () => ({ update: (row) => ({ eq: (col, val) => mockUpdate(row, col, val) }) }),
+    from: () => ({
+      update: (row) => ({
+        eq: (col, val) => mockUpdate(row, col, val),
+      }),
+    }),
   },
 }));
 jest.mock("@/lib/auth/session", () => ({
@@ -75,3 +79,4 @@ test("Rejects when confirm does not match password", async () => {
   const res = await POST(req({ password: "@NewValidPass1", confirm: "@Different1!" }));
   expect(res.status).toBe(400);
 });
+

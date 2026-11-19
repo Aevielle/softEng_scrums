@@ -10,7 +10,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
-    "test": "dotenv run -f .env.test -- jest"
+    "test": "dotenv run -f .env.test -- jest",
+    "pretest:e2e": "npm run seed:user",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",
@@ -24,7 +26,9 @@
     "server-only": "^0.0.1"
   },
   "devDependencies": {
+    "@playwright/test": "^1.65.1",
     "@types/bcryptjs": "^2.4.6",
+    "@types/jest": "^30.0.0",
     "@types/node": "^20.19.43",
     "@types/nodemailer": "^8.0.2",
     "@types/react": "^19.3.0",

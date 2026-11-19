@@ -20,6 +20,28 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## End-to-end tests
+
+The browser tests use Playwright with strict TypeScript. Install the browser once:
+
+```bash
+npx playwright install chromium
+```
+
+Run the E2E suite with:
+
+```bash
+npm run test:e2e
+```
+
+Tests belong in the `src/test/e2e/` directory. Playwright starts the test Next.js server
+automatically. To test an already-running server, provide its URL:
+
+```powershell
+$env:BASE_URL = "http://localhost:3000"
+npm run test:e2e
+```
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:

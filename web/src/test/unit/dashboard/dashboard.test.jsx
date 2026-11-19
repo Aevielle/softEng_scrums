@@ -48,3 +48,4 @@ test("propagates page-access redirects", async () => {
     Dashboard({ searchParams: Promise.resolve({}) })
   ).rejects.toThrow("REDIRECT:/set-password");
 });
+

@@ -29,3 +29,4 @@ test('must_change_password sends sign-in to set-password', () => {
 test('Reset always ends at set-password', () => {
   expect(decide('reset', active)).toEqual({ kind: 'session', mustChange: true, redirect: '/set-password' });
 });
+

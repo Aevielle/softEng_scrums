@@ -13,17 +13,20 @@ const Dashboard = require("@/app/dashboard/page").default;
 jest.setTimeout(20000);
 
 const seededUsers = ["regularUser", "admin", "superadmin"];
+
 const collectedText = (node) => {
   if (typeof node === "string") return node;
   if (Array.isArray(node)) return node.map(collectedText).join("");
-  if (node && node.props) return collectedText(node.props.children);
+  if (node && typeof node === "object" && "props" in node) {
+    return collectedText(node.props?.children);
+  }
   return "";
 };
 
 let databaseUsers;
 
 beforeAll(async () => {
-  databaseUsers = {};
+  const foundUsers = {};
 
   for (const key of seededUsers) {
     const seeded = users[key];
@@ -35,8 +38,9 @@ beforeAll(async () => {
 
     if (error) throw new Error(error.message);
     if (!data) throw new Error(`Seeded user was not found: ${seeded.email}`);
-    databaseUsers[key] = data;
+    foundUsers[key] = data;
   }
+  databaseUsers = foundUsers;
 });
 
 beforeEach(() => jest.clearAllMocks());
@@ -59,3 +63,5 @@ test.each([
   expect(page.type).toBe("div");
   expect(text).toContain(`Welcome back, ${seeded.first_name}!`);
 });
+
+

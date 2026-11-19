@@ -34,7 +34,7 @@ jest.mock("@/lib/supabase/admin", () => ({
 
 const { POST } = require("@/app/api/register/route");
 
-function mockNextRequest(bodyData){
+function mockNextRequest(bodyData) {
     return {
         json: async() => bodyData,
     };
@@ -131,3 +131,4 @@ test("Succesful register", async() =>{
     expect(mockInsert).toHaveBeenCalledTimes(1);
     expect(mockInsert.mock.calls[0][0].password_hash).not.toBe("@ValidPass1");
 });
+

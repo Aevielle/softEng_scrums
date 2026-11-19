@@ -17,8 +17,10 @@ const makeReq = (path, token) =>
     headers: token ? { cookie: `session=${token}` } : {},
   });
 
-const redirectPath = (res) =>
-  res.headers.get("location") && new URL(res.headers.get("location")).pathname;
+const redirectPath = (res) => {
+  const location = res.headers.get("location");
+  return location ? new URL(location).pathname : null;
+};
 
 const user = { sub: "18", role: "User", mustChange: false };
 
@@ -92,3 +94,4 @@ describe("first login (mustChange)", () => {
     expect(res.headers.get("location")).toBeNull();
   });
 });
+

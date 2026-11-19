@@ -6,7 +6,7 @@ const { createSession } = require("@/lib/auth/session");
 const {POST} = require("@/app/api/auth/login/route");
 const users = require("@/test/test-users.json");
 
-function mockNextRequest(bodyData){
+function mockNextRequest(bodyData) {
     return {
         json: async() => bodyData,
     };
@@ -72,4 +72,6 @@ test("Returns 200 when login is successful", async() => {
     expect(createSession).toHaveBeenCalledTimes(1);
     expect(createSession.mock.calls[0][0].role).toBe("User");
 })
+
+
 

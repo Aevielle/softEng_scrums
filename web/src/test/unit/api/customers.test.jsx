@@ -84,3 +84,4 @@ it('delegates errors to fail()', async () => {
   expect(mockFail).toHaveBeenCalledWith(err);
   expect(res).toBe(failed);
 });
+

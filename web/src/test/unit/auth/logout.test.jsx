@@ -14,3 +14,4 @@ test("Returns 200 and clears the session on logout", async () => {
   expect(response.status).toBe(200);
   expect(destroySession).toHaveBeenCalledTimes(1);
 });
+

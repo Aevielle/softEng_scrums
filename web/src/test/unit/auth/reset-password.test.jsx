@@ -3,12 +3,11 @@ const mockTokenUpdate = jest.fn();
 const mockTokenEq = jest.fn();
 const mockTokenGt = jest.fn();
 const mockUserUpdate = jest.fn();
-
 jest.mock("@/lib/supabase/admin", () => ({
   supabaseAdmin: {
-    from: (table) => {
+   from: (table) => {
       if (table === "password_reset_tokens") {
-        const q = {};
+       const q = {};
         q.update = (row) => { mockTokenUpdate(row); return q; };
         q.eq = (col, val) => { mockTokenEq(col, val); return q; };
         q.gt = (col, val) => { mockTokenGt(col, val); return q; };
@@ -143,3 +142,4 @@ test("Rejects when confirm does not match password", async () => {
   expect(res.status).toBe(400);
   expect(body.code).toBe("MISMATCH");
 });
+

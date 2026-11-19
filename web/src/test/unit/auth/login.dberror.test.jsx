@@ -3,7 +3,10 @@ jest.mock('@/lib/auth/session', () => ({
 }));
 
 // The mock result is swapped per test
-let mockResult;
+let mockResult = {
+  data: null,
+  error: null,
+};
 jest.mock('@/lib/supabase/admin', () => ({
   supabaseAdmin: {
     from: () => ({
@@ -82,3 +85,4 @@ test('Wrong password still returns the same 401 message', async () => {
   expect(body.message).toBe(INVALID);
   expect(createSession).not.toHaveBeenCalled();
 });
+
