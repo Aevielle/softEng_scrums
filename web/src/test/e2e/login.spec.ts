@@ -1,8 +1,10 @@
+import path from 'node:path';
 import { expect, test } from '@playwright/test';
 
 import users from '../test-users.json';
 
 const regularUser = users.regularUser;
+const testedDate = new Date().toISOString().slice(0, 10);
 
 test('signs in and opens the dashboard', async ({ page }) => {
   await page.goto('/login');
@@ -16,6 +18,14 @@ test('signs in and opens the dashboard', async ({ page }) => {
 
   await expect(page).toHaveURL(/\/dashboard$/);
   await expect(page.getByText('Welcome back, Regular!')).toBeVisible();
+  await page.screenshot({
+    path: path.join(
+      __dirname,
+      'screenshots',
+      `dashboard-${testedDate}.png`
+    ),
+    fullPage: true,
+  });
 });
 
 test('rejects an incorrect password', async ({ page }) => {
