@@ -8,6 +8,7 @@ export default defineConfig({
   reporter: 'list',
   use: {
     baseURL,
+    headless: false,
     trace: 'on-first-retry',
   },
   webServer: process.env.BASE_URL
