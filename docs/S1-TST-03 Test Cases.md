@@ -1,6 +1,7 @@
 # Test Plan for S1-TST-03
 
 ## Test Setup
+Automated E2E Testing using Playwright
 
 ### Tester
 Franchesca E. Ramirez
