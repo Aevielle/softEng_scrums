@@ -8,6 +8,7 @@ const customConfig = {
     "^@/(.*)$": "<rootDir>/src/$1",
   },
   testEnvironment: "node",                        // if your old config had it
+  testPathIgnorePatterns: ["/node_modules/", "<rootDir>/src/test/e2e/"],
 };
 
 module.exports = async () => {

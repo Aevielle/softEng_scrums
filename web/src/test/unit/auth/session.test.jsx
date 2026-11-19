@@ -99,3 +99,4 @@ describe("destroySession", () => {
     expect(mockDelete).toHaveBeenCalledWith(COOKIE);
   });
 });
+

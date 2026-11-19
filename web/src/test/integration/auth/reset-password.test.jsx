@@ -1,7 +1,7 @@
 import { supabaseAdmin } from "@/lib/supabase/admin";
 const { hashToken } = require("@/lib/auth/reset");
-const { POST } = require("../app/api/auth/reset-password/route");
-const users = require("./test-users.json");
+const { POST } = require("@/app/api/auth/reset-password/route");
+const users = require("@/test/test-users.json");
 
 jest.setTimeout(20000);
 const hashes = [];
@@ -10,6 +10,7 @@ let userId;
 beforeAll(async () => {
   const { data } = await supabaseAdmin.from("app_user").select("user_id")
     .eq("email", users.regularUser.email.toLowerCase()).maybeSingle();
+  if (!data) throw new Error(`Seeded user was not found: ${users.regularUser.email}`);
   userId = data.user_id;
 });
 
@@ -30,7 +31,8 @@ async function makeToken(overrides) {
   return raw;
 }
 
-const body = (token) => ({ json: async () => ({ token, password: "@NewValidPass1", confirm: "@NewValidPass1" }) });
+const body = (token) =>
+  ({ json: async () => ({ token, password: "@NewValidPass1", confirm: "@NewValidPass1" }) });
 
 test("Expired link is rejected", async () => {
   const token = await makeToken({ expires_at: new Date(Date.now() - 60_000).toISOString() });
@@ -45,3 +47,4 @@ test("Already-used link is rejected", async () => {
   expect(res.status).toBe(400);
   expect((await res.json()).code).toBe("INVALID_LINK");
 });
+

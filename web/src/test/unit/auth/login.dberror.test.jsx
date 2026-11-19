@@ -3,7 +3,10 @@ jest.mock('@/lib/auth/session', () => ({
 }));
 
 // The mock result is swapped per test
-let mockResult;
+let mockResult = {
+  data: null,
+  error: null,
+};
 jest.mock('@/lib/supabase/admin', () => ({
   supabaseAdmin: {
     from: () => ({
@@ -18,7 +21,7 @@ jest.mock('@/lib/supabase/admin', () => ({
 
 const bcrypt = require('bcryptjs');
 const { createSession } = require('@/lib/auth/session');
-const { POST } = require('../app/api/auth/login/route');
+const { POST } = require('@/app/api/auth/login/route');
 
 const req = (body) => ({ json: async () => body });
 const INVALID = 'Invalid email or password. Please check and try again.';
@@ -82,3 +85,4 @@ test('Wrong password still returns the same 401 message', async () => {
   expect(body.message).toBe(INVALID);
   expect(createSession).not.toHaveBeenCalled();
 });
+
