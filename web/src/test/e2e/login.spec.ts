@@ -22,7 +22,7 @@ test('signs in and opens the dashboard', async ({ page }) => {
     path: path.join(
       __dirname,
       'screenshots',
-      `dashboard-${testedDate}.png`
+      `sign-in-test-${testedDate}.png`
     ),
     fullPage: true,
   });
@@ -39,4 +39,12 @@ test('rejects an incorrect password', async ({ page }) => {
     page.getByText('Invalid email or password. Please check and try again.')
   ).toBeVisible();
   await expect(page).toHaveURL(/\/login/);
+   await page.screenshot({
+    path: path.join(
+      __dirname,
+      'screenshots',
+      `invalid-email-pass-${testedDate}.png`
+    ),
+    fullPage: true,
+  });
 });
