@@ -21,6 +21,7 @@ Test the User Management screen as a signed-in Superadmin using a test database 
 **Result:** 6 passed
 
 The test file creates throwaway users, uses the demo verification code for Admin and Superadmin sign-in, and deletes temporary accounts during cleanup.
+Each test captures a full-page screenshot in `web/src/test/e2e/screenshots/` after it finishes. The filename includes the test name, result status, and run date, so screenshots are available for both passed and failed runs.
 
 ## Features to Test
 
@@ -59,4 +60,7 @@ The test file creates throwaway users, uses the demo verification code for Admin
 | An Admin cannot edit a Superadmin account. | 1. Sign in as the Admin.<br>2. Open **User Management**.<br>3. Verify that no Superadmin row or Edit action is available.<br>4. Attempt a direct edit request for a known Superadmin user ID. | The Superadmin has no Edit action, and the direct edit request is rejected with Not Found or Forbidden. | The Admin can open, edit, change, or save the Superadmin account. | **Pass** (E2E/API) | `user-man.spec.ts` |
 | The last active Superadmin cannot be blocked. | 1. Ensure exactly one active, unblocked Superadmin exists.<br>2. Sign in as that Superadmin or another authorized Superadmin.<br>3. Open **User Management**.<br>4. Click **Block** on the last Superadmin.<br>5. If direct API testing is used, send the block request for that account. | The system rejects the action. The account remains active and unblocked. | The last Superadmin becomes blocked or the warning is missing. | **Pass** (E2E/API) | `user-man.spec.ts` |
 | The last active Superadmin cannot be demoted. | 1. Ensure exactly one active, unblocked Superadmin exists.<br>2. Sign in as that Superadmin or another authorized Superadmin.<br>3. Attempt to change the last Superadmin role to User or Admin.<br>4. If direct API testing is used, send the role-change request. | The system rejects the action. The account remains a Superadmin. | The last Superadmin is demoted. | **Pass** (E2E/API) | `user-man.spec.ts` |
-| The last active Superadmin cannot be removed. | 1. Ensure exactly one active, unblocked Superadmin exists.<br>2. Attempt to delete or remove the account. | The system rejects account removal and the account remains a Superadmin. | The account is removed. | **Not implemented** (no remove/delete route) | None yet |
+| The last active Superadmin cannot be removed. | 1. Ensure exactly one active, unblocked Superadmin exists.<br>2. Attempt to delete or remove the account. | The system rejects account removal and the account remains a Superadmin. | The account is removed. | **Not implemented** (no remove/delete route) | Issue #199 |
+
+# Notes
+- Please keep the last test case as "Not Implemented". DO NOT ADD THIS FEATURE!
