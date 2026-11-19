@@ -54,3 +54,4 @@ web/node_modules/
 web/out/
 
 create-bug-issues.sh
+web/src/test/e2e/screenshots/

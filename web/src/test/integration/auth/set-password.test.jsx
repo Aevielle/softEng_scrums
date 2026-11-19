@@ -7,7 +7,7 @@ jest.mock("@/lib/auth/session", () => ({
 }));
 
 const { getSession, createSession } = require("@/lib/auth/session");
-const { POST } = require("../app/api/auth/set-password/route"); // confirm path
+const { POST } = require("@/app/api/auth/set-password/route");
 
 jest.setTimeout(20000);
 
@@ -19,7 +19,15 @@ let oldHash;
 
 const req = (body) => ({ json: async () => body });
 const readHash = async () =>
-  (await supabaseAdmin.from("app_user").select("password_hash").eq("user_id", userId).single()).data.password_hash;
+  await (async () => {
+    const { data } = await supabaseAdmin
+      .from("app_user")
+      .select("password_hash")
+      .eq("user_id", userId)
+      .single();
+    if (!data) throw new Error("Test user hash was not found.");
+    return data.password_hash;
+  })();
 
 beforeAll(async () => {
   oldHash = await bcrypt.hash(oldPassword, 10);
@@ -33,6 +41,7 @@ beforeAll(async () => {
     .select("user_id")
     .single();
   if (error) throw new Error(error.message);
+  if (!data) throw new Error("Inserted test user was not returned.");
   userId = data.user_id;
 });
 
@@ -64,3 +73,4 @@ test("Valid password replaces the stored hash", async () => {
   expect(await bcrypt.compare(oldPassword, hash)).toBe(false); // old password no longer works
   expect(createSession).toHaveBeenCalledWith(expect.objectContaining({ mustChange: false }));
 });
+

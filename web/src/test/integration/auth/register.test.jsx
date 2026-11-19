@@ -1,5 +1,5 @@
 import { supabaseAdmin } from "@/lib/supabase/admin";
-const { POST } = require("../app/api/register/route");
+const { POST } = require("@/app/api/register/route");
 
 const email = `it.register.${Date.now()}@example.com`;
 
@@ -18,6 +18,8 @@ test("Registers a real account as pending", async () => {
 
   const { data } = await supabaseAdmin
     .from("app_user").select("account_status, role_id").eq("email", email).maybeSingle();
+  if (!data) throw new Error(`Created user was not found: ${email}`);
   expect(data.account_status).toBe("pending");
   expect(data.role_id).toBe(3);
 });
+
