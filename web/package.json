@@ -5,7 +5,7 @@
   "scripts": {
     "seed:user": "dotenv run -f .env.test -- node src/test/seeder-script-regular.mjs",
     "pretest": "npm run seed:user",
-    "dev": "next dev",
+    "dev": "dotenv run -f .env.test -- next dev",
     "dev:test": "dotenv run -f .env.test -- next",
     "build": "next build",
     "start": "next start",
