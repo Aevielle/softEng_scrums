@@ -7,7 +7,7 @@ jest.mock("@/lib/auth/session", () => ({
 }));
 
 const { getSession, createSession } = require("@/lib/auth/session");
-const { POST } = require("../app/api/auth/set-password/route"); // confirm path
+const { POST } = require("@/app/api/auth/set-password/route");
 
 jest.setTimeout(20000);
 

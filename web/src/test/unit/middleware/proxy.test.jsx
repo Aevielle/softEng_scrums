@@ -2,7 +2,7 @@
 import { SignJWT } from "jose";
 import { NextRequest } from "next/server";
 
-const { proxy } = require("../proxy"); // confirm path: src/proxy.ts or src/middleware
+const { proxy } = require("@/proxy");
 
 const secretKey = () => new TextEncoder().encode(process.env.SESSION_SECRET);
 

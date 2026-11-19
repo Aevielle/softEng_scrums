@@ -21,9 +21,13 @@ jest.mock("@/lib/supabase/admin", () => ({
   },
 }));
 
+jest.mock("@/lib/auth/guard", () => ({
+  requirePageAccess: jest.fn(),
+}));
+
 const { hashToken } = require("@/lib/auth/reset");
-const { PASSWORD_RULES_MESSAGE } = require("@/lib/auth/password");
-const { POST } = require("../app/api/auth/reset-password/route");
+const { PASSWORD_LENGTH_MESSAGE, PASSWORD_RULES_MESSAGE } = require("@/lib/auth/password");
+const { POST } = require("@/app/api/auth/reset-password/route");
 
 const req = (body) => ({ json: async () => body });
 const INVALID = "This reset link is invalid, expired, or already used.";
@@ -82,7 +86,7 @@ test("Weak password is rejected without using up the token", async () => {
   const body = await res.json();
   expect(res.status).toBe(400);
   expect(body.code).toBe("WEAK");
-  expect(body.message).toBe(PASSWORD_RULES_MESSAGE);
+  expect(body.message).toBe(PASSWORD_LENGTH_MESSAGE);
   expect(mockTokenUpdate).not.toHaveBeenCalled();
 });
 
@@ -102,20 +106,20 @@ test("Returns 500 when the password update fails", async () => {
 });
 
 test.each([
-  ["empty", ""],
-  ["missing", undefined],
-  ["too short", "Ab1!"],
-  ["no lowercase", "ABCDEF1!"],
-  ["no uppercase", "abcdef1!"],
-  ["no digit", "Abcdefg!"],
-  ["no special character", "Abcdefg1"],
-])("Rejects password: %s, without using up the token", async (_label, password) => {
+  ["empty", "", PASSWORD_LENGTH_MESSAGE],
+  ["missing", undefined, "Please enter a new password."],
+  ["too short", "Ab1!", PASSWORD_LENGTH_MESSAGE],
+  ["no lowercase", "ABCDEF1!", PASSWORD_RULES_MESSAGE],
+  ["no uppercase", "abcdef1!", PASSWORD_RULES_MESSAGE],
+  ["no digit", "Abcdefg!", PASSWORD_RULES_MESSAGE],
+  ["no special character", "Abcdefg1", PASSWORD_RULES_MESSAGE],
+])("Rejects password: %s, without using up the token", async (_label, password, message) => {
   const res = await POST(req({ ...good, password, confirm: password }));
   const body = await res.json();
 
   expect(res.status).toBe(400);
   expect(body.code).toBe("WEAK");
-  expect(body.message).toBe(PASSWORD_RULES_MESSAGE);
+  expect(body.message).toBe(message);
   expect(mockTokenUpdate).not.toHaveBeenCalled();
 });
 
@@ -123,4 +127,19 @@ test("Missing confirm is rejected as a mismatch", async () => {
   const res = await POST(req({ token: good.token, password: good.password }));
   expect(res.status).toBe(400);
   expect((await res.json()).code).toBe("MISMATCH");
+});
+
+test("Rejects when confirm does not match password", async () => {
+  const res = await POST(
+    req({
+      token: good.token,
+      password: "@NewValidPass1",
+      confirm: "@Different1!",
+    })
+  );
+
+  const body = await res.json();
+
+  expect(res.status).toBe(400);
+  expect(body.code).toBe("MISMATCH");
 });

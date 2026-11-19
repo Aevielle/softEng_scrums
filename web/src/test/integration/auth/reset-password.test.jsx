@@ -1,7 +1,7 @@
 import { supabaseAdmin } from "@/lib/supabase/admin";
 const { hashToken } = require("@/lib/auth/reset");
-const { POST } = require("../app/api/auth/reset-password/route");
-const users = require("./test-users.json");
+const { POST } = require("@/app/api/auth/reset-password/route");
+const users = require("@/test/test-users.json");
 
 jest.setTimeout(20000);
 const hashes = [];

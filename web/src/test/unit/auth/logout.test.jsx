@@ -3,7 +3,7 @@ jest.mock("@/lib/auth/session", () => ({
 }));
 
 const { destroySession } = require("@/lib/auth/session");
-const { POST } = require("../app/api/auth/logout/route");
+const { POST } = require("@/app/api/auth/logout/route");
 
 beforeEach(() => jest.clearAllMocks());
 

@@ -1,19 +1,9 @@
 import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
+import { destroySession } from '@/lib/auth/session';
 
 export async function POST() {
   try {
-    const store = await cookies();
-
-    // Same name and path the cookie was created with in createSession
-    store.set('session', '', {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      path: '/',
-      maxAge: 0,
-    });
-
+    await destroySession();
     return NextResponse.json({ redirect: '/' });
   } catch (err) {
     console.error('[logout] unexpected error:', err);

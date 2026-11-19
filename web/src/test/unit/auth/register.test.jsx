@@ -1,4 +1,7 @@
-import {PASSWORD_RULES_MESSAGE} from "@/lib/auth/password";
+import {
+  PASSWORD_LENGTH_MESSAGE,
+  PASSWORD_RULES_MESSAGE,
+} from "@/lib/auth/password";
 
 const mockUserLookup = jest.fn();
 const mockInsert = jest.fn();
@@ -12,6 +15,7 @@ jest.mock("@/lib/supabase/admin", () => ({
               ilike: () => ({
                 limit: () => ({ maybeSingle: () => mockUserLookup() }),
               }),
+              eq: () => ({ maybeSingle: () => mockUserLookup() }),
             }),
             insert: (row) => mockInsert(row),
           }
@@ -20,12 +24,15 @@ jest.mock("@/lib/supabase/admin", () => ({
               eq: () => ({
                 maybeSingle: async () => ({ data: { role_id: 1 }, error: null }),
               }),
+              ilike: () => ({
+                maybeSingle: async () => ({ data: { role_id: 1 }, error: null }),
+              }),
             }),
           },
   },
 }));
 
-const { POST } = require("../app/api/register/route");
+const { POST } = require("@/app/api/register/route");
 
 function mockNextRequest(bodyData){
     return {
@@ -89,12 +96,12 @@ test("Returns 400 when one or more fields are empty",async () =>{
   });
 
   test.each([
-  ["too short", "Ab1!"],
-  ["no lowercase", "ABCDEF1!"],
-  ["no uppercase", "abcdef1!"],
-  ["no digit", "Abcdefg!"],
-  ["no special character", "Abcdefg1"],
-])('Returns 400 for password with %s', async(_label, password) =>{
+    ["too short", "Ab1!", PASSWORD_LENGTH_MESSAGE],
+    ["no lowercase", "ABCDEF1!", PASSWORD_RULES_MESSAGE],
+    ["no uppercase", "abcdef1!", PASSWORD_RULES_MESSAGE],
+    ["no digit", "Abcdefg!", PASSWORD_RULES_MESSAGE],
+    ["no special character", "Abcdefg1", PASSWORD_RULES_MESSAGE],
+  ])('Returns 400 for password with %s', async(_label, password, message) =>{
   const mockRequest = mockNextRequest({
       firstName:"Test",
       lastName:"User",
@@ -105,7 +112,7 @@ test("Returns 400 when one or more fields are empty",async () =>{
     const body = await response.json();
 
     expect(response.status).toBe(400);
-    expect(body.message).toBe(PASSWORD_RULES_MESSAGE);
+    expect(body.message).toBe(message);
 })
 
 // Mock Test
@@ -119,10 +126,8 @@ test("Succesful register", async() =>{
     const response = await POST(mockRequest);
     const body = await response.json();
 
-    console.log(response.status, body.message);
-
     expect(response.status).toBe(201);
-    expect(body.message).toBe("Registration successful! Your account is waiting for Superadmin approval.");
+    expect(body.message).toBe("Registration successful! Your account is waiting for approval.");
     expect(mockInsert).toHaveBeenCalledTimes(1);
     expect(mockInsert.mock.calls[0][0].password_hash).not.toBe("@ValidPass1");
 });

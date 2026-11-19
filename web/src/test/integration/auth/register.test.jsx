@@ -1,5 +1,5 @@
 import { supabaseAdmin } from "@/lib/supabase/admin";
-const { POST } = require("../app/api/register/route");
+const { POST } = require("@/app/api/register/route");
 
 const email = `it.register.${Date.now()}@example.com`;
 
