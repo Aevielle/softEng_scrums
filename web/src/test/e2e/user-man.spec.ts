@@ -90,6 +90,24 @@ async function openUserManagement(page: import('@playwright/test').Page) {
 
 test.describe.configure({ mode: 'serial' });
 
+test.afterEach(async ({ page }, testInfo) => {
+  const testName = testInfo.title
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '');
+  const screenshotPath = path.join(
+    __dirname,
+    'screenshots',
+    `${testName}-${testInfo.status}-${testedDate}.png`
+  );
+
+  await page.screenshot({ path: screenshotPath, fullPage: true });
+  await testInfo.attach(`${testName}-${testInfo.status}`, {
+    path: screenshotPath,
+    contentType: 'image/png',
+  });
+});
+
 test('Superadmin adds a user', async ({ page }) => {
   const testEmail = `playwright.add.${Date.now()}@hope.erp.com`;
   try {
@@ -108,10 +126,6 @@ test('Superadmin adds a user', async ({ page }) => {
     await expect(page.getByText(/temporary password/i)).toBeVisible();
     await page.getByRole('button', { name: 'Done', exact: true }).click();
 
-    await page.screenshot({
-      path: path.join(__dirname, 'screenshots', `superadmin-add-user-${testedDate}.png`),
-      fullPage: true,
-    });
   } finally {
     await deleteTestUsers([testEmail]);
   }
@@ -146,6 +160,7 @@ test('Superadmin edits, blocks, and unblocks a User', async ({ page }) => {
     await row.getByRole('button', { name: 'Unblock', exact: true }).click();
     await expect(row.getByText('Active', { exact: true })).toBeVisible();
     await expect(row.getByRole('button', { name: 'Block', exact: true })).toBeVisible();
+
   } finally {
     await deleteTestUsers([testEmail]);
   }
@@ -168,6 +183,7 @@ test('Superadmin approves a pending account', async ({ page }) => {
 
     const userRow = page.getByRole('row').filter({ hasText: testEmail });
     await expect(userRow.getByText('Active', { exact: true })).toBeVisible();
+
   } finally {
     await deleteTestUsers([testEmail]);
   }
@@ -183,6 +199,7 @@ test('Superadmin makes a User an Admin', async ({ page }) => {
     const row = page.getByRole('row').filter({ hasText: testEmail });
     await row.getByRole('button', { name: 'Make Admin', exact: true }).click();
     await expect(row.getByText('ADMIN', { exact: true })).toBeVisible();
+
   } finally {
     await deleteTestUsers([testEmail]);
   }
@@ -209,6 +226,7 @@ test("Admin cannot see or edit a Superadmin", async ({ page }) => {
       data: { firstName: 'Unauthorized', lastName: 'Edit', email: superAdmin.email },
     });
     expect([403, 404]).toContain(response.status());
+
   } finally {
     await deleteTestUsers([testEmail]);
   }
@@ -258,6 +276,7 @@ test("last active Superadmin cannot be blocked or demoted", async ({ page }) => 
     if (protectionError) throw new Error(`Could not verify protected account: ${protectionError.message}`);
     expect(protectedAccount.role_id).toBe(superRoleId);
     expect(protectedAccount.is_blocked).toBe(false);
+
   } finally {
     for (const other of others) {
       await supabase.from('app_user').update({ role_id: superRoleId }).eq('user_id', other.user_id);
