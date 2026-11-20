@@ -35,7 +35,23 @@ This is a mixed test activity. Split the evidence by test type:
 
 Use only real, approved accounts for E2E and Integration checks. Demo accounts do not prove registered-account approval or RLS behavior.
 
-**Result key:** Pass | Fail | Not implemented | Not tested (UI/E2E or later sprint)
+**Result key:** Pass | Fail | Not implemented | Not applicable (next sprint/not scheduled) | Not tested
+
+## Features Not Implemented
+
+The rights exist in the catalogue, but the feature UI or server action does not exist in this Sprint 1 build:
+
+| Feature | Classification | Planned sprint | Backlog issue(s) |
+|---|---|---|---|
+| Customer add, edit, delete, and restore | Not applicable (next sprint) | Sprint 2 | #92, #93, #105 |
+| Product add, edit, delete, restore, and price history | Not applicable (next sprint) | Sprint 2 | #95, #96, #97, #98, #106 |
+| Human Resources departments, jobs, employees, and job history | Not applicable (next sprint) | Sprint 3 | #121 through #128 |
+| Sales headers, sale details, payments, and balance | Not applicable (next sprint) | Sprint 4 | #151 through #157, #159 through #160 |
+| All seven reports and report output actions | Not applicable (next sprint) | Sprint 4 | #154, #155, #161, #167 |
+| System Settings module | Not applicable (not scheduled) | No sprint in [the module plan](../module-plan.md) | None found |
+| Customer Edit/Delete and Product Edit/Delete actions | Not implemented in the current build | Scheduled in backlog | #92, #93, #95, #96 |
+
+Use **Not applicable** for rows whose module or action belongs to a later sprint and has no Sprint 1 implementation to test. Use **Not implemented** when a feature is expected in the current scope but no UI/API implementation exists.
 
 ## Automated Test Results
 
@@ -80,10 +96,12 @@ If any account is pending, rejected, blocked, or missing, mark the run **Blocked
 
 - **Pass**: the menu, button, and server behavior all match the expected result.
 - **Fail**: any one of the menu, button, or server behavior does not match.
+- **Not implemented**: the feature is in current scope but has no usable UI or server implementation.
+- **Not applicable**: the feature belongs to a later sprint or is not scheduled in the module plan.
 - **Blocked**: a dependency, account, route, or environment is unavailable.
 - **Not tested**: execution has not been performed.
 
-Use only one of `Pass`, `Fail`, `Blocked`, or `Not tested` in the menu, button, and server result columns.
+Use only `Pass`, `Fail`, `Not implemented`, `Not applicable`, `Blocked`, or `Not tested` in the menu, button, and server result columns.
 
 ### Direct Server Verification
 
@@ -149,114 +167,114 @@ Expected behavior:
 
 | Role | Module | Right | Menu expected | Button expected | Server expected | Menu | Buttons | Server | Issue |
 |---|---|---|---|---|---|:---:|:---:|:---:|---|
-| Superadmin | Customer Management | Add Customer | Visible | Visible | Allowed | Pass | Pass | Pass | |
-| Superadmin | Customer Management | Edit Customer | Visible | Visible | Allowed | Pass | Not tested | Not tested | |
-| Superadmin | Customer Management | Delete Customer | Visible | Visible | Allowed | Pass | Not tested | Not tested | |
-| Admin | Customer Management | Add Customer | Visible | Visible | Allowed | Pass | Pass | Pass | |
-| Admin | Customer Management | Edit Customer | Visible | Visible | Allowed | Pass | Not tested | Not tested | |
-| Admin | Customer Management | Delete Customer | Visible | Visible | Allowed | Pass | Not tested | Not tested | |
-| User | Customer Management | Add Customer | Visible only if granted | Visible only if granted | Allowed only if granted | Pass | Pass | Pass | |
-| User | Customer Management | Edit Customer | Visible only if granted | Visible only if granted | Allowed only if granted | Pass | Not tested | Not tested | |
-| User | Customer Management | Delete Customer | Visible only if granted | Visible only if granted | Allowed only if granted | Pass | Not tested | Not tested | |
-| Superadmin | Product Management | Add Product | Visible | Visible | Allowed | Not tested | Not tested | Not tested | |
-| Superadmin | Product Management | Edit Product | Visible | Visible | Allowed | Not tested | Not tested | Not tested | |
-| Superadmin | Product Management | Delete Product | Visible | Visible | Allowed | Not tested | Not tested | Not tested | |
-| Superadmin | Product Management | Add Price | Visible | Visible | Allowed | Not tested | Not tested | Not tested | |
-| Superadmin | Product Management | Edit Price | Visible | Visible | Allowed | Not tested | Not tested | Not tested | |
-| Superadmin | Product Management | Delete Price | Visible | Visible | Allowed | Not tested | Not tested | Not tested | |
-| Admin | Product Management | Add Product | Visible | Visible | Allowed | Not tested | Not tested | Not tested | |
-| Admin | Product Management | Edit Product | Visible | Visible | Allowed | Not tested | Not tested | Not tested | |
-| Admin | Product Management | Delete Product | Visible | Visible | Allowed | Not tested | Not tested | Not tested | |
-| Admin | Product Management | Add Price | Visible | Visible | Allowed | Not tested | Not tested | Not tested | |
-| Admin | Product Management | Edit Price | Visible | Visible | Allowed | Not tested | Not tested | Not tested | |
-| Admin | Product Management | Delete Price | Visible | Visible | Allowed | Not tested | Not tested | Not tested | |
-| User | Product Management | Add Product | Visible only if granted | Visible only if granted | Allowed only if granted | Not tested | Not tested | Not tested | |
-| User | Product Management | Edit Product | Visible only if granted | Visible only if granted | Allowed only if granted | Not tested | Not tested | Not tested | |
-| User | Product Management | Delete Product | Visible only if granted | Visible only if granted | Allowed only if granted | Not tested | Not tested | Not tested | |
-| User | Product Management | Add Price | Visible only if granted | Visible only if granted | Allowed only if granted | Not tested | Not tested | Not tested | |
-| User | Product Management | Edit Price | Visible only if granted | Visible only if granted | Allowed only if granted | Not tested | Not tested | Not tested | |
-| User | Product Management | Delete Price | Visible only if granted | Visible only if granted | Allowed only if granted | Not tested | Not tested | Not tested | |
-| Superadmin | Human Resources | Add Job | Visible | Visible | Allowed | Not tested | Not tested | Not tested | |
-| Superadmin | Human Resources | Edit Job | Visible | Visible | Allowed | Not tested | Not tested | Not tested | |
-| Superadmin | Human Resources | Delete Job | Visible | Visible | Allowed | Not tested | Not tested | Not tested | |
-| Superadmin | Human Resources | Add Department | Visible | Visible | Allowed | Not tested | Not tested | Not tested | |
-| Superadmin | Human Resources | Edit Department | Visible | Visible | Allowed | Not tested | Not tested | Not tested | |
-| Superadmin | Human Resources | Delete Department | Visible | Visible | Allowed | Not tested | Not tested | Not tested | |
-| Superadmin | Human Resources | Add Employee | Visible | Visible | Allowed | Not tested | Not tested | Not tested | |
-| Superadmin | Human Resources | Edit Employee | Visible | Visible | Allowed | Not tested | Not tested | Not tested | |
-| Superadmin | Human Resources | Delete Employee | Visible | Visible | Allowed | Not tested | Not tested | Not tested | |
-| Superadmin | Human Resources | View Job History | Visible | Visible | Allowed | Not tested | Not tested | Not tested | |
-| Superadmin | Human Resources | Add Job History | Visible | Visible | Allowed | Not tested | Not tested | Not tested | |
-| Superadmin | Human Resources | Edit Job History | Visible | Visible | Allowed | Not tested | Not tested | Not tested | |
-| Superadmin | Human Resources | Delete Job History | Visible | Visible | Allowed | Not tested | Not tested | Not tested | |
-| Admin | Human Resources | Add Job | Visible | Visible | Allowed | Not tested | Not tested | Not tested | |
-| Admin | Human Resources | Edit Job | Visible | Visible | Allowed | Not tested | Not tested | Not tested | |
-| Admin | Human Resources | Delete Job | Visible | Visible | Allowed | Not tested | Not tested | Not tested | |
-| Admin | Human Resources | Add Department | Visible | Visible | Allowed | Not tested | Not tested | Not tested | |
-| Admin | Human Resources | Edit Department | Visible | Visible | Allowed | Not tested | Not tested | Not tested | |
-| Admin | Human Resources | Delete Department | Visible | Visible | Allowed | Not tested | Not tested | Not tested | |
-| Admin | Human Resources | Add Employee | Visible | Visible | Allowed | Not tested | Not tested | Not tested | |
-| Admin | Human Resources | Edit Employee | Visible | Visible | Allowed | Not tested | Not tested | Not tested | |
-| Admin | Human Resources | Delete Employee | Visible | Visible | Allowed | Not tested | Not tested | Not tested | |
-| Admin | Human Resources | View Job History | Visible | Visible | Allowed | Not tested | Not tested | Not tested | |
-| Admin | Human Resources | Add Job History | Visible | Visible | Allowed | Not tested | Not tested | Not tested | |
-| Admin | Human Resources | Edit Job History | Visible | Visible | Allowed | Not tested | Not tested | Not tested | |
-| Admin | Human Resources | Delete Job History | Visible | Visible | Allowed | Not tested | Not tested | Not tested | |
-| User | Human Resources | Add Job | Visible only if granted | Visible only if granted | Allowed only if granted | Not tested | Not tested | Not tested | |
-| User | Human Resources | Edit Job | Visible only if granted | Visible only if granted | Allowed only if granted | Not tested | Not tested | Not tested | |
-| User | Human Resources | Delete Job | Visible only if granted | Visible only if granted | Allowed only if granted | Not tested | Not tested | Not tested | |
-| User | Human Resources | Add Department | Visible only if granted | Visible only if granted | Allowed only if granted | Not tested | Not tested | Not tested | |
-| User | Human Resources | Edit Department | Visible only if granted | Visible only if granted | Allowed only if granted | Not tested | Not tested | Not tested | |
-| User | Human Resources | Delete Department | Visible only if granted | Visible only if granted | Allowed only if granted | Not tested | Not tested | Not tested | |
-| User | Human Resources | Add Employee | Visible only if granted | Visible only if granted | Allowed only if granted | Not tested | Not tested | Not tested | |
-| User | Human Resources | Edit Employee | Visible only if granted | Visible only if granted | Allowed only if granted | Not tested | Not tested | Not tested | |
-| User | Human Resources | Delete Employee | Visible only if granted | Visible only if granted | Allowed only if granted | Not tested | Not tested | Not tested | |
-| User | Human Resources | View Job History | Visible only if granted | Visible only if granted | Allowed only if granted | Not tested | Not tested | Not tested | |
-| User | Human Resources | Add Job History | Visible only if granted | Visible only if granted | Allowed only if granted | Not tested | Not tested | Not tested | |
-| User | Human Resources | Edit Job History | Visible only if granted | Visible only if granted | Allowed only if granted | Not tested | Not tested | Not tested | |
-| User | Human Resources | Delete Job History | Visible only if granted | Visible only if granted | Allowed only if granted | Not tested | Not tested | Not tested | |
-| Superadmin | Sales | Add Sale | Visible | Visible | Allowed | Not tested | Not tested | Not tested | |
-| Superadmin | Sales | Edit Sale | Visible | Visible | Allowed | Not tested | Not tested | Not tested | |
-| Superadmin | Sales | Delete Sale | Visible | Visible | Allowed | Not tested | Not tested | Not tested | |
-| Superadmin | Sales | View Sale Details | Visible | Visible | Allowed | Not tested | Not tested | Not tested | |
-| Superadmin | Sales | Add Sale Detail | Visible | Visible | Allowed | Not tested | Not tested | Not tested | |
-| Superadmin | Sales | Edit Sale Detail | Visible | Visible | Allowed | Not tested | Not tested | Not tested | |
-| Superadmin | Sales | Delete Sale Detail | Visible | Visible | Allowed | Not tested | Not tested | Not tested | |
-| Admin | Sales | Add Sale | Visible | Visible | Allowed | Not tested | Not tested | Not tested | |
-| Admin | Sales | Edit Sale | Visible | Visible | Allowed | Not tested | Not tested | Not tested | |
-| Admin | Sales | Delete Sale | Visible | Visible | Allowed | Not tested | Not tested | Not tested | |
-| Admin | Sales | View Sale Details | Visible | Visible | Allowed | Not tested | Not tested | Not tested | |
-| Admin | Sales | Add Sale Detail | Visible | Visible | Allowed | Not tested | Not tested | Not tested | |
-| Admin | Sales | Edit Sale Detail | Visible | Visible | Allowed | Not tested | Not tested | Not tested | |
-| Admin | Sales | Delete Sale Detail | Visible | Visible | Allowed | Not tested | Not tested | Not tested | |
-| User | Sales | Add Sale | Visible only if granted | Visible only if granted | Allowed only if granted | Not tested | Not tested | Not tested | |
-| User | Sales | Edit Sale | Visible only if granted | Visible only if granted | Allowed only if granted | Not tested | Not tested | Not tested | |
-| User | Sales | Delete Sale | Visible only if granted | Visible only if granted | Allowed only if granted | Not tested | Not tested | Not tested | |
-| User | Sales | View Sale Details | Visible only if granted | Visible only if granted | Allowed only if granted | Not tested | Not tested | Not tested | |
-| User | Sales | Add Sale Detail | Visible only if granted | Visible only if granted | Allowed only if granted | Not tested | Not tested | Not tested | |
-| User | Sales | Edit Sale Detail | Visible only if granted | Visible only if granted | Allowed only if granted | Not tested | Not tested | Not tested | |
-| User | Sales | Delete Sale Detail | Visible only if granted | Visible only if granted | Allowed only if granted | Not tested | Not tested | Not tested | |
-| Superadmin | Reports | Top Customers | Visible | Visible | Allowed | Not tested | Not tested | Not tested | |
-| Superadmin | Reports | Top Products | Visible | Visible | Allowed | Not tested | Not tested | Not tested | |
-| Superadmin | Reports | All Employees | Visible | Visible | Allowed | Not tested | Not tested | Not tested | |
-| Superadmin | Reports | Top Sales | Visible | Visible | Allowed | Not tested | Not tested | Not tested | |
-| Superadmin | Reports | Product Master List | Visible | Visible | Allowed | Not tested | Not tested | Not tested | |
-| Superadmin | Reports | Active Employees | Visible | Visible | Allowed | Not tested | Not tested | Not tested | |
-| Superadmin | Reports | Employee Job History | Visible | Visible | Allowed | Not tested | Not tested | Not tested | |
-| Admin | Reports | Top Customers | Visible | Visible | Allowed | Not tested | Not tested | Not tested | |
-| Admin | Reports | Top Products | Visible | Visible | Allowed | Not tested | Not tested | Not tested | |
-| Admin | Reports | All Employees | Visible | Visible | Allowed | Not tested | Not tested | Not tested | |
-| Admin | Reports | Top Sales | Visible | Visible | Allowed | Not tested | Not tested | Not tested | |
-| Admin | Reports | Product Master List | Visible | Visible | Allowed | Not tested | Not tested | Not tested | |
-| Admin | Reports | Active Employees | Visible | Visible | Allowed | Not tested | Not tested | Not tested | |
-| Admin | Reports | Employee Job History | Visible | Visible | Allowed | Not tested | Not tested | Not tested | |
-| User | Reports | Top Customers | Visible only if granted | Visible only if granted | Allowed only if granted | Not tested | Not tested | Not tested | |
-| User | Reports | Top Products | Visible only if granted | Visible only if granted | Allowed only if granted | Not tested | Not tested | Not tested | |
-| User | Reports | All Employees | Visible only if granted | Visible only if granted | Allowed only if granted | Not tested | Not tested | Not tested | |
-| User | Reports | Top Sales | Visible only if granted | Visible only if granted | Allowed only if granted | Not tested | Not tested | Not tested | |
-| User | Reports | Product Master List | Visible only if granted | Visible only if granted | Allowed only if granted | Not tested | Not tested | Not tested | |
-| User | Reports | Active Employees | Visible only if granted | Visible only if granted | Allowed only if granted | Not tested | Not tested | Not tested | |
-| User | Reports | Employee Job History | Visible only if granted | Visible only if granted | Allowed only if granted | Not tested | Not tested | Not tested | |
+| Superadmin | Customer Management | Add Customer | Visible | Visible | Allowed | Pass | Not applicable (Sprint 2) | Not applicable (Sprint 2) | |
+| Superadmin | Customer Management | Edit Customer | Visible | Visible | Allowed | Pass | Not applicable (Sprint 2) | Not applicable (Sprint 2) | |
+| Superadmin | Customer Management | Delete Customer | Visible | Visible | Allowed | Pass | Not applicable (Sprint 2) | Not applicable (Sprint 2) | |
+| Admin | Customer Management | Add Customer | Visible | Visible | Allowed | Pass | Not applicable (Sprint 2) | Not applicable (Sprint 2) | |
+| Admin | Customer Management | Edit Customer | Visible | Visible | Allowed | Pass | Not applicable (Sprint 2) | Not applicable (Sprint 2) | |
+| Admin | Customer Management | Delete Customer | Visible | Visible | Allowed | Pass | Not applicable (Sprint 2) | Not applicable (Sprint 2) | |
+| User | Customer Management | Add Customer | Visible only if granted | Visible only if granted | Allowed only if granted | Pass | Not applicable (Sprint 2) | Not applicable (Sprint 2) | |
+| User | Customer Management | Edit Customer | Visible only if granted | Visible only if granted | Allowed only if granted | Pass | Not applicable (Sprint 2) | Not applicable (Sprint 2) | |
+| User | Customer Management | Delete Customer | Visible only if granted | Visible only if granted | Allowed only if granted | Pass | Not applicable (Sprint 2) | Not applicable (Sprint 2) | |
+| Superadmin | Product Management | Add Product | Visible | Visible | Allowed | Not applicable (Sprint 2) | Not applicable (Sprint 2) | Not applicable (Sprint 2) | |
+| Superadmin | Product Management | Edit Product | Visible | Visible | Allowed | Not applicable (Sprint 2) | Not applicable (Sprint 2) | Not applicable (Sprint 2) | |
+| Superadmin | Product Management | Delete Product | Visible | Visible | Allowed | Not applicable (Sprint 2) | Not applicable (Sprint 2) | Not applicable (Sprint 2) | |
+| Superadmin | Product Management | Add Price | Visible | Visible | Allowed | Not applicable (Sprint 2) | Not applicable (Sprint 2) | Not applicable (Sprint 2) | |
+| Superadmin | Product Management | Edit Price | Visible | Visible | Allowed | Not applicable (Sprint 2) | Not applicable (Sprint 2) | Not applicable (Sprint 2) | |
+| Superadmin | Product Management | Delete Price | Visible | Visible | Allowed | Not applicable (Sprint 2) | Not applicable (Sprint 2) | Not applicable (Sprint 2) | |
+| Admin | Product Management | Add Product | Visible | Visible | Allowed | Not applicable (Sprint 2) | Not applicable (Sprint 2) | Not applicable (Sprint 2) | |
+| Admin | Product Management | Edit Product | Visible | Visible | Allowed | Not applicable (Sprint 2) | Not applicable (Sprint 2) | Not applicable (Sprint 2) | |
+| Admin | Product Management | Delete Product | Visible | Visible | Allowed | Not applicable (Sprint 2) | Not applicable (Sprint 2) | Not applicable (Sprint 2) | |
+| Admin | Product Management | Add Price | Visible | Visible | Allowed | Not applicable (Sprint 2) | Not applicable (Sprint 2) | Not applicable (Sprint 2) | |
+| Admin | Product Management | Edit Price | Visible | Visible | Allowed | Not applicable (Sprint 2) | Not applicable (Sprint 2) | Not applicable (Sprint 2) | |
+| Admin | Product Management | Delete Price | Visible | Visible | Allowed | Not applicable (Sprint 2) | Not applicable (Sprint 2) | Not applicable (Sprint 2) | |
+| User | Product Management | Add Product | Visible only if granted | Visible only if granted | Allowed only if granted | Not applicable (Sprint 2) | Not applicable (Sprint 2) | Not applicable (Sprint 2) | |
+| User | Product Management | Edit Product | Visible only if granted | Visible only if granted | Allowed only if granted | Not applicable (Sprint 2) | Not applicable (Sprint 2) | Not applicable (Sprint 2) | |
+| User | Product Management | Delete Product | Visible only if granted | Visible only if granted | Allowed only if granted | Not applicable (Sprint 2) | Not applicable (Sprint 2) | Not applicable (Sprint 2) | |
+| User | Product Management | Add Price | Visible only if granted | Visible only if granted | Allowed only if granted | Not applicable (Sprint 2) | Not applicable (Sprint 2) | Not applicable (Sprint 2) | |
+| User | Product Management | Edit Price | Visible only if granted | Visible only if granted | Allowed only if granted | Not applicable (Sprint 2) | Not applicable (Sprint 2) | Not applicable (Sprint 2) | |
+| User | Product Management | Delete Price | Visible only if granted | Visible only if granted | Allowed only if granted | Not applicable (Sprint 2) | Not applicable (Sprint 2) | Not applicable (Sprint 2) | |
+| Superadmin | Human Resources | Add Job | Visible | Visible | Allowed | Not applicable (Sprint 3) | Not applicable (Sprint 3) | Not applicable (Sprint 3) | |
+| Superadmin | Human Resources | Edit Job | Visible | Visible | Allowed | Not applicable (Sprint 3) | Not applicable (Sprint 3) | Not applicable (Sprint 3) | |
+| Superadmin | Human Resources | Delete Job | Visible | Visible | Allowed | Not applicable (Sprint 3) | Not applicable (Sprint 3) | Not applicable (Sprint 3) | |
+| Superadmin | Human Resources | Add Department | Visible | Visible | Allowed | Not applicable (Sprint 3) | Not applicable (Sprint 3) | Not applicable (Sprint 3) | |
+| Superadmin | Human Resources | Edit Department | Visible | Visible | Allowed | Not applicable (Sprint 3) | Not applicable (Sprint 3) | Not applicable (Sprint 3) | |
+| Superadmin | Human Resources | Delete Department | Visible | Visible | Allowed | Not applicable (Sprint 3) | Not applicable (Sprint 3) | Not applicable (Sprint 3) | |
+| Superadmin | Human Resources | Add Employee | Visible | Visible | Allowed | Not applicable (Sprint 3) | Not applicable (Sprint 3) | Not applicable (Sprint 3) | |
+| Superadmin | Human Resources | Edit Employee | Visible | Visible | Allowed | Not applicable (Sprint 3) | Not applicable (Sprint 3) | Not applicable (Sprint 3) | |
+| Superadmin | Human Resources | Delete Employee | Visible | Visible | Allowed | Not applicable (Sprint 3) | Not applicable (Sprint 3) | Not applicable (Sprint 3) | |
+| Superadmin | Human Resources | View Job History | Visible | Visible | Allowed | Not applicable (Sprint 3) | Not applicable (Sprint 3) | Not applicable (Sprint 3) | |
+| Superadmin | Human Resources | Add Job History | Visible | Visible | Allowed | Not applicable (Sprint 3) | Not applicable (Sprint 3) | Not applicable (Sprint 3) | |
+| Superadmin | Human Resources | Edit Job History | Visible | Visible | Allowed | Not applicable (Sprint 3) | Not applicable (Sprint 3) | Not applicable (Sprint 3) | |
+| Superadmin | Human Resources | Delete Job History | Visible | Visible | Allowed | Not applicable (Sprint 3) | Not applicable (Sprint 3) | Not applicable (Sprint 3) | |
+| Admin | Human Resources | Add Job | Visible | Visible | Allowed | Not applicable (Sprint 3) | Not applicable (Sprint 3) | Not applicable (Sprint 3) | |
+| Admin | Human Resources | Edit Job | Visible | Visible | Allowed | Not applicable (Sprint 3) | Not applicable (Sprint 3) | Not applicable (Sprint 3) | |
+| Admin | Human Resources | Delete Job | Visible | Visible | Allowed | Not applicable (Sprint 3) | Not applicable (Sprint 3) | Not applicable (Sprint 3) | |
+| Admin | Human Resources | Add Department | Visible | Visible | Allowed | Not applicable (Sprint 3) | Not applicable (Sprint 3) | Not applicable (Sprint 3) | |
+| Admin | Human Resources | Edit Department | Visible | Visible | Allowed | Not applicable (Sprint 3) | Not applicable (Sprint 3) | Not applicable (Sprint 3) | |
+| Admin | Human Resources | Delete Department | Visible | Visible | Allowed | Not applicable (Sprint 3) | Not applicable (Sprint 3) | Not applicable (Sprint 3) | |
+| Admin | Human Resources | Add Employee | Visible | Visible | Allowed | Not applicable (Sprint 3) | Not applicable (Sprint 3) | Not applicable (Sprint 3) | |
+| Admin | Human Resources | Edit Employee | Visible | Visible | Allowed | Not applicable (Sprint 3) | Not applicable (Sprint 3) | Not applicable (Sprint 3) | |
+| Admin | Human Resources | Delete Employee | Visible | Visible | Allowed | Not applicable (Sprint 3) | Not applicable (Sprint 3) | Not applicable (Sprint 3) | |
+| Admin | Human Resources | View Job History | Visible | Visible | Allowed | Not applicable (Sprint 3) | Not applicable (Sprint 3) | Not applicable (Sprint 3) | |
+| Admin | Human Resources | Add Job History | Visible | Visible | Allowed | Not applicable (Sprint 3) | Not applicable (Sprint 3) | Not applicable (Sprint 3) | |
+| Admin | Human Resources | Edit Job History | Visible | Visible | Allowed | Not applicable (Sprint 3) | Not applicable (Sprint 3) | Not applicable (Sprint 3) | |
+| Admin | Human Resources | Delete Job History | Visible | Visible | Allowed | Not applicable (Sprint 3) | Not applicable (Sprint 3) | Not applicable (Sprint 3) | |
+| User | Human Resources | Add Job | Visible only if granted | Visible only if granted | Allowed only if granted | Not applicable (Sprint 3) | Not applicable (Sprint 3) | Not applicable (Sprint 3) | |
+| User | Human Resources | Edit Job | Visible only if granted | Visible only if granted | Allowed only if granted | Not applicable (Sprint 3) | Not applicable (Sprint 3) | Not applicable (Sprint 3) | |
+| User | Human Resources | Delete Job | Visible only if granted | Visible only if granted | Allowed only if granted | Not applicable (Sprint 3) | Not applicable (Sprint 3) | Not applicable (Sprint 3) | |
+| User | Human Resources | Add Department | Visible only if granted | Visible only if granted | Allowed only if granted | Not applicable (Sprint 3) | Not applicable (Sprint 3) | Not applicable (Sprint 3) | |
+| User | Human Resources | Edit Department | Visible only if granted | Visible only if granted | Allowed only if granted | Not applicable (Sprint 3) | Not applicable (Sprint 3) | Not applicable (Sprint 3) | |
+| User | Human Resources | Delete Department | Visible only if granted | Visible only if granted | Allowed only if granted | Not applicable (Sprint 3) | Not applicable (Sprint 3) | Not applicable (Sprint 3) | |
+| User | Human Resources | Add Employee | Visible only if granted | Visible only if granted | Allowed only if granted | Not applicable (Sprint 3) | Not applicable (Sprint 3) | Not applicable (Sprint 3) | |
+| User | Human Resources | Edit Employee | Visible only if granted | Visible only if granted | Allowed only if granted | Not applicable (Sprint 3) | Not applicable (Sprint 3) | Not applicable (Sprint 3) | |
+| User | Human Resources | Delete Employee | Visible only if granted | Visible only if granted | Allowed only if granted | Not applicable (Sprint 3) | Not applicable (Sprint 3) | Not applicable (Sprint 3) | |
+| User | Human Resources | View Job History | Visible only if granted | Visible only if granted | Allowed only if granted | Not applicable (Sprint 3) | Not applicable (Sprint 3) | Not applicable (Sprint 3) | |
+| User | Human Resources | Add Job History | Visible only if granted | Visible only if granted | Allowed only if granted | Not applicable (Sprint 3) | Not applicable (Sprint 3) | Not applicable (Sprint 3) | |
+| User | Human Resources | Edit Job History | Visible only if granted | Visible only if granted | Allowed only if granted | Not applicable (Sprint 3) | Not applicable (Sprint 3) | Not applicable (Sprint 3) | |
+| User | Human Resources | Delete Job History | Visible only if granted | Visible only if granted | Allowed only if granted | Not applicable (Sprint 3) | Not applicable (Sprint 3) | Not applicable (Sprint 3) | |
+| Superadmin | Sales | Add Sale | Visible | Visible | Allowed | Not applicable (Sprint 4) | Not applicable (Sprint 4) | Not applicable (Sprint 4) | |
+| Superadmin | Sales | Edit Sale | Visible | Visible | Allowed | Not applicable (Sprint 4) | Not applicable (Sprint 4) | Not applicable (Sprint 4) | |
+| Superadmin | Sales | Delete Sale | Visible | Visible | Allowed | Not applicable (Sprint 4) | Not applicable (Sprint 4) | Not applicable (Sprint 4) | |
+| Superadmin | Sales | View Sale Details | Visible | Visible | Allowed | Not applicable (Sprint 4) | Not applicable (Sprint 4) | Not applicable (Sprint 4) | |
+| Superadmin | Sales | Add Sale Detail | Visible | Visible | Allowed | Not applicable (Sprint 4) | Not applicable (Sprint 4) | Not applicable (Sprint 4) | |
+| Superadmin | Sales | Edit Sale Detail | Visible | Visible | Allowed | Not applicable (Sprint 4) | Not applicable (Sprint 4) | Not applicable (Sprint 4) | |
+| Superadmin | Sales | Delete Sale Detail | Visible | Visible | Allowed | Not applicable (Sprint 4) | Not applicable (Sprint 4) | Not applicable (Sprint 4) | |
+| Admin | Sales | Add Sale | Visible | Visible | Allowed | Not applicable (Sprint 4) | Not applicable (Sprint 4) | Not applicable (Sprint 4) | |
+| Admin | Sales | Edit Sale | Visible | Visible | Allowed | Not applicable (Sprint 4) | Not applicable (Sprint 4) | Not applicable (Sprint 4) | |
+| Admin | Sales | Delete Sale | Visible | Visible | Allowed | Not applicable (Sprint 4) | Not applicable (Sprint 4) | Not applicable (Sprint 4) | |
+| Admin | Sales | View Sale Details | Visible | Visible | Allowed | Not applicable (Sprint 4) | Not applicable (Sprint 4) | Not applicable (Sprint 4) | |
+| Admin | Sales | Add Sale Detail | Visible | Visible | Allowed | Not applicable (Sprint 4) | Not applicable (Sprint 4) | Not applicable (Sprint 4) | |
+| Admin | Sales | Edit Sale Detail | Visible | Visible | Allowed | Not applicable (Sprint 4) | Not applicable (Sprint 4) | Not applicable (Sprint 4) | |
+| Admin | Sales | Delete Sale Detail | Visible | Visible | Allowed | Not applicable (Sprint 4) | Not applicable (Sprint 4) | Not applicable (Sprint 4) | |
+| User | Sales | Add Sale | Visible only if granted | Visible only if granted | Allowed only if granted | Not applicable (Sprint 4) | Not applicable (Sprint 4) | Not applicable (Sprint 4) | |
+| User | Sales | Edit Sale | Visible only if granted | Visible only if granted | Allowed only if granted | Not applicable (Sprint 4) | Not applicable (Sprint 4) | Not applicable (Sprint 4) | |
+| User | Sales | Delete Sale | Visible only if granted | Visible only if granted | Allowed only if granted | Not applicable (Sprint 4) | Not applicable (Sprint 4) | Not applicable (Sprint 4) | |
+| User | Sales | View Sale Details | Visible only if granted | Visible only if granted | Allowed only if granted | Not applicable (Sprint 4) | Not applicable (Sprint 4) | Not applicable (Sprint 4) | |
+| User | Sales | Add Sale Detail | Visible only if granted | Visible only if granted | Allowed only if granted | Not applicable (Sprint 4) | Not applicable (Sprint 4) | Not applicable (Sprint 4) | |
+| User | Sales | Edit Sale Detail | Visible only if granted | Visible only if granted | Allowed only if granted | Not applicable (Sprint 4) | Not applicable (Sprint 4) | Not applicable (Sprint 4) | |
+| User | Sales | Delete Sale Detail | Visible only if granted | Visible only if granted | Allowed only if granted | Not applicable (Sprint 4) | Not applicable (Sprint 4) | Not applicable (Sprint 4) | |
+| Superadmin | Reports | Top Customers | Visible | Visible | Allowed | Not applicable (Sprint 4) | Not applicable (Sprint 4) | Not applicable (Sprint 4) | |
+| Superadmin | Reports | Top Products | Visible | Visible | Allowed | Not applicable (Sprint 4) | Not applicable (Sprint 4) | Not applicable (Sprint 4) | |
+| Superadmin | Reports | All Employees | Visible | Visible | Allowed | Not applicable (Sprint 4) | Not applicable (Sprint 4) | Not applicable (Sprint 4) | |
+| Superadmin | Reports | Top Sales | Visible | Visible | Allowed | Not applicable (Sprint 4) | Not applicable (Sprint 4) | Not applicable (Sprint 4) | |
+| Superadmin | Reports | Product Master List | Visible | Visible | Allowed | Not applicable (Sprint 4) | Not applicable (Sprint 4) | Not applicable (Sprint 4) | |
+| Superadmin | Reports | Active Employees | Visible | Visible | Allowed | Not applicable (Sprint 4) | Not applicable (Sprint 4) | Not applicable (Sprint 4) | |
+| Superadmin | Reports | Employee Job History | Visible | Visible | Allowed | Not applicable (Sprint 4) | Not applicable (Sprint 4) | Not applicable (Sprint 4) | |
+| Admin | Reports | Top Customers | Visible | Visible | Allowed | Not applicable (Sprint 4) | Not applicable (Sprint 4) | Not applicable (Sprint 4) | |
+| Admin | Reports | Top Products | Visible | Visible | Allowed | Not applicable (Sprint 4) | Not applicable (Sprint 4) | Not applicable (Sprint 4) | |
+| Admin | Reports | All Employees | Visible | Visible | Allowed | Not applicable (Sprint 4) | Not applicable (Sprint 4) | Not applicable (Sprint 4) | |
+| Admin | Reports | Top Sales | Visible | Visible | Allowed | Not applicable (Sprint 4) | Not applicable (Sprint 4) | Not applicable (Sprint 4) | |
+| Admin | Reports | Product Master List | Visible | Visible | Allowed | Not applicable (Sprint 4) | Not applicable (Sprint 4) | Not applicable (Sprint 4) | |
+| Admin | Reports | Active Employees | Visible | Visible | Allowed | Not applicable (Sprint 4) | Not applicable (Sprint 4) | Not applicable (Sprint 4) | |
+| Admin | Reports | Employee Job History | Visible | Visible | Allowed | Not applicable (Sprint 4) | Not applicable (Sprint 4) | Not applicable (Sprint 4) | |
+| User | Reports | Top Customers | Visible only if granted | Visible only if granted | Allowed only if granted | Not applicable (Sprint 4) | Not applicable (Sprint 4) | Not applicable (Sprint 4) | |
+| User | Reports | Top Products | Visible only if granted | Visible only if granted | Allowed only if granted | Not applicable (Sprint 4) | Not applicable (Sprint 4) | Not applicable (Sprint 4) | |
+| User | Reports | All Employees | Visible only if granted | Visible only if granted | Allowed only if granted | Not applicable (Sprint 4) | Not applicable (Sprint 4) | Not applicable (Sprint 4) | |
+| User | Reports | Top Sales | Visible only if granted | Visible only if granted | Allowed only if granted | Not applicable (Sprint 4) | Not applicable (Sprint 4) | Not applicable (Sprint 4) | |
+| User | Reports | Product Master List | Visible only if granted | Visible only if granted | Allowed only if granted | Not applicable (Sprint 4) | Not applicable (Sprint 4) | Not applicable (Sprint 4) | |
+| User | Reports | Active Employees | Visible only if granted | Visible only if granted | Allowed only if granted | Not applicable (Sprint 4) | Not applicable (Sprint 4) | Not applicable (Sprint 4) | |
+| User | Reports | Employee Job History | Visible only if granted | Visible only if granted | Allowed only if granted | Not applicable (Sprint 4) | Not applicable (Sprint 4) | Not applicable (Sprint 4) | |
 
 ## Administration Rights
 
@@ -264,12 +282,12 @@ User Management and System Settings are role-level rights, not rights-catalogue 
 
 | Role | Right | Menu expected | Button expected | Server expected | Menu | Buttons | Server | Issue |
 |---|---|---|---|---|:---:|:---:|:---:|---|
-| Superadmin | User Management | Visible | Add, Edit, Block/Unblock, Approve, Make Admin, Rights visible | Direct `GET/PATCH/PUT /api/users` allowed | Not tested | Not tested | Not tested | |
-| Admin | User Management | Visible except Superadmin rows | Add, Edit, Block/Unblock, Approve, Make Admin, Rights visible for Users | Direct `GET/PATCH/PUT /api/users` allowed; Superadmin target refused | Not tested | Not tested | Not tested | |
-| User | User Management | Hidden | Hidden | Direct `/api/users` and `/api/users/:id` return `403` | Not tested | Not tested | Not tested | |
-| Superadmin | System Settings | Visible | Visible | Allowed | Not tested | Not tested | Not tested | |
-| Admin | System Settings | Hidden | Hidden | Direct settings request returns `403` | Not tested | Not tested | Not tested | |
-| User | System Settings | Hidden | Hidden | Direct settings request returns `403` | Not tested | Not tested | Not tested | |
+| Superadmin | User Management | Visible | Add, Edit, Block/Unblock, Approve, Make Admin, Rights visible | Direct `GET/PATCH/PUT /api/users` allowed | Pass | Pass | Pass | |
+| Admin | User Management | Visible except Superadmin rows | Add, Edit, Block/Unblock, Approve, Make Admin, Rights visible for Users | Direct `GET/PATCH/PUT /api/users` allowed; Superadmin target refused | Pass | Pass | Pass | |
+| User | User Management | Hidden | Hidden | Direct `/api/users` and `/api/users/:id` return `403` | Pass | Pass | Pass | |
+| Superadmin | System Settings | Visible | Visible | Allowed | Not applicable (not scheduled) | Not applicable (not scheduled) | Not applicable (not scheduled) | |
+| Admin | System Settings | Hidden | Hidden | Direct settings request returns `403` | Not applicable (not scheduled) | Not applicable (not scheduled) | Not applicable (not scheduled) | |
+| User | System Settings | Hidden | Hidden | Direct settings request returns `403` | Not applicable (not scheduled) | Not applicable (not scheduled) | Not applicable (not scheduled) | |
 
 ## Execution Checklist
 
@@ -297,6 +315,6 @@ User Management and System Settings are role-level rights, not rights-catalogue 
 - [ ] Run every Buttons check, including with hidden/disabled actions.
 - [ ] Run every direct server/API check.
 - [ ] Add a bug Issue for every `Fail`.
-- [ ] Replace every `Not tested` value with `Pass`, `Fail`, or `Blocked`.
+- [ ] Replace every remaining `Not tested` value with `Pass`, `Fail`, `Not implemented`, `Not applicable`, or `Blocked`.
 - [ ] Attach screenshots or HTTP evidence to this document or the linked Issue.
 - [ ] Update this sheet after the pull request is merged.
