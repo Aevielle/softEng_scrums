@@ -1,4 +1,5 @@
 
+ 
 /* Colours come from the .shell variables defined in ../dashboard/dashboard.module.css */
  
 .bar { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 22px; }
@@ -35,10 +36,12 @@
   --table-line: rgba(130, 160, 255, .18);
   background-attachment: fixed;
 }
-.tw table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+/* min-width: on a narrow screen the table scrolls sideways (.tw has overflow-x: auto) instead of squeezing columns until words break letter by letter */
+.tw table { width: 100%; min-width: 720px; border-collapse: collapse; font-size: 13.5px; }
  
 .tw th { padding: 12px 16px; text-align: left; font-size: 12px; color: var(--muted); white-space: nowrap; vertical-align: middle; }
-.tw td { padding: 14px 16px; overflow-wrap: anywhere; vertical-align: middle; }
+/* break-word, not "anywhere": wraps at spaces, and only splits a word that is longer than the whole column */
+.tw td { padding: 14px 16px; overflow-wrap: break-word; word-break: normal; vertical-align: middle; }
 .tw th:first-child, .tw td:first-child { padding-left: 20px; }
 .tw th:last-child, .tw td:last-child { padding-right: 20px; }
  
@@ -65,7 +68,7 @@ div.ac { display: flex; align-items: center; gap: 6px; white-space: nowrap; }
  
 .empty { margin: 0; padding: 6px 20px 20px; color: var(--muted); font-size: 13px; }
  
-.rb { display: inline-block; padding: 4px 10px; border-radius: 99px; font-size: 11px; font-weight: 800; letter-spacing: .06em; }
+.rb { display: inline-block; white-space: nowrap; padding: 4px 10px; border-radius: 99px; font-size: 11px; font-weight: 800; letter-spacing: .06em; }
 .superadmin { background: #fff1c9; color: #8a5a00; }
 .admin { background: var(--hi); color: var(--ac); }
 .user { background: color-mix(in srgb, var(--ok) 15%, transparent); color: var(--ok); }

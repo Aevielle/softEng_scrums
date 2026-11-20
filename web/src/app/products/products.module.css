@@ -1,14 +1,15 @@
-/* Colours come from the .shell variables defined in ../dashboard/dashboard.module.css */
 
+/* Colours come from the .shell variables defined in ../dashboard/dashboard.module.css */
+ 
 .bar { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 22px; }
 .heading { margin: 0; font-size: 18px; letter-spacing: -.02em; }
 .tools { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
-
+ 
 .tabs { display: flex; gap: 4px; padding: 3px; border-radius: 10px; background: var(--hi); }
 .tabs button { padding: 5px 12px; border: 0; border-radius: 8px; background: none; color: var(--muted); font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; transition: background .2s, color .2s; }
 .tabs button:hover { color: var(--text); }
 .tabs .on { background: rgba(79, 111, 232, .22); color: #A9BBFF; }
-
+ 
 /* white search bar */
 .search {
   width: 220px; padding: 9px 12px; border: 1px solid #c9d6ff; border-radius: 10px;
@@ -17,7 +18,7 @@
 }
 .search::placeholder { color: #5a6488; }
 .search:focus { outline: 0; border-color: #5b82ff; box-shadow: 0 0 0 3px rgba(91, 130, 255, .35); }
-
+ 
 .btn {
   padding: 9px 16px; border: 1px solid var(--line); border-radius: 10px; background: var(--card); color: var(--text);
   font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; transition: transform .2s, border-color .2s, filter .2s;
@@ -27,11 +28,11 @@
 .pri { border-color: transparent; background: linear-gradient(100deg, #1945bb, #2858d1); color: #fff; opacity: 1; }
 .pri:hover:not(:disabled) { filter: brightness(1.12); }
 .sm { padding: 4px 10px; font-size: 12px; border-radius: 8px; }
-
+ 
 /* table: same design as users.module.css / customers.module.css.
    Light mode uses the normal panel colours; dark mode uses the sidebar gradient */
 .tw { overflow-x: auto; border: 1px solid var(--table-line, var(--panel-line)); border-radius: 22px; background: var(--table-bg, var(--panel)); }
-
+ 
 /* dark mode only: same blue gradient as the sidebar */
 @media (prefers-color-scheme: dark) {
   :global(:root:not([data-theme="light"])) .tw {
@@ -45,39 +46,41 @@
   --table-line: rgba(130, 160, 255, .18);
   background-attachment: fixed;
 }
-.tw table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
-
+/* min-width: on a narrow screen the table scrolls sideways (.tw has overflow-x: auto) instead of squeezing columns until words break letter by letter */
+.tw table { width: 100%; min-width: 900px; border-collapse: collapse; font-size: 13.5px; }
+ 
 .tw th { padding: 12px 16px; text-align: left; font-size: 12px; color: var(--muted); white-space: nowrap; vertical-align: middle; }
-.tw td { padding: 14px 16px; overflow-wrap: anywhere; vertical-align: middle; }
+/* break-word, not "anywhere": wraps at spaces, and only splits a word that is longer than the whole column */
+.tw td { padding: 14px 16px; overflow-wrap: break-word; word-break: normal; vertical-align: middle; }
 .tw th:first-child, .tw td:first-child { padding-left: 20px; }
 .tw th:last-child, .tw td:last-child { padding-right: 20px; }
-
+ 
 /* one border per row, so every column's line lines up */
 .tw thead tr { border-bottom: 1px solid var(--table-line, var(--panel-line)); }
 .tw tbody tr { border-bottom: 1px solid var(--table-line, var(--panel-line)); transition: background .2s; }
 .tw tbody tr:last-child { border-bottom: 0; }
-
+ 
 /* alternating rows: paint the row, not the cells */
 .tw tbody tr:nth-child(even) { background: color-mix(in srgb, var(--text) 6%, transparent); }
 .tw tbody tr:hover { background: var(--hover); }
-
+ 
 /* soft-deleted row (Admin / Superadmin only): keep AFTER stripe and hover rules */
 .tw tbody tr.deleted { background: color-mix(in srgb, var(--er) 7%, transparent); }
-
+ 
 .stamp { font-size: 12px; color: var(--muted); }
-
+ 
 /* actions: keep it a real table-cell and lay the buttons out inline */
 .tw td.ac { display: table-cell; white-space: nowrap; }
 .tw td.ac > * { vertical-align: middle; }
 .tw td.ac > * + * { margin-left: 6px; }
-
+ 
 .empty { padding: 28px 20px; text-align: center; color: var(--muted); }
 .count { margin: 10px 4px 0; font-size: 12px; color: var(--muted); }
-
+ 
 .pill { display: inline-block; white-space: nowrap; padding: 3px 10px; border-radius: 99px; background: color-mix(in srgb, var(--ok) 15%, transparent); color: var(--ok); font-size: 12px; font-weight: 700; }
 .tw td:has(> .pill) { white-space: nowrap; }
 .x { background: color-mix(in srgb, var(--er) 15%, transparent); color: var(--er); } /* Inactive = red */
-
+ 
 @media (max-width: 700px) {
   .bar { flex-direction: column; align-items: flex-start; }
   .search { width: 100%; }
