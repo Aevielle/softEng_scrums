@@ -39,9 +39,9 @@ Use only real, approved accounts for E2E and Integration checks. Demo accounts d
 
 ## Automated Test Results
 
-**Unit run:** 25 passed
+**Unit run:** 33 passed
 
-**Unit command:** `npx jest src/test/unit/auth/permissions.test.jsx src/test/unit/auth/rights-layout.test.jsx src/test/unit/api/rights-route.test.jsx --runInBand`
+**Unit command:** `npx jest src/test/unit/auth/permissions.test.jsx src/test/unit/auth/rights-layout.test.jsx src/test/unit/api/rights-route.test.jsx src/test/unit/auth/guard.test.jsx --runInBand`
 
 **E2E run date:** 2026-11-20
 
@@ -62,17 +62,17 @@ Use separate accounts for every role. Do not use demo accounts for server author
 
 | Role | Account email | Registered | Approved | Password reset/first login completed |
 |---|---|:---:|:---:|:---:|
-| Superadmin | `<superadmin-test-account>` | Pending | Pending | Pending |
-| Admin | `<admin-test-account>` | Pending | Pending | Pending |
-| User | `<user-test-account>` | Pending | Pending | Pending |
+| Superadmin | `seed.superadmin@hope.erp.com` | Pass | Pass | Pass |
+| Admin | `seed.admin@hope.erp.com` | Pass | Pass | Pass |
+| User | `seed.user@hope.erp.com` | Pass | Pass | Pass |
 
 Record the actual approved account emails below before starting the run:
 
 | Role | Account email |
 |---|---|
-| Superadmin | |
-| Admin | |
-| User | |
+| Superadmin | `seed.superadmin@hope.erp.com` |
+| Admin | `seed.admin@hope.erp.com` |
+| User | `seed.user@hope.erp.com` |
 
 If any account is pending, rejected, blocked, or missing, mark the run **Blocked** and do not substitute a demo account.
 
@@ -149,15 +149,15 @@ Expected behavior:
 
 | Role | Module | Right | Menu expected | Button expected | Server expected | Menu | Buttons | Server | Issue |
 |---|---|---|---|---|---|:---:|:---:|:---:|---|
-| Superadmin | Customer Management | Add Customer | Visible | Visible | Allowed | Not tested | Not tested | Not tested | |
-| Superadmin | Customer Management | Edit Customer | Visible | Visible | Allowed | Not tested | Not tested | Not tested | |
-| Superadmin | Customer Management | Delete Customer | Visible | Visible | Allowed | Not tested | Not tested | Not tested | |
-| Admin | Customer Management | Add Customer | Visible | Visible | Allowed | Not tested | Not tested | Not tested | |
-| Admin | Customer Management | Edit Customer | Visible | Visible | Allowed | Not tested | Not tested | Not tested | |
-| Admin | Customer Management | Delete Customer | Visible | Visible | Allowed | Not tested | Not tested | Not tested | |
-| User | Customer Management | Add Customer | Visible only if granted | Visible only if granted | Allowed only if granted | Not tested | Not tested | Not tested | |
-| User | Customer Management | Edit Customer | Visible only if granted | Visible only if granted | Allowed only if granted | Not tested | Not tested | Not tested | |
-| User | Customer Management | Delete Customer | Visible only if granted | Visible only if granted | Allowed only if granted | Not tested | Not tested | Not tested | |
+| Superadmin | Customer Management | Add Customer | Visible | Visible | Allowed | Pass | Pass | Pass | |
+| Superadmin | Customer Management | Edit Customer | Visible | Visible | Allowed | Pass | Not tested | Not tested | |
+| Superadmin | Customer Management | Delete Customer | Visible | Visible | Allowed | Pass | Not tested | Not tested | |
+| Admin | Customer Management | Add Customer | Visible | Visible | Allowed | Pass | Pass | Pass | |
+| Admin | Customer Management | Edit Customer | Visible | Visible | Allowed | Pass | Not tested | Not tested | |
+| Admin | Customer Management | Delete Customer | Visible | Visible | Allowed | Pass | Not tested | Not tested | |
+| User | Customer Management | Add Customer | Visible only if granted | Visible only if granted | Allowed only if granted | Pass | Pass | Pass | |
+| User | Customer Management | Edit Customer | Visible only if granted | Visible only if granted | Allowed only if granted | Pass | Not tested | Not tested | |
+| User | Customer Management | Delete Customer | Visible only if granted | Visible only if granted | Allowed only if granted | Pass | Not tested | Not tested | |
 | Superadmin | Product Management | Add Product | Visible | Visible | Allowed | Not tested | Not tested | Not tested | |
 | Superadmin | Product Management | Edit Product | Visible | Visible | Allowed | Not tested | Not tested | Not tested | |
 | Superadmin | Product Management | Delete Product | Visible | Visible | Allowed | Not tested | Not tested | Not tested | |
