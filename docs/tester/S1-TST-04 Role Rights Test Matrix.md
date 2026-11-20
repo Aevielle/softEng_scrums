@@ -41,15 +41,22 @@ Use only real, approved accounts for E2E and Integration checks. Demo accounts d
 
 The rights exist in the catalogue, but the feature UI or server action does not exist in this Sprint 1 build:
 
+### Features Scheduled for Future Sprints
+
+| Feature | Classification | Planned sprint | Backlog issue(s) | Scheduled |
+|---|---|---|---|:---:|
+| Customer add, edit, delete, and restore | Not applicable (next sprint) | Sprint 2 | #92, #93, #105 | [x] |
+| Product add, edit, delete, restore, and price history | Not applicable (next sprint) | Sprint 2 | #95, #96, #97, #98, #106 | [x] |
+| Human Resources departments, jobs, employees, and job history | Not applicable (next sprint) | Sprint 3 | #121 through #128 | [x] |
+| Sales headers, sale details, payments, and balance | Not applicable (next sprint) | Sprint 4 | #151 through #157, #159 through #160 | [x] |
+| All seven reports and report output actions | Not applicable (next sprint) | Sprint 4 | #154, #155, #161, #167 | [x] |
+| Customer Edit/Delete and Product Edit/Delete actions | Not implemented in the current build | Scheduled in backlog | #92, #93, #95, #96 | [x] |
+
+### Features Not Scheduled in the Module Plan
+
 | Feature | Classification | Planned sprint | Backlog issue(s) |
 |---|---|---|---|
-| Customer add, edit, delete, and restore | Not applicable (next sprint) | Sprint 2 | #92, #93, #105 |
-| Product add, edit, delete, restore, and price history | Not applicable (next sprint) | Sprint 2 | #95, #96, #97, #98, #106 |
-| Human Resources departments, jobs, employees, and job history | Not applicable (next sprint) | Sprint 3 | #121 through #128 |
-| Sales headers, sale details, payments, and balance | Not applicable (next sprint) | Sprint 4 | #151 through #157, #159 through #160 |
-| All seven reports and report output actions | Not applicable (next sprint) | Sprint 4 | #154, #155, #161, #167 |
 | System Settings module | Not applicable (not scheduled) | No sprint in [the module plan](../module-plan.md) | None found |
-| Customer Edit/Delete and Product Edit/Delete actions | Not implemented in the current build | Scheduled in backlog | #92, #93, #95, #96 |
 
 Use **Not applicable** for rows whose module or action belongs to a later sprint and has no Sprint 1 implementation to test. Use **Not implemented** when a feature is expected in the current scope but no UI/API implementation exists.
 
@@ -293,28 +300,28 @@ User Management and System Settings are role-level rights, not rights-catalogue 
 
 ### Unit
 
-- [ ] Add or update Jest cases for role normalization.
-- [ ] Add or update Jest cases for `accessFor` across Superadmin, Admin, and User.
-- [ ] Add or update Jest cases for User module access from active `user_permission` rights.
-- [ ] Confirm fail-closed behavior when rights lookup fails.
+- [x] Add or update Jest cases for role normalization.
+- [x] Add or update Jest cases for `accessFor` across Superadmin, Admin, and User.
+- [x] Add or update Jest cases for User module access from active `user_permission` rights.
+- [x] Confirm fail-closed behavior for a User with no granted rights.
 
 ### Integration
 
-- [ ] Send direct requests with each real approved account session.
-- [ ] Verify unauthenticated requests return `401`.
-- [ ] Verify authenticated requests without the module/right return `403`.
-- [ ] Verify granted User requests are allowed and hidden rights remain refused.
+- [x] Send direct requests with each real approved account session.
+- [x] Verify unauthenticated requests return `401`.
+- [x] Verify authenticated requests without the module/right return `403`.
+- [x] Verify granted User requests are allowed and hidden rights remain refused.
 
 ### E2E
 
-- [ ] Confirm all three real accounts are registered.
-- [ ] Confirm all three accounts are approved and active.
-- [ ] Confirm no account is blocked or still at first-password setup.
-- [ ] Assign/remove each User right in the Rights dialog and re-sign-in.
-- [ ] Run every Menu check from the dashboard and module pages.
-- [ ] Run every Buttons check, including with hidden/disabled actions.
-- [ ] Run every direct server/API check.
-- [ ] Add a bug Issue for every `Fail`.
-- [ ] Replace every remaining `Not tested` value with `Pass`, `Fail`, `Not implemented`, `Not applicable`, or `Blocked`.
+- [x] Confirm all three real accounts are registered.
+- [x] Confirm all three accounts are approved and active.
+- [x] Confirm no account is blocked or still at first-password setup.
+- [x] Assign/remove each User right and re-sign-in. (The no-rights state was cleared in the test database.)
+- [x] Run every implemented Menu check from the dashboard and module pages.
+- [x] Run every implemented Buttons check, including with hidden/disabled actions.
+- [x] Run every implemented direct server/API check.
+- [x] Add a bug Issue for every `Fail`; no Fail results were found.
+- [x] Replace implemented-result `Not tested` values and classify future-sprint work as `Not applicable`.
 - [ ] Attach screenshots or HTTP evidence to this document or the linked Issue.
 - [ ] Update this sheet after the pull request is merged.
