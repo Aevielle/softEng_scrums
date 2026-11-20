@@ -3,7 +3,7 @@
 Related issue: #182
 
 ## Test Setup
-Automated unit and integration checks, plus automated E2E checks using Playwright.
+Automated unit and integration checks using Jest, plus automated E2E checks using Playwright.
 
 ### Tester
 Franchesca E. Ramirez
@@ -50,15 +50,62 @@ The rights exist in the catalogue, but the feature UI or server action does not 
 | Human Resources departments, jobs, employees, and job history | Not applicable (next sprint) | Sprint 3 | #121 through #128 | [x] |
 | Sales headers, sale details, payments, and balance | Not applicable (next sprint) | Sprint 4 | #151 through #157, #159 through #160 | [x] |
 | All seven reports and report output actions | Not applicable (next sprint) | Sprint 4 | #154, #155, #161, #167 | [x] |
+| System Settings | Not applicable (next sprint) | Sprint 4 | To be created | [x] |
 | Customer Edit/Delete and Product Edit/Delete actions | Not implemented in the current build | Scheduled in backlog | #92, #93, #95, #96 | [x] |
 
-### Features Not Scheduled in the Module Plan
-
-| Feature | Classification | Planned sprint | Backlog issue(s) |
-|---|---|---|---|
-| System Settings module | Not applicable (not scheduled) | No sprint in [the module plan](../module-plan.md) | None found |
-
 Use **Not applicable** for rows whose module or action belongs to a later sprint and has no Sprint 1 implementation to test. Use **Not implemented** when a feature is expected in the current scope but no UI/API implementation exists.
+
+## Features to be Implemented
+
+Use this checklist to track the planned features and the sprint in which each feature is implemented. Once a feature is implemented, add its role and rights coverage to the corresponding **Unit**, **Integration**, and **E2E** execution checklists below.
+
+### Sprint 1 — User Management
+
+- [x] Landing page — **Unit, Integration, E2E**
+- [x] Registration — **Unit, Integration, E2E**
+- [ ] Confirmation email — **Unit, Integration, E2E**
+- [x] Sign in and sign out — **Unit, Integration, E2E**
+- [x] Forgot-password and reset-password flow — **Unit, Integration, E2E**
+- [x] Session and route protection — **Unit, Integration, E2E**
+- [x] Dashboard and main page — **Unit, Integration, E2E**
+- [x] User list — **Unit, Integration, E2E**
+- [x] Approve users — **Unit, Integration, E2E**
+- [x] Block and unblock users — **Unit, Integration, E2E**
+- [x] Assign roles and rights — **Unit, Integration, E2E**
+- [x] Server-side permission checks — **Unit, Integration, E2E**
+
+### Sprint 2 — Customers and Products
+
+- [ ] Customer search and list — **Unit, Integration, E2E**
+- [ ] Add and edit customers — **Unit, Integration, E2E**
+- [ ] Soft-delete and restore customers — **Unit, Integration, E2E**
+- [ ] Product search and list — **Unit, Integration, E2E**
+- [ ] Add and edit products — **Unit, Integration, E2E**
+- [ ] Soft-delete and restore products — **Unit, Integration, E2E**
+- [ ] Product price history — **Unit, Integration, E2E**
+
+### Sprint 3 — Human Resources
+
+- [ ] Department management — **Unit, Integration, E2E**
+- [ ] Job management — **Unit, Integration, E2E**
+- [ ] Employee management — **Unit, Integration, E2E**
+- [ ] Employee soft-delete and restore — **Unit, Integration, E2E**
+- [ ] Employee job history — **Unit, Integration, E2E**
+
+### Sprint 4 — Sales, Reports, and Administration
+
+- [ ] Sales headers and line items — **Unit, Integration, E2E**
+- [ ] Payment recording and balance calculation — **Unit, Integration, E2E**
+- [ ] Top Customers report — **Unit, Integration, E2E**
+- [ ] Top Products report — **Unit, Integration, E2E**
+- [ ] All Employees report — **Unit, Integration, E2E**
+- [ ] Top Sales report — **Unit, Integration, E2E**
+- [ ] Product Master List report — **Unit, Integration, E2E**
+- [ ] Active Employees report — **Unit, Integration, E2E**
+- [ ] Employee Job History report — **Unit, Integration, E2E**
+- [ ] Report print and PDF output — **Unit, Integration, E2E**
+- [ ] Audit-log viewer — **Unit, Integration, E2E**
+- [ ] System Settings — **Unit, Integration, E2E**
 
 ## Automated Test Results
 
@@ -292,9 +339,9 @@ User Management and System Settings are role-level rights, not rights-catalogue 
 | Superadmin | User Management | Visible | Add, Edit, Block/Unblock, Approve, Make Admin, Rights visible | Direct `GET/PATCH/PUT /api/users` allowed | Pass | Pass | Pass | |
 | Admin | User Management | Visible except Superadmin rows | Add, Edit, Block/Unblock, Approve, Make Admin, Rights visible for Users | Direct `GET/PATCH/PUT /api/users` allowed; Superadmin target refused | Pass | Pass | Pass | |
 | User | User Management | Hidden | Hidden | Direct `/api/users` and `/api/users/:id` return `403` | Pass | Pass | Pass | |
-| Superadmin | System Settings | Visible | Visible | Allowed | Not applicable (not scheduled) | Not applicable (not scheduled) | Not applicable (not scheduled) | |
-| Admin | System Settings | Hidden | Hidden | Direct settings request returns `403` | Not applicable (not scheduled) | Not applicable (not scheduled) | Not applicable (not scheduled) | |
-| User | System Settings | Hidden | Hidden | Direct settings request returns `403` | Not applicable (not scheduled) | Not applicable (not scheduled) | Not applicable (not scheduled) | |
+| Superadmin | System Settings | Visible | Visible | Allowed | Not applicable (Sprint 4) | Not applicable (Sprint 4) | Not applicable (Sprint 4) | |
+| Admin | System Settings | Hidden | Hidden | Direct settings request returns `403` | Not applicable (Sprint 4) | Not applicable (Sprint 4) | Not applicable (Sprint 4) | |
+| User | System Settings | Hidden | Hidden | Direct settings request returns `403` | Not applicable (Sprint 4) | Not applicable (Sprint 4) | Not applicable (Sprint 4) | |
 
 ## Execution Checklist
 
