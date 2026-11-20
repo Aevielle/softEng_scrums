@@ -1,8 +1,15 @@
-# Test Matrix for Role Rights
+# Test Cases for S1-TST-04
 
 Related issue: #182
 
-## Purpose
+## Test Setup
+Automated unit and integration checks, plus automated E2E checks using Playwright.
+
+### Tester
+Franchesca E. Ramirez
+
+### Testing Start Time
+After Paolo's S1-DEV-07 (Rights dialog) and S1-DEV-08 (main page) are merged.
 
 Verify every rights-catalogue right for a real, approved account in each role:
 
@@ -28,15 +35,7 @@ This is a mixed test activity. Split the evidence by test type:
 
 Use only real, approved accounts for E2E and Integration checks. Demo accounts do not prove registered-account approval or RLS behavior.
 
-## Test Setup
-
-### Tester
-
-Franchesca E. Ramirez
-
-### Dependencies
-
-Paolo's S1-DEV-07 (Rights dialog) and S1-DEV-08 (main page) must be merged and deployed before execution.
+**Result key:** Pass | Fail | Not implemented | Not tested (UI/E2E or later sprint)
 
 ### Accounts
 
@@ -97,6 +96,27 @@ Every row with a `Fail` in Menu, Buttons, or Server must be reported as a separa
 - Issue link
 
 Do not mark the overall right as Pass if one surface fails.
+
+## Features to Test
+
+- Role normalization and role-level access
+- Customer, Product, Human Resources, Sales, and Reports rights
+- User Management and System Settings
+- Menu visibility
+- Right-specific buttons
+- Direct page/API authorization
+
+## Pass-Fail Conditions and Results
+
+| Scenario | Steps | Pass | Fail | Result | Test |
+|---|---|---|---|:---:|---|
+| Superadmin rights | Sign in with the approved Superadmin. Open every module and inspect every right-specific action. | Every business module and administration menu is visible, every right button is available, and direct requests are allowed. | Any menu, button, or direct server request behaves differently. | **Not tested** | Unit, Playwright E2E, direct HTTP integration |
+| Admin rights | Sign in with the approved Admin. Inspect business modules, User Management, and System Settings. | Business modules and User Management are available; System Settings and direct settings requests are denied. | An unauthorized menu or button is exposed, or any direct request is allowed incorrectly. | **Not tested** | Unit, Playwright E2E, direct HTTP integration |
+| User rights | Sign in with the approved User, then change the User's rights and re-sign-in. | Only granted module menus and buttons are visible; granted requests are allowed; direct hidden-right requests return `403`. | A denied menu/button is visible or a denied direct request is allowed. | **Not tested** | Rights dialog, Playwright E2E, direct HTTP integration |
+| Role normalization | Run Jest checks for Superadmin, Admin, and User values. | The same role value always resolves to the expected normalized role. | An unexpected role is normalized or grants access. | **Not tested** | Jest unit test |
+| Unauthenticated server request | Send a direct page/API request with no session cookie. | The request returns `401` or redirects to login. | The protected page or API data is returned. | **Not tested** | Direct HTTP integration |
+| Authenticated hidden-right server request | Send a direct page/API request as a User without that right. | The request returns `403` or redirects to the dashboard with a denial. | The protected page or action is allowed. | **Not tested** | Direct HTTP integration |
+| Rights fail closed | Remove or fail to load a User's rights. | No business module or right-specific action is granted. | A module/action remains granted when rights are unavailable or missing. | **Not tested** | Jest unit test |
 
 ## Rights Matrix
 
