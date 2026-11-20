@@ -85,3 +85,60 @@
   .bar { flex-direction: column; align-items: flex-start; }
   .search { width: 100%; }
 }
+/* ---------------------------------------------------------------------------
+   S2-DEV-05: Add / Edit Product dialog + "saved" toast
+   Light mode: white card. Dark mode: the same sidebar gradient the table uses.
+   --------------------------------------------------------------------------- */
+.dlg {
+  width: min(440px, calc(100% - 32px)); max-height: 88vh; padding: 0; overflow: auto;
+  border: 1px solid var(--panel-line, var(--line)); border-radius: 20px;
+  background: #ffffff; color: var(--text);
+  box-shadow: 0 20px 60px rgba(10, 36, 114, .25);
+}
+.dlg::backdrop { background: rgba(0, 7, 45, .55); backdrop-filter: blur(4px); }
+
+@media (prefers-color-scheme: dark) {
+  :global(:root:not([data-theme="light"])) .dlg {
+    background: linear-gradient(180deg, #16278a 0%, #0a1450 55%, #060d38 100%);
+    border-color: rgba(130, 160, 255, .18);
+  }
+}
+:global(:root[data-theme="dark"]) .dlg {
+  background: linear-gradient(180deg, #16278a 0%, #0a1450 55%, #060d38 100%);
+  border-color: rgba(130, 160, 255, .18);
+}
+
+.dlgBody { padding: 24px; }
+.dlgTitle { margin: 0 0 4px; font-size: 20px; letter-spacing: -.02em; }
+.dlgSub { margin: 0 0 14px; font-size: 13px; color: var(--muted); }
+
+.field { margin-top: 12px; }
+.field label { display: block; margin-bottom: 5px; font-size: 12px; font-weight: 700; color: var(--muted); }
+.field input, .field select {
+  width: 100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px;
+  background: var(--hi); color: var(--text); font: inherit; font-size: 13.5px;
+  transition: border-color .2s, box-shadow .2s;
+}
+.field input:focus, .field select:focus { outline: 0; border-color: var(--ac); box-shadow: 0 0 0 3px color-mix(in srgb, var(--ac) 30%, transparent); }
+/* the code: visibly locked */
+.field input:disabled { opacity: .65; cursor: not-allowed; }
+
+.note { margin: 5px 0 0; font-size: 12px; color: var(--muted); }
+.fieldErr { margin: 5px 0 0; font-size: 12.5px; font-weight: 700; color: var(--er); }
+.field .invalid { border-color: var(--er); background: color-mix(in srgb, var(--er) 8%, var(--hi)); box-shadow: 0 0 0 3px color-mix(in srgb, var(--er) 22%, transparent); }
+
+.banner { margin: 0 0 6px; padding: 10px 12px; border-radius: 10px; font-size: 13px; font-weight: 700; color: var(--er); background: color-mix(in srgb, var(--er) 12%, transparent); border: 1px solid color-mix(in srgb, var(--er) 40%, transparent); }
+
+.dlgActions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 20px; }
+
+.toast {
+  position: fixed; right: 16px; top: 76px; z-index: 60; max-width: 340px; padding: 12px 16px;
+  border: 1px solid var(--line); border-left: 4px solid var(--ok); border-radius: 12px;
+  background: var(--card); color: var(--text); font-size: 13.5px; font-weight: 700;
+  box-shadow: 0 20px 60px rgba(10, 36, 114, .25);
+}
+
+@keyframes toastIn { from { opacity: 0; transform: translateY(-6px); } }
+@media (prefers-reduced-motion: no-preference) {
+  .toast { animation: toastIn .25s ease; }
+}
