@@ -16,6 +16,18 @@ The test covers three surfaces separately:
 2. **Buttons**: the right-specific action button is visible/enabled only when the role or right grants access.
 3. **Server**: the direct page/API request is refused with `401` or `403` when access is not granted.
 
+## Test Categorization
+
+This is a mixed test activity. Split the evidence by test type:
+
+| Test type | Surface | What it verifies | Execution |
+|---|---|---|---|
+| **E2E** | Menu and Buttons | Real approved accounts see or cannot see navigation and action controls. | Playwright with a signed-in browser session |
+| **Integration** | Server | Direct page/API requests accept or refuse a real account session. | REST requests with the approved account session cookie |
+| **Unit** | Role/access decisions | Role normalization and module/right mappings return the correct access set. | Jest for pure authorization functions |
+
+Use only real, approved accounts for E2E and Integration checks. Demo accounts do not prove registered-account approval or RLS behavior.
+
 ## Test Setup
 
 ### Tester
@@ -221,6 +233,22 @@ User Management and System Settings are role-level rights, not rights-catalogue 
 | User | System Settings | Hidden | Hidden | Direct settings request returns `403` | Not tested | Not tested | Not tested | |
 
 ## Execution Checklist
+
+### Unit
+
+- [ ] Add or update Jest cases for role normalization.
+- [ ] Add or update Jest cases for `accessFor` across Superadmin, Admin, and User.
+- [ ] Add or update Jest cases for User module access from active `user_permission` rights.
+- [ ] Confirm fail-closed behavior when rights lookup fails.
+
+### Integration
+
+- [ ] Send direct requests with each real approved account session.
+- [ ] Verify unauthenticated requests return `401`.
+- [ ] Verify authenticated requests without the module/right return `403`.
+- [ ] Verify granted User requests are allowed and hidden rights remain refused.
+
+### E2E
 
 - [ ] Confirm all three real accounts are registered.
 - [ ] Confirm all three accounts are approved and active.
