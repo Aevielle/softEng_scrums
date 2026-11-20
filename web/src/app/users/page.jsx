@@ -4,6 +4,7 @@ import { listUsers } from '@/lib/users/service';
 import dash from '../dashboard/dashboard.module.css';
 import Sidebar from '../dashboard/Sidebar';
 import TopBar from '../dashboard/TopBar';
+import DashFooter from '../dashboard/DashFooter';
 import UsersClient from './UsersClient';
 
 export default async function UsersPage() {
@@ -37,6 +38,7 @@ export default async function UsersPage() {
           email={user.email}
         />
         <UsersClient initial={rows} actor={{ id: user.id, role: user.role }} intro={intro} />
+        <DashFooter />
       </main>
     </div>
   );

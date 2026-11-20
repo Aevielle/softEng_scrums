@@ -1,9 +1,11 @@
 import { requirePageAccess } from '@/lib/auth/guard';
 import { navGroups } from '@/lib/auth/nav';
+import { rightsFor } from '@/lib/auth/rights';
 import { listCustomers } from '@/lib/customers/service';
 import dash from '../dashboard/dashboard.module.css';
 import Sidebar from '../dashboard/Sidebar';
 import TopBar from '../dashboard/TopBar';
+import DashFooter from '../dashboard/DashFooter';
 import CustomersClient from './CustomersClient';
 
 export default async function CustomersPage() {
@@ -16,10 +18,11 @@ export default async function CustomersPage() {
   const rows = await listCustomers(user);
   const isAdmin = user.role !== 'user';
 
-  // Buttons only (Add / Edit / Delete are built in the next tickets). Admins see all of them.
-  // For a User, replace this with however guard.ts exposes per-action rights (cust:a / cust:e / cust:d).
-  const has = (key) => isAdmin || Boolean(user.rights?.has?.(key));
-  const perm = { add: has('cust:a'), edit: has('cust:e'), del: has('cust:d') };
+  // Which buttons to show. Admins hold every right; a User only the ones ticked in the Rights dialog.
+  // This only hides buttons: /api/customers checks the same rights again before anything is saved.
+  // (Delete is built in the next ticket.)
+  const rights = await rightsFor(user);
+  const perm = { add: rights.has('Add Customer'), edit: rights.has('Edit Customer'), del: rights.has('Delete Customer') };
 
   return (
     <div className={dash.shell}>
@@ -41,6 +44,7 @@ export default async function CustomersPage() {
           email={user.email}
         />
         <CustomersClient initial={rows} isAdmin={isAdmin} perm={perm} />
+        <DashFooter />
       </main>
     </div>
   );

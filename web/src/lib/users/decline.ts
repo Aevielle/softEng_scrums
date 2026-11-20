@@ -8,8 +8,11 @@ import { ServiceError } from '@/lib/users/service';
  * Superadmin only (same people who see and use Approve). The change is written to audit_log.
  */
 export async function declineUser(actor: CurrentUser, userId: number) {
-  if (actor.role !== 'superadmin' || actor.id === null) {
+  if (actor.role !== 'superadmin') {
     throw new ServiceError(403, 'FORBIDDEN', 'Only a Superadmin can decline requests.');
+  }
+  if (actor.id === null) {
+    throw new ServiceError(403, 'FORBIDDEN', 'Your account has no user record, so this change cannot be logged. Sign in with an account listed under User Management.');
   }
   if (!Number.isInteger(userId) || userId <= 0) {
     throw new ServiceError(400, 'INVALID', 'Invalid user.');

@@ -36,7 +36,7 @@ function useInView() {
 /** data: [[label, value], ...] */
 export function SalesChart({ data }) {
   const [ref, go] = useInView();
-  if (!data.length) return <p className={styles.muted}>No sales yet.</p>;
+  if (!data.length) return <p className={`${styles.chart} ${go ? styles.drawn : ''}`}>No sales yet.</p>;
 
   const max = Math.max(...data.map((d) => d[1])) * 1.15 || 1;
   const x = (i) => (data.length > 1 ? 30 + (i * (CW - 60)) / (data.length - 1) : CW / 2);
@@ -53,7 +53,7 @@ export function SalesChart({ data }) {
     <svg
       ref={ref}
       viewBox={`0 0 ${CW} ${CH}`}
-      className={`${styles.chart} ${go ? styles.go : ''}`}
+      className={`${styles.chart} ${go ? styles.drawn : ''}`}
       role="img"
       aria-label="Sales overview"
     >
@@ -91,7 +91,7 @@ export function SalesChart({ data }) {
 /** data: [[label, value], ...] already sorted high to low */
 export function ProductChart({ data }) {
   const [ref, go] = useInView();
-  if (!data.length) return <p className={styles.muted}>No data yet.</p>;
+  if (!data.length) return <p className={`${styles.chart} ${go ? styles.drawn : ''}`}>No data yet.</p>;
 
   const max = Math.max(...data.map((d) => d[1])) || 1;
   const w = (CW - 40) / data.length;
@@ -100,7 +100,7 @@ export function ProductChart({ data }) {
     <svg
       ref={ref}
       viewBox={`0 0 ${CW} ${CH}`}
-      className={`${styles.chart} ${go ? styles.go : ''}`}
+      className={`${styles.chart} ${go ? styles.drawn : ''}`}
       role="img"
       aria-label="Revenue by product"
     >

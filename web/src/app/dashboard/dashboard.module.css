@@ -59,7 +59,7 @@
 .active .navIcon { background: linear-gradient(135deg, #2f5bff, #5b82ff); box-shadow: 0 8px 22px rgba(47, 91, 255, .6); }
 .label { white-space: nowrap; transition: opacity .2s; }
 .toggle {
-  position: relative; flex: none; display: grid; place-items: center; width: 46px; height: 46px; margin: 6px 6px 0 auto;
+  position: relative; flex: none; display: grid; place-items: center; width: 46px; height: 46px; margin: 6px auto 0;
   border: 0; border-radius: 50%; background: rgba(255, 255, 255, .16); color: #fff; cursor: pointer; transition: background .2s, transform .3s;
 }
 .toggle:hover { background: rgba(255, 255, 255, .28); transform: scale(1.08); }
@@ -128,13 +128,13 @@
 .banner p { position: relative; z-index: 1; max-width: 620px; margin: 4px 0 0; font-size: 14px; opacity: .88; }
 
 .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
-.stat { display: flex; flex-direction: column; padding: 16px 18px; border: 1px solid var(--panel-line); border-radius: 22px; background: color-mix(in srgb, var(--panel) 92%, transparent); backdrop-filter: blur(10px); transition: transform .25s; }
+.stat { display: flex; flex-direction: column; padding: 16px 18px; border: 1px solid var(--line); background: color-mix(in srgb, var(--card) 86%, transparent); backdrop-filter: blur(10px); transition: transform .25s; }
 .stat:hover { transform: translateY(-3px); }
 .stat span { font-size: 12px; color: var(--muted); }
 .stat strong { font-size: 24px; letter-spacing: -.02em; line-height: 1.2; }
 .stat small { font-size: 12px; font-weight: 700; color: var(--ok); }
 
-.card { padding: 16px 18px; border: 1px solid var(--panel-line); border-radius: 22px; background: color-mix(in srgb, var(--panel) 92%, transparent); backdrop-filter: blur(10px); box-shadow: 0 10px 30px rgba(10, 36, 114, .06); }
+.card { padding: 16px 18px; border: 1px solid var(--line); background: color-mix(in srgb, var(--card) 86%, transparent); backdrop-filter: blur(10px); box-shadow: 0 10px 30px rgba(10, 36, 114, .06); }
 .card[aria-label="Calendar"] { border-color: var(--line); background: color-mix(in srgb, var(--card) 86%, transparent); }
 .cardHead { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 10px; }
 .cardHead h3 { margin: 0; font-size: 15px; }
@@ -145,12 +145,16 @@
 .dn { color: var(--er); }
 
 /* quick action tiles */
-.p1 { background: color-mix(in srgb, #3fb8a4 20%, var(--panel)); }
-.p2 { background: color-mix(in srgb, #ff7eb6 20%, var(--panel)); }
-.p3 { background: color-mix(in srgb, #ffc94d 24%, var(--panel)); }
-.p4 { background: color-mix(in srgb, #8b6bff 20%, var(--panel)); }
+.p1 { background: color-mix(in srgb, #3fb8a4 20%, var(--card)); }
+.p2 { background: color-mix(in srgb, #ff7eb6 20%, var(--card)); }
+.p3 { background: color-mix(in srgb, #ffc94d 24%, var(--card)); }
+.p4 { background: color-mix(in srgb, #8b6bff 20%, var(--card)); }
 :global(:root[data-theme="light"]) .p1, :global(:root[data-theme="light"]) .p2,
 :global(:root[data-theme="light"]) .p3, :global(:root[data-theme="light"]) .p4 { background: var(--hi); }
+@media (prefers-color-scheme: light) {
+  :global(:root:not([data-theme="dark"])) .p1, :global(:root:not([data-theme="dark"])) .p2,
+  :global(:root:not([data-theme="dark"])) .p3, :global(:root:not([data-theme="dark"])) .p4 { background: var(--hi); }
+}
 .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
 .tile {
   display: flex; flex-direction: column; justify-content: space-between; gap: 6px; min-height: 84px; padding: 14px;
@@ -169,11 +173,11 @@ a.tile:hover .go { transform: rotate(45deg); }
 .area, .lbl { opacity: 0; }
 .bar { transform-box: fill-box; transform-origin: 50% 100%; transform: scaleY(0); }
 .dot { transform-box: fill-box; transform-origin: center; transform: scale(0); }
-.go .line { animation: draw 1.4s ease forwards; }
-.go .area { animation: fadeIn 1s ease forwards; }
-.go .lbl { animation: fadeIn .8s ease .5s forwards; }
-.go .bar { animation: grow .9s cubic-bezier(.2, .8, .2, 1) forwards; }
-.go .dot { animation: popIn .4s ease 1s forwards; }
+.go .drawn .line { animation: draw 1.4s ease forwards; }
+.go .drawn .area { animation: fadeIn 1s ease forwards; }
+.go .drawn .lbl { animation: fadeIn .8s ease .5s forwards; }
+.go .drawn .bar { animation: grow .9s cubic-bezier(.2, .8, .2, 1) forwards; }
+.go .drawn .dot { animation: popIn .4s ease 1s forwards; }
 
 /* right column */
 .clockBox {
@@ -196,6 +200,8 @@ a.tile:hover .go { transform: rotate(45deg); }
 .activity { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 6px; padding: 8px 12px; border-radius: 16px; font-size: 13px; }
 .activity b { display: block; font-size: 13px; font-weight: 600; }
 .activity time { font-size: 12px; color: var(--muted); }
+
+.foot { --border: var(--line); margin-top: 40px; }
 
 @keyframes rise { from { opacity: 0; transform: translateY(8px); } }
 @keyframes slideIn { from { opacity: 0; transform: translateX(-14px); } }

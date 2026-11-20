@@ -9,6 +9,7 @@ import TopBar from './TopBar';
 import SideWidgets from './SideWidgets';
 import ActivityList from './ActivityList';
 import { SalesChart, ProductChart } from './Charts';
+import DashFooter from './DashFooter';
 
 // ---------------------------------------------------------------------------
 // SAMPLE DATA from the prototype (Student Guide, 3.2). Replace with real queries later,
@@ -119,6 +120,7 @@ export default async function DashboardPage({ searchParams }) {
       <main className={styles.main}>
         <TopBar
           title="Dashboard"
+          showDate={false}
           role={user.role}
           roleLabel={user.roleLabel}
           firstName={user.firstName}
@@ -204,6 +206,7 @@ export default async function DashboardPage({ searchParams }) {
             </section>
           </div>
         </div>
+        <DashFooter />
       </main>
     </div>
   );
