@@ -10,4 +10,5 @@ User view (In his/her profile) requesting for role change/access:
 ![alt text](image-3.png)
 
 SuperAdmin view (In user management module):
-![alt text](image-2.png)
+![alt text](image-5.png)
+
