@@ -8,7 +8,7 @@ import { fmtTs } from './format';
 import styles from './dashboard.module.css';
 
 // Title + date/time on the left; theme, role badge, notifications and profile menu on the right.
-export default function TopBar({ title, role, roleLabel, firstName, email, notes = [] }) {
+export default function TopBar({ title, role, roleLabel, firstName, email, notes = [], showDate = true }) {
   const [stamp, setStamp] = useState('');
   const [dark, setDark] = useState(true);
   const [menu, setMenu] = useState(null); // 'bell' | 'prof' | null
@@ -68,7 +68,7 @@ export default function TopBar({ title, role, roleLabel, firstName, email, notes
     <header className={styles.topbar}>
       <div>
         <h1 className={styles.pageTitle}>{title}</h1>
-        <div className={styles.stamp}>{stamp || ' '}</div>
+        {showDate && <div className={styles.stamp}>{stamp || ' '}</div>}
       </div>
 
       <div className={styles.tools} ref={toolsRef}>

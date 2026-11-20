@@ -1,21 +1,36 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { countByStatus, filterCustomers } from '@/lib/customers/filter';
+import CustomerForm from './CustomerForm';
 import styles from './customers.module.css';
 
 const TABS = ['Active', 'Inactive', 'All'];
+const byNo = (a, b) => a.custno.localeCompare(b.custno);
 
 export default function CustomersClient({ initial, isAdmin, perm }) {
+  const [all, setAll] = useState(initial); // grows / changes as customers are added or edited
+  const [form, setForm] = useState(null); // { mode: 'add' } | { mode: 'edit', row }
+  const [toast, setToast] = useState(null); // { title, message, err }
   const [tab, setTab] = useState('All'); // Figure 9 opens on All; only Admins can change it
   const [q, setQ] = useState('');
 
-  const counts = useMemo(() => countByStatus(initial), [initial]);
+  useEffect(() => {
+    if (!toast) return;
+    const t = setTimeout(() => setToast(null), 5000);
+    return () => clearTimeout(t);
+  }, [toast]);
+
+  const notify = (title, message, err = false) => setToast({ title, message, err });
+  const upsert = (row) => setAll((l) => [...l.filter((x) => x.custno !== row.custno), row].sort(byNo));
+  const closeForm = () => setForm(null);
+
+  const counts = useMemo(() => countByStatus(all), [all]);
 
   // A User's rows are already Active-only from the server, so the status filter is skipped for them.
   const rows = useMemo(
-    () => filterCustomers(initial, { q, status: isAdmin ? tab : 'All' }),
-    [initial, q, tab, isAdmin]
+    () => filterCustomers(all, { q, status: isAdmin ? tab : 'All' }),
+    [all, q, tab, isAdmin]
   );
 
   const showActions = perm.edit || perm.del;
@@ -54,7 +69,7 @@ export default function CustomersClient({ initial, isAdmin, perm }) {
           />
 
           {perm.add && (
-            <button type="button" className={`${styles.btn} ${styles.pri}`} disabled title="Coming in a later ticket">
+            <button type="button" className={`${styles.btn} ${styles.pri}`} onClick={() => setForm({ mode: 'add' })}>
               + Add Customer
             </button>
           )}
@@ -100,7 +115,7 @@ export default function CustomersClient({ initial, isAdmin, perm }) {
                       ) : (
                         <>
                           {perm.edit && (
-                            <button type="button" className={`${styles.btn} ${styles.sm}`} disabled title="Coming in a later ticket">
+                            <button type="button" className={`${styles.btn} ${styles.sm}`} onClick={() => setForm({ mode: 'edit', row: r })}>
                               Edit
                             </button>
                           )}
@@ -128,8 +143,17 @@ export default function CustomersClient({ initial, isAdmin, perm }) {
       </div>
 
       <p className={styles.count} role="status" aria-live="polite">
-        Showing {rows.length} of {initial.length}
+        Showing {rows.length} of {all.length}
       </p>
+
+      {form && <CustomerForm mode={form.mode} row={form.row} onClose={closeForm} onSaved={upsert} notify={notify} />}
+
+      {toast && (
+        <div className={`${styles.toast} ${toast.err ? styles.err : ''}`} role="status">
+          <b>{toast.title}</b>
+          <span>{toast.message}</span>
+        </div>
+      )}
     </>
   );
 }

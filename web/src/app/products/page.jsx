@@ -4,6 +4,7 @@ import { listProducts } from '@/lib/products/service';
 import dash from '../dashboard/dashboard.module.css';
 import Sidebar from '../dashboard/Sidebar';
 import TopBar from '../dashboard/TopBar';
+import DashFooter from '../dashboard/DashFooter';
 import ProductsClient from './ProductsClient';
 
 export default async function ProductsPage() {
@@ -41,6 +42,7 @@ export default async function ProductsPage() {
           email={user.email}
         />
         <ProductsClient initial={rows} isAdmin={isAdmin} perm={perm} />
+        <DashFooter />
       </main>
     </div>
   );
