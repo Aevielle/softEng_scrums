@@ -1,6 +1,8 @@
 import { requirePageAccess } from '@/lib/auth/guard';
+import { rightsFor } from '@/lib/auth/rights';
 import { navGroups } from '@/lib/auth/nav';
 import { listProducts } from '@/lib/products/service';
+import { PRODUCT_RIGHTS } from '@/lib/products/rights';
 import dash from '../dashboard/dashboard.module.css';
 import Sidebar from '../dashboard/Sidebar';
 import TopBar from '../dashboard/TopBar';
@@ -17,10 +19,14 @@ export default async function ProductsPage() {
   const rows = await listProducts(user);
   const isAdmin = user.role !== 'user';
 
-  // Buttons only (Add / Edit / Delete / Prices dialog are built in the next tickets). Admins see all of them.
-  // For a User, replace this with however guard.ts exposes per-action rights (prod:a / prod:e / prod:d).
-  const has = (key) => isAdmin || Boolean(user.rights?.has?.(key));
-  const perm = { add: has('prod:a'), edit: has('prod:e'), del: has('prod:d') };
+  // Which buttons to show. rightsFor reads user_permission (Admins hold every right, a User with no rows holds none).
+  // This only decides what is DRAWN: the API routes check the same rights again before saving anything.
+  const rights = await rightsFor(user);
+  const perm = {
+    add: rights.has(PRODUCT_RIGHTS.add),
+    edit: rights.has(PRODUCT_RIGHTS.edit),
+    del: rights.has(PRODUCT_RIGHTS.del),
+  };
 
   return (
     <div className={dash.shell}>
