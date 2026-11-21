@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { countByStatus, filterProducts, formatPrice } from '@/lib/products/filter';
 import ProductFormDialog from './ProductFormDialog';
+import PriceHistoryDialog from './PriceHistoryDialog';
 import styles from './products.module.css';
 
 const TABS = ['Active', 'Inactive', 'All'];
@@ -18,6 +19,7 @@ export default function ProductsClient({ initial, isAdmin, perm }) {
   useEffect(() => setItems(initial), [initial]);
 
   const [dialog, setDialog] = useState(null); // null | { mode: 'add' } | { mode: 'edit', product }
+  const [priceFor, setPriceFor] = useState(null); // the product whose Price History dialog is open
   const [notice, setNotice] = useState('');
   useEffect(() => {
     if (!notice) return undefined;
@@ -46,6 +48,11 @@ export default function ProductsClient({ initial, isAdmin, perm }) {
     setDialog(null);
     setNotice(`Product ${product.prodcode} ${mode === 'edit' ? 'updated' : 'added'}.`);
   }
+
+  // The Price History dialog reports the price now in force, so the Current Price column updates without a reload.
+  const handleCurrentPrice = useCallback((prodcode, price) => {
+    setItems((prev) => prev.map((r) => (r.prodcode === prodcode && r.price !== price ? { ...r, price } : r)));
+  }, []);
 
   return (
     <>
@@ -128,8 +135,7 @@ export default function ProductsClient({ initial, isAdmin, perm }) {
                       )
                     ) : (
                       <>
-                        {/* S2-DEV-07: build the price dialog, then remove `disabled` and open it from here. */}
-                        <button type="button" className={`${styles.btn} ${styles.sm}`} disabled title="The price dialog is built in S2-DEV-07">
+                        <button type="button" className={`${styles.btn} ${styles.sm}`} onClick={() => setPriceFor(r)}>
                           Prices
                         </button>
                         {perm.edit && (
@@ -171,6 +177,17 @@ export default function ProductsClient({ initial, isAdmin, perm }) {
         <div className={styles.toast} role="status">
           {notice}
         </div>
+      )}
+
+      {priceFor && (
+        <PriceHistoryDialog
+          key={priceFor.prodcode}
+          product={priceFor}
+          isAdmin={isAdmin}
+          perm={perm}
+          onClose={() => setPriceFor(null)}
+          onCurrentPrice={handleCurrentPrice}
+        />
       )}
 
       {dialog && (

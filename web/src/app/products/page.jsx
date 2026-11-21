@@ -2,7 +2,7 @@ import { requirePageAccess } from '@/lib/auth/guard';
 import { rightsFor } from '@/lib/auth/rights';
 import { navGroups } from '@/lib/auth/nav';
 import { listProducts } from '@/lib/products/service';
-import { PRODUCT_RIGHTS } from '@/lib/products/rights';
+import { PRICE_RIGHTS, PRODUCT_RIGHTS } from '@/lib/products/rights';
 import dash from '../dashboard/dashboard.module.css';
 import Sidebar from '../dashboard/Sidebar';
 import TopBar from '../dashboard/TopBar';
@@ -26,6 +26,9 @@ export default async function ProductsPage() {
     add: rights.has(PRODUCT_RIGHTS.add),
     edit: rights.has(PRODUCT_RIGHTS.edit),
     del: rights.has(PRODUCT_RIGHTS.del),
+    addPrice: rights.has(PRICE_RIGHTS.add),
+    editPrice: rights.has(PRICE_RIGHTS.edit),
+    delPrice: rights.has(PRICE_RIGHTS.del),
   };
 
   return (

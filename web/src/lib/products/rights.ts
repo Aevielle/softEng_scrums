@@ -8,3 +8,10 @@ export const PRODUCT_RIGHTS = {
   edit: 'Edit Product',
   del: 'Delete Product',
 } as const;
+
+// S2-DEV-07: the Price History dialog has its own three rights.
+export const PRICE_RIGHTS = {
+  add: 'Add Price',
+  edit: 'Edit Price',
+  del: 'Delete Price',
+} as const;

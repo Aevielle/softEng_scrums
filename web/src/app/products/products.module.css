@@ -142,3 +142,28 @@
 @media (prefers-reduced-motion: no-preference) {
   .toast { animation: toastIn .25s ease; }
 }
+
+/* ---------------------------------------------------------------------------
+   S2-DEV-07: Price History dialog (Figures 12-13)
+   --------------------------------------------------------------------------- */
+.dlgWide { width: min(760px, calc(100% - 32px)); }
+.dlgHead { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.closeX { border: 0; background: none; color: var(--muted); font-size: 24px; line-height: 1; cursor: pointer; padding: 0 4px; transition: color .2s; }
+.closeX:hover { color: var(--text); }
+
+.priceBar { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin: 6px 0 14px; }
+
+/* the dialog table is narrower than the page table, so it needs no sideways scroll at 760px */
+.priceTable { margin-top: 4px; }
+.priceTable table { min-width: 0; }
+.priceTable td.ac { white-space: normal; }
+
+.priceForm { margin: 0 0 14px; padding: 14px 16px; border: 1px solid var(--line); border-radius: 14px; background: var(--hi); }
+.formTitle { margin: 0 0 4px; font-size: 14px; }
+.formRow { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 520px) { .formRow { grid-template-columns: 1fr; } }
+.priceForm .dlgActions { margin-top: 12px; }
+
+.ask { font-size: 12px; font-weight: 700; color: var(--er); margin-right: 6px; }
+.danger { border-color: color-mix(in srgb, var(--er) 55%, transparent); color: var(--er); }
+.danger:hover:not(:disabled) { border-color: var(--er); }
