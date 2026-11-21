@@ -1,7 +1,7 @@
 import { supabaseAdmin } from '@/lib/supabase/admin';
 import { makeStamp } from '@/lib/stamp';
 import { isDeleted, NOT_DELETED, today } from './common';
-import type { PriceInput, PriceRow } from './prices';
+import { pickCurrentPrice, type PriceInput, type PriceRow } from './prices';
 
 // S2-DEV-07: the price table (pricehist) holds one row per product per effective date.
 // Prices are never overwritten by a newer price, so an old sale keeps the price it was sold at.
@@ -33,39 +33,67 @@ function shape(actor: Actor, rec: PriceRecord): PriceRow {
 }
 
 /**
- * The price in force on `asOf`: the latest Active price whose effective date is on or before it.
- * Soft-deleted prices are skipped. null = no price yet.
+ * The price in force on `asOf`: the latest Active price whose effective date is on or before it
+ * (the rule lives in pickCurrentPrice). Soft-deleted prices are skipped. null = no price yet.
  * (get_product_price_as_of from S2-DBA-02 does not skip deleted prices, so the app applies the rule here.)
  */
 export async function currentPrice(prodcode: string, asOf: string = today()): Promise<number | null> {
   const { data, error } = await supabaseAdmin
     .from('pricehist')
-    .select('unitprice')
+    .select('effdate, unitprice, stamp')
     .eq('prodcode', prodcode)
-    .lte('effdate', asOf)
-    .or(NOT_DELETED)
-    .order('effdate', { ascending: false })
-    .limit(1);
+    .lte('effdate', asOf);
   if (error) throw error;
-  return data?.[0] ? Number(data[0].unitprice) : null;
+  return pickCurrentPrice(data ?? [], asOf);
+}
+
+/**
+ * Current price of EVERY product in one pass (the product list used to ask once per product).
+ * Pages through pricehist because Supabase returns at most 1000 rows per request.
+ */
+export async function currentPrices(asOf: string = today()): Promise<Map<string, number>> {
+  const PAGE = 1000;
+  const byProduct = new Map<string, { effdate: string; unitprice: number | string; stamp: string | null }[]>();
+  for (let from = 0; ; from += PAGE) {
+    const { data, error } = await supabaseAdmin
+      .from('pricehist')
+      .select('prodcode, effdate, unitprice, stamp')
+      .lte('effdate', asOf)
+      .order('prodcode', { ascending: true })
+      .order('effdate', { ascending: true })
+      .range(from, from + PAGE - 1);
+    if (error) throw error;
+    for (const r of data ?? []) {
+      const list = byProduct.get(r.prodcode) ?? [];
+      list.push(r);
+      byProduct.set(r.prodcode, list);
+    }
+    if ((data?.length ?? 0) < PAGE) break;
+  }
+  const out = new Map<string, number>();
+  for (const [code, rows] of byProduct) {
+    const price = pickCurrentPrice(rows, asOf);
+    if (price !== null) out.set(code, price);
+  }
+  return out;
 }
 
 /** The product must exist. A User is told "not found" for a deleted product, since Users never see those. */
 async function loadProduct(actor: Actor, prodcode: string) {
   const { data, error } = await supabaseAdmin
     .from('product')
-    .select('prodcode, description, unit, stamp')
+    .select('prodcode, description, unit, is_deleted')
     .eq('prodcode', prodcode)
     .maybeSingle();
   if (error) throw error;
-  if (!data || (actor.role === 'user' && isDeleted(data.stamp))) throw new PriceError('NOT_FOUND', PRODUCT_GONE);
+  if (!data || (actor.role === 'user' && data.is_deleted)) throw new PriceError('NOT_FOUND', PRODUCT_GONE);
   return data;
 }
 
 /** Same as loadProduct, and an Inactive product can no longer take price changes (an Admin restores it first). */
 async function loadWritableProduct(actor: Actor, prodcode: string) {
   const p = await loadProduct(actor, prodcode);
-  if (isDeleted(p.stamp)) throw new PriceError('PRODUCT_DELETED', 'This product is Inactive. Restore it before changing its prices.');
+  if (p.is_deleted) throw new PriceError('PRODUCT_DELETED', 'This product is Inactive. Restore it before changing its prices.');
   return p;
 }
 

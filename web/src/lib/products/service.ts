@@ -1,7 +1,7 @@
 import { supabaseAdmin } from '@/lib/supabase/admin';
 import { makeStamp } from '@/lib/stamp';
 import { today } from './common';
-import { currentPrice } from './prices-service';
+import { currentPrice, currentPrices } from './prices-service';
 import type { ProductRow } from './filter';
 import type { ProductInput } from './validate';
 
@@ -13,9 +13,8 @@ type WriteActor = { role: string; email: string };
 // ./prices-service (S2-DEV-07): it skips soft-deleted prices.
 
 async function withPrices<T extends { prodcode: string }>(rows: T[]) {
-  const asOf = today();
-  const prices = await Promise.all(rows.map((r) => currentPrice(r.prodcode, asOf)));
-  return rows.map((r, i) => ({ ...r, price: prices[i] }));
+  const prices = await currentPrices(today()); // one query for the whole list
+  return rows.map((r) => ({ ...r, price: prices.get(r.prodcode) ?? null }));
 }
 
 export async function listProducts(actor: Actor): Promise<ProductRow[]> {

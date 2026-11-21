@@ -2,6 +2,7 @@ import { requirePageAccess } from '@/lib/auth/guard';
 import { navGroups } from '@/lib/auth/nav';
 import { rightsFor } from '@/lib/auth/rights';
 import { listCustomers } from '@/lib/customers/service';
+import { CUSTOMER_RIGHTS } from '@/lib/customers/rights';
 import dash from '../dashboard/dashboard.module.css';
 import Sidebar from '../dashboard/Sidebar';
 import TopBar from '../dashboard/TopBar';
@@ -21,7 +22,11 @@ export default async function CustomersPage() {
   // Which buttons to show. Admins hold every right; a User only the ones ticked in the Rights dialog.
   // This only hides buttons: /api/customers checks the same rights again before anything is saved.
   const rights = await rightsFor(user);
-  const perm = { add: rights.has('Add Customer'), edit: rights.has('Edit Customer'), del: rights.has('Delete Customer') };
+  const perm = {
+    add: rights.has(CUSTOMER_RIGHTS.add),
+    edit: rights.has(CUSTOMER_RIGHTS.edit),
+    del: rights.has(CUSTOMER_RIGHTS.del),
+  };
 
   return (
     <div className={dash.shell}>
