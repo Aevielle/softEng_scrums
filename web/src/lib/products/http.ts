@@ -50,6 +50,23 @@ export async function authorizeProductWrite(
   }
 }
 
+/**
+ * Restore is for Admin and Superadmin only (no per-action right exists for it): signed in + "products" module,
+ * then the role, then JSON content type (blocks a forged cross-site <form> POST). A User gets 403.
+ */
+export async function authorizeProductRestore(req: Request): Promise<WriteAuth> {
+  const auth = await authorizeApi('products');
+  if (!auth.ok) return auth;
+
+  if (auth.user.role === 'user') {
+    return { ok: false, response: json(403, 'FORBIDDEN', 'Only an Admin or Superadmin can restore a product.') };
+  }
+  if (!(req.headers.get('content-type') ?? '').toLowerCase().startsWith('application/json')) {
+    return { ok: false, response: json(415, 'UNSUPPORTED_MEDIA_TYPE', 'Send the request as JSON.') };
+  }
+  return { ok: true, user: auth.user, body: null };
+}
+
 export const validationFailed = (errors: ProductErrors | PriceErrors) =>
   json(400, 'VALIDATION', 'Please fix the highlighted fields. Nothing was saved.', { errors });
 
