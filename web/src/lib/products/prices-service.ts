@@ -11,7 +11,7 @@ import { pickCurrentPrice, type PriceInput, type PriceRow } from './prices';
 type Actor = { role: string };
 type WriteActor = { role: string; email: string };
 
-export type PriceErrorCode = 'NOT_FOUND' | 'PRODUCT_DELETED' | 'PRICE_DELETED' | 'DUPLICATE_DATE';
+export type PriceErrorCode = 'NOT_FOUND' | 'PRODUCT_DELETED' | 'PRICE_DELETED' | 'DUPLICATE_DATE' | 'DELETE_NOT_KEPT';
 
 /** Business errors the API routes turn into 404 / 409. Anything else is an unexpected failure. */
 export class PriceError extends Error {
@@ -219,6 +219,17 @@ export async function deletePrice(actor: WriteActor, prodcode: string, effdate: 
     .maybeSingle();
   if (error) throw error;
   if (!data) throw await whyMissing(actor, prodcode, effdate);
+
+  // The row that comes back is what the database actually kept. If something on the database side rewrote the
+  // Stamp (for example a stamp trigger on pricehist writing "EDIT ..."), the price would still count as Active:
+  // say so, instead of telling the person it now shows under Inactive.
+  if (!isDeleted(data.stamp)) {
+    console.error('[prices] delete did not keep the DELETED stamp:', prodcode, effdate, data.stamp);
+    throw new PriceError(
+      'DELETE_NOT_KEPT',
+      `The price was not marked Inactive: the database stored the Stamp "${data.stamp ?? ''}" instead of DELETED. Ask the DBA to check the pricehist stamp trigger.`
+    );
+  }
   return { price: shape(actor, data), currentPrice: await currentPrice(prodcode) };
 }
 

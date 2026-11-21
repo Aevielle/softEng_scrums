@@ -110,3 +110,5 @@ div.ac { display: flex; align-items: center; gap: 6px; white-space: nowrap; }
 @media (prefers-reduced-motion: reduce) { .md, .toast { animation: none; } .btn { transition: none; } }
 @media (max-width: 700px) { .bar { flex-direction: column; align-items: flex-start; } }
  
+/* request rows inside the Change requests table: tighter than the dialog helper text */
+.tw td .sub { margin: 2px 0 0; }

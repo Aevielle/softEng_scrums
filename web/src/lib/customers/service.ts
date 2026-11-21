@@ -40,6 +40,26 @@ export async function listCustomers(actor: Actor): Promise<CustomerRow[]> {
   return (data ?? []) as CustomerRow[];
 }
 
+export type CustomerCounts = { total: number; active: number; inactive: number };
+
+/**
+ * Numbers for the dashboard, counted the same way the Customers page counts them: an Admin sees every row
+ * (the "All" tab), a User only Active ones. Returns null if the lookup fails, so the dashboard still opens.
+ */
+export async function countCustomers(actor: Actor): Promise<CustomerCounts | null> {
+  const head = () => supabaseAdmin.from('customer').select('custno', { count: 'exact', head: true });
+
+  const active = await head().eq('is_deleted', false);
+  if (active.error) return null;
+  const a = active.count ?? 0;
+  if (actor.role === 'user') return { total: a, active: a, inactive: 0 };
+
+  const all = await head();
+  if (all.error) return null;
+  const t = all.count ?? 0;
+  return { total: t, active: a, inactive: t - a };
+}
+
 // ---------------------------------------------------------------------------
 // Add / Edit (S2-DEV-02). Both check the right on the server, validate again, and write the Stamp.
 // ---------------------------------------------------------------------------

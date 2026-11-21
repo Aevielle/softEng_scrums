@@ -5,11 +5,20 @@ import { assignableRoles, canManage, ROLE_LABEL, sortUsers } from '@/lib/users/r
 import { validateUserInput } from '@/lib/users/validation';
 import styles from './users.module.css';
 import RightsDialog from './RightsDialog';
+import { requestDetails, requestTitle } from '@/lib/requests/rules';
+
+const when = (iso) => {
+  const d = new Date(iso);
+  return `${d.toLocaleDateString('sv-SE')} ${d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}`;
+};
 
 const fullName = (u) => `${u.firstName} ${u.lastName}`.trim();
 
-export default function UsersClient({ initial, actor, intro }) {
+export default function UsersClient({ initial, requests = [], actor, intro }) {
   const [rows, setRows] = useState(initial);
+  const [reqs, setReqs] = useState(requests); // role / access / profile requests waiting for a Superadmin
+  const [reqBusy, setReqBusy] = useState(null);
+  const [declineReq, setDeclineReq] = useState(null); // the request waiting for "Decline this request?" confirmation
   const [form, setForm] = useState(null); // { mode: 'add' } | { mode: 'edit', row }
   const [toast, setToast] = useState(null); // { title, message, err }
   const [busyId, setBusyId] = useState(null);
@@ -83,6 +92,28 @@ export default function UsersClient({ initial, actor, intro }) {
     }
   }
 
+  // Approve or decline a change request from the Profile module. Approving applies it (role, rights or name/email).
+  async function answer(req, decision) {
+    setReqBusy(req.id);
+    try {
+      const res = await fetch(`/api/requests/${req.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ decision }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) return notify(data.title || 'Could not save', data.message || 'Please try again.', true);
+      setReqs((l) => l.filter((x) => x.id !== req.id));
+      if (data.user) upsert(data.user); // new role, name or email shows in the table right away
+      setDeclineReq(null);
+      notify(decision === 'approve' ? 'Request approved' : 'Request declined', `${req.userName}: ${requestTitle(req)}`);
+    } catch {
+      notify('No connection', 'Check your network and try again.', true);
+    } finally {
+      setReqBusy(null);
+    }
+  }
+
   return (
     <>
       <div className={styles.bar}>
@@ -123,6 +154,58 @@ export default function UsersClient({ initial, actor, intro }) {
                         className={`${styles.btn} ${styles.sm} ${styles.danger}`}
                         disabled={busyId === u.id}
                         onClick={() => setDeclineFor(u)}
+                      >
+                        Decline
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+      )}
+
+      {isSuper && (
+        <div className={styles.tw}>
+          <h3>Change requests ({reqs.length})</h3>
+          {reqs.length === 0 ? (
+            <p className={styles.empty}>No change requests.</p>
+          ) : (
+            <table>
+              <thead>
+                <tr><th>From</th><th>Request</th><th>Reason</th><th>Sent</th><th>Actions</th></tr>
+              </thead>
+              <tbody>
+                {reqs.map((r) => (
+                  <tr key={r.id}>
+                    <td>
+                      <b>{r.userName}</b>{' '}
+                      <span className={`${styles.rb} ${styles[r.userRole]}`}>{ROLE_LABEL[r.userRole].toUpperCase()}</span>
+                      <div className={styles.sub}>{r.userEmail}</div>
+                    </td>
+                    <td>
+                      <b>{requestTitle(r)}</b>
+                      {requestDetails(r).map((d) => (
+                        <div key={d} className={styles.sub}>{d}</div>
+                      ))}
+                    </td>
+                    <td>{r.reason}</td>
+                    <td suppressHydrationWarning>{when(r.createdAt)}</td>
+                    <td className={styles.ac}>
+                      <button
+                        type="button"
+                        className={`${styles.btn} ${styles.sm} ${styles.pri}`}
+                        disabled={reqBusy === r.id}
+                        onClick={() => answer(r, 'approve')}
+                      >
+                        Approve
+                      </button>
+                      <button
+                        type="button"
+                        className={`${styles.btn} ${styles.sm} ${styles.danger}`}
+                        disabled={reqBusy === r.id}
+                        onClick={() => setDeclineReq(r)}
                       >
                         Decline
                       </button>
@@ -223,6 +306,30 @@ export default function UsersClient({ initial, actor, intro }) {
             notify(m.title, m.detail); // "Rights saved" / "<name> will see the change on next sign-in."
           }}
         />
+      )}
+
+      {declineReq && (
+        <div className={styles.overlay} onClick={() => reqBusy !== declineReq.id && setDeclineReq(null)}>
+          <div className={styles.md} role="alertdialog" aria-modal="true" aria-labelledby="dr-title" onClick={(e) => e.stopPropagation()}>
+            <h3 id="dr-title">Decline this request?</h3>
+            <p className={styles.sub}>
+              <b>{declineReq.userName}</b> asked for <b>{requestTitle(declineReq)}</b>. Nothing will change on their account.
+            </p>
+            <div className={styles.row}>
+              <button type="button" className={styles.btn} onClick={() => setDeclineReq(null)} disabled={reqBusy === declineReq.id}>
+                Cancel
+              </button>
+              <button
+                type="button"
+                className={`${styles.btn} ${styles.dangerSolid}`}
+                onClick={() => answer(declineReq, 'decline')}
+                disabled={reqBusy === declineReq.id}
+              >
+                {reqBusy === declineReq.id ? 'Declining...' : 'Decline'}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {declineFor && (

@@ -273,7 +273,7 @@ export default function PriceHistoryDialog({ product, isAdmin, perm, onClose, on
                           {perm.delPrice && (
                             <button
                               type="button"
-                              className={`${styles.btn} ${styles.sm}`}
+                              className={`${styles.btn} ${styles.sm} ${styles.danger}`}
                               onClick={() => {
                                 setConfirming(r.effdate);
                                 setForm(null);

@@ -1,6 +1,7 @@
 import { requirePageAccess } from '@/lib/auth/guard';
 import { navGroups } from '@/lib/auth/nav';
 import { listUsers } from '@/lib/users/service';
+import { listPending } from '@/lib/requests/service';
 import dash from '../dashboard/dashboard.module.css';
 import Sidebar from '../dashboard/Sidebar';
 import TopBar from '../dashboard/TopBar';
@@ -12,6 +13,7 @@ export default async function UsersPage() {
   // back to the dashboard with the "no rights" banner. The API routes check again.
   const user = await requirePageAccess('users');
   const rows = await listUsers(user); // Admins never receive Superadmin rows
+  const requests = await listPending(user); // role / access / profile requests; empty unless Superadmin
 
   const intro =
     user.role === 'superadmin'
@@ -37,7 +39,7 @@ export default async function UsersPage() {
           firstName={user.firstName}
           email={user.email}
         />
-        <UsersClient initial={rows} actor={{ id: user.id, role: user.role }} intro={intro} />
+        <UsersClient initial={rows} requests={requests} actor={{ id: user.id, role: user.role }} intro={intro} />
         <DashFooter />
       </main>
     </div>

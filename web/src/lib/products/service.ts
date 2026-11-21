@@ -46,6 +46,26 @@ export async function listProducts(actor: Actor): Promise<ProductRow[]> {
   return withPrices(data ?? []);
 }
 
+export type ProductCounts = { total: number; active: number; inactive: number };
+
+/**
+ * Numbers for the dashboard, counted the same way the Products page counts them: an Admin sees every row
+ * (the "All" tab), a User only Active ones. Returns null if the lookup fails, so the dashboard still opens.
+ */
+export async function countProducts(actor: Actor): Promise<ProductCounts | null> {
+  const head = () => supabaseAdmin.from('product').select('prodcode', { count: 'exact', head: true });
+
+  const active = await head().eq('is_deleted', false);
+  if (active.error) return null;
+  const a = active.count ?? 0;
+  if (actor.role === 'user') return { total: a, active: a, inactive: 0 };
+
+  const all = await head();
+  if (all.error) return null;
+  const t = all.count ?? 0;
+  return { total: t, active: a, inactive: t - a };
+}
+
 // ---------------------------------------------------------------------------
 // S2-DEV-05: create and edit
 // ---------------------------------------------------------------------------
