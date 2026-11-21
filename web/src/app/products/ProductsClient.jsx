@@ -1,11 +1,59 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { countByStatus, filterProducts, formatPrice } from '@/lib/products/filter';
 import ProductFormDialog from './ProductFormDialog';
+import PriceHistoryDialog from './PriceHistoryDialog';
 import styles from './products.module.css';
 
 const TABS = ['Active', 'Inactive', 'All'];
+
+// Same look as the Delete customer dialog: says plainly that the row is only marked Inactive, not erased.
+function DeleteDialog({ product, isAdmin, busy, error, onConfirm, onCancel }) {
+  const ref = useRef(null);
+  useEffect(() => {
+    const d = ref.current;
+    if (d && !d.open) d.showModal();
+  }, []);
+
+  return (
+    <dialog
+      ref={ref}
+      className={styles.dlg}
+      aria-labelledby="del-product-title"
+      onCancel={(e) => {
+        e.preventDefault(); // Esc: close ourselves so we can refuse while the delete is saving
+        if (!busy) onCancel();
+      }}
+      onClick={(e) => {
+        if (e.target === ref.current && !busy) onCancel(); // click on the backdrop
+      }}
+    >
+      <div className={styles.dlgBody}>
+        <h3 id="del-product-title" className={styles.dlgTitle}>Delete product {product.prodcode}?</h3>
+        <p className={styles.dlgSub}>
+          <b>{product.description || product.prodcode}</b>{' '}
+          {isAdmin
+            ? 'will be marked Inactive, not erased. It will show shaded in the list, and you can restore it later.'
+            : 'will be removed from the list. Sales that use it are not affected.'}
+        </p>
+        {error && (
+          <p className={styles.banner} role="alert">
+            {error}
+          </p>
+        )}
+        <div className={styles.dlgActions}>
+          <button type="button" className={styles.btn} onClick={onCancel} disabled={busy}>
+            Cancel
+          </button>
+          <button type="button" className={`${styles.btn} ${styles.danger}`} onClick={onConfirm} disabled={busy}>
+            {busy ? 'Deleting…' : 'Delete'}
+          </button>
+        </div>
+      </div>
+    </dialog>
+  );
+}
 
 const byCode = (a, b) => a.prodcode.localeCompare(b.prodcode, 'en', { numeric: true });
 
@@ -18,10 +66,14 @@ export default function ProductsClient({ initial, isAdmin, perm }) {
   useEffect(() => setItems(initial), [initial]);
 
   const [dialog, setDialog] = useState(null); // null | { mode: 'add' } | { mode: 'edit', product }
-  const [notice, setNotice] = useState('');
+  const [priceFor, setPriceFor] = useState(null); // the product whose Price History dialog is open
+  const [notice, setNotice] = useState(null); // { title, text, error? }
+  const [confirming, setConfirming] = useState(null); // the product whose Delete dialog is open
+  const [dialogError, setDialogError] = useState(''); // a refused delete is explained inside the dialog
+  const [busy, setBusy] = useState(null); // prodcode with a delete / restore in flight
   useEffect(() => {
     if (!notice) return undefined;
-    const t = setTimeout(() => setNotice(''), 5000);
+    const t = setTimeout(() => setNotice(null), notice.error ? 9000 : 5000);
     return () => clearTimeout(t);
   }, [notice]);
 
@@ -44,8 +96,70 @@ export default function ProductsClient({ initial, isAdmin, perm }) {
       return next.sort(byCode);
     });
     setDialog(null);
-    setNotice(`Product ${product.prodcode} ${mode === 'edit' ? 'updated' : 'added'}.`);
+    setNotice({
+      title: mode === 'edit' ? 'Updated' : 'Added',
+      text: `Product ${product.prodcode} ${mode === 'edit' ? 'updated' : 'added'}.`,
+    });
   }
+
+  // S2-DEV-06: Delete and Restore. The server answers with the saved row (Stamp and Status already changed).
+  // The server decides everything; this only shows the result. A User's answer has no status, so that row just leaves.
+  async function act(kind, product) {
+    if (busy) return;
+    setBusy(product.prodcode);
+    setDialogError('');
+    const verb = kind === 'delete' ? 'deleted' : 'restored';
+    try {
+      const url = `/api/products/${encodeURIComponent(product.prodcode)}`;
+      const res =
+        kind === 'delete'
+          ? await fetch(url, { method: 'DELETE' })
+          : await fetch(`${url}/restore`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: '{}',
+            });
+      const data = await res.json().catch(() => null);
+      if (!res.ok) {
+        const msg =
+          res.status === 401
+            ? `Your session has ended. Sign in again, then retry. Nothing was ${verb}.`
+            : data?.message || `Could not ${kind} the product (server error ${res.status}). Nothing was ${verb}.`;
+        // A refused delete (e.g. the product is on an active sale line) stays in the dialog so the reason is read.
+        if (kind === 'delete') setDialogError(msg);
+        else setNotice({ title: 'Could not restore', text: msg, error: true });
+        return;
+      }
+      const saved = data.product;
+      setItems((prev) =>
+        saved.status === undefined
+          ? prev.filter((r) => r.prodcode !== saved.prodcode) // a User no longer sees it
+          : prev.map((r) => (r.prodcode === saved.prodcode ? saved : r))
+      );
+      setConfirming(null);
+      setNotice(
+        kind === 'delete'
+          ? {
+              title: 'Deleted',
+              text: isAdmin
+                ? `Product ${saved.prodcode} moved to Inactive. An Admin can restore it.`
+                : `Product ${saved.prodcode} deleted.`,
+            }
+          : { title: 'Restored', text: `Product ${saved.prodcode} is active again.` }
+      );
+    } catch {
+      const msg = `Could not reach the server. Nothing was ${verb}. Check your connection and try again.`;
+      if (kind === 'delete') setDialogError(msg);
+      else setNotice({ title: 'Could not restore', text: msg, error: true });
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  // The Price History dialog reports the price now in force, so the Current Price column updates without a reload.
+  const handleCurrentPrice = useCallback((prodcode, price) => {
+    setItems((prev) => prev.map((r) => (r.prodcode === prodcode && r.price !== price ? { ...r, price } : r)));
+  }, []);
 
   return (
     <>
@@ -107,6 +221,7 @@ export default function ProductsClient({ initial, isAdmin, perm }) {
           <tbody>
             {rows.map((r) => {
               const deleted = isAdmin && r.status === 'Inactive';
+              const working = busy === r.prodcode;
               return (
                 <tr key={r.prodcode} className={deleted ? styles.deleted : ''}>
                   <td><b>{r.prodcode}</b></td>
@@ -121,15 +236,20 @@ export default function ProductsClient({ initial, isAdmin, perm }) {
                   {isAdmin && <td className={styles.stamp}>{r.stamp || '—'}</td>}
                   <td className={styles.ac}>
                     {deleted ? (
-                      perm.del && (
-                        <button type="button" className={`${styles.btn} ${styles.sm}`} disabled title="Coming in a later ticket">
-                          Restore
+                      // Restore is for Admin / Superadmin only; only they ever see an Inactive row.
+                      isAdmin && (
+                        <button
+                          type="button"
+                          className={`${styles.btn} ${styles.sm}`}
+                          onClick={() => act('restore', r)}
+                          disabled={busy !== null}
+                        >
+                          {working ? 'Restoring…' : 'Restore'}
                         </button>
                       )
                     ) : (
                       <>
-                        {/* S2-DEV-07: build the price dialog, then remove `disabled` and open it from here. */}
-                        <button type="button" className={`${styles.btn} ${styles.sm}`} disabled title="The price dialog is built in S2-DEV-07">
+                        <button type="button" className={`${styles.btn} ${styles.sm}`} onClick={() => setPriceFor(r)}>
                           Prices
                         </button>
                         {perm.edit && (
@@ -142,7 +262,14 @@ export default function ProductsClient({ initial, isAdmin, perm }) {
                           </button>
                         )}
                         {perm.del && (
-                          <button type="button" className={`${styles.btn} ${styles.sm}`} disabled title="Coming in a later ticket">
+                          <button
+                            type="button"
+                            className={`${styles.btn} ${styles.sm} ${styles.danger}`}
+                            onClick={() => {
+                              setConfirming(r);
+                              setDialogError('');
+                                                      }}
+                          >
                             Delete
                           </button>
                         )}
@@ -168,9 +295,33 @@ export default function ProductsClient({ initial, isAdmin, perm }) {
       </p>
 
       {notice && (
-        <div className={styles.toast} role="status">
-          {notice}
+        <div className={`${styles.toast} ${notice.error ? styles.toastErr : ''}`} role={notice.error ? 'alert' : 'status'}>
+          <b className={styles.toastTitle}>{notice.title}</b>
+          <span className={styles.toastText}>{notice.text}</span>
         </div>
+      )}
+
+      {confirming && (
+        <DeleteDialog
+          key={confirming.prodcode}
+          product={confirming}
+          isAdmin={isAdmin}
+          busy={busy === confirming.prodcode}
+          error={dialogError}
+          onConfirm={() => act('delete', confirming)}
+          onCancel={() => setConfirming(null)}
+        />
+      )}
+
+      {priceFor && (
+        <PriceHistoryDialog
+          key={priceFor.prodcode}
+          product={priceFor}
+          isAdmin={isAdmin}
+          perm={perm}
+          onClose={() => setPriceFor(null)}
+          onCurrentPrice={handleCurrentPrice}
+        />
       )}
 
       {dialog && (

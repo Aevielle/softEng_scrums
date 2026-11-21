@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { authorizeApi } from '@/lib/auth/guard';
 import { fail } from '@/lib/users/service';
-import { updateCustomer } from '@/lib/customers/service';
+import { deleteCustomer, updateCustomer } from '@/lib/customers/service';
 
 // PATCH /api/customers/C0082  { custname, address, payterm }
 // Needs the "Edit Customer" right (checked in the service). The number cannot be changed here,
@@ -18,6 +18,21 @@ export async function PATCH(req: Request, ctx: { params: Promise<{ custno: strin
 
   try {
     return NextResponse.json(await updateCustomer(auth.user, custno, body));
+  } catch (e) {
+    return fail(e);
+  }
+}
+
+// DELETE /api/customers/C0082
+// Needs the "Delete Customer" right (checked in the service). Soft delete: the row stays, the Stamp becomes
+// "DELETED <who> <when>". Refused with 409 HAS_ACTIVE_SALES while the customer still has active sales.
+export async function DELETE(_req: Request, ctx: { params: Promise<{ custno: string }> }) {
+  const auth = await authorizeApi('customers');
+  if (!auth.ok) return auth.response;
+
+  const { custno } = await ctx.params;
+  try {
+    return NextResponse.json(await deleteCustomer(auth.user, custno));
   } catch (e) {
     return fail(e);
   }
