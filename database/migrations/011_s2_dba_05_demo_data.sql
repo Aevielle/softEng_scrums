@@ -30,4 +30,17 @@ SET description = EXCLUDED.description,
     status      = EXCLUDED.status,
     is_deleted  = EXCLUDED.is_deleted;
 
+-- 3. Price History
+-- P-001 has multiple price points; P-004 intentionally has no price history
+INSERT INTO public.pricehist (effdate, prodcode, unitprice, is_deleted)
+VALUES
+    ('2026-01-15', 'P-001', 15.00, false),
+    ('2026-06-01', 'P-001', 18.00, false),
+    ('2026-02-01', 'P-002', 42.50, false),
+    ('2026-03-10', 'P-003', 65.00, false),
+    ('2026-01-10', 'P-005', 24.00, true)
+ON CONFLICT (effdate, prodcode) DO UPDATE
+SET unitprice  = EXCLUDED.unitprice,
+    is_deleted = EXCLUDED.is_deleted;
+
 COMMIT;
