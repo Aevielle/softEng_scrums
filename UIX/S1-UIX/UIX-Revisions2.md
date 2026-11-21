@@ -1,4 +1,4 @@
-# Hope, Inc. ERP - Approving/Declining Roles and Access (S1-UIX-Revisions2) 
+# Hope, Inc. ERP - Approving/Declining Roles and Access Revisions (S1-UIX-Revisions2) 
 
 1. Made the design mockups for the revisions on User Management where a superadmin can approve/decline the new accounts and give them roles and rights. 
 2. The Superadmin can also add now a user and approve new accounts just by using the user management module.
