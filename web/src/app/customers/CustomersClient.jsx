@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { countByStatus, filterCustomers } from '@/lib/customers/filter';
 import CustomerForm from './CustomerForm';
+import DeleteCustomerDialog from './DeleteCustomerDialog';
 import styles from './customers.module.css';
 
 const TABS = ['Active', 'Inactive', 'All'];
@@ -11,6 +12,8 @@ const byNo = (a, b) => a.custno.localeCompare(b.custno);
 export default function CustomersClient({ initial, isAdmin, perm }) {
   const [all, setAll] = useState(initial); // grows / changes as customers are added or edited
   const [form, setForm] = useState(null); // { mode: 'add' } | { mode: 'edit', row }
+  const [confirmDel, setConfirmDel] = useState(null); // the row waiting for "Delete customer?" confirmation
+  const [restoring, setRestoring] = useState(''); // custno of the restore in flight
   const [toast, setToast] = useState(null); // { title, message, err }
   const [tab, setTab] = useState('All'); // Figure 9 opens on All; only Admins can change it
   const [q, setQ] = useState('');
@@ -24,6 +27,39 @@ export default function CustomersClient({ initial, isAdmin, perm }) {
   const notify = (title, message, err = false) => setToast({ title, message, err });
   const upsert = (row) => setAll((l) => [...l.filter((x) => x.custno !== row.custno), row].sort(byNo));
   const closeForm = () => setForm(null);
+  const remove = (custno) => setAll((l) => l.filter((x) => x.custno !== custno));
+
+  // Delete: Admins keep the row (now Inactive, shaded). A User's list drops it, since Users never see Inactive rows.
+  function handleDeleted(row) {
+    if (isAdmin) upsert(row);
+    else remove(row.custno);
+    setConfirmDel(null);
+    notify('Deleted', `Customer ${row.custno} moved to Inactive.${isAdmin ? ' You can restore it.' : ' An Admin can restore it.'}`);
+  }
+
+  // Restore (Admin / Superadmin): the same row comes back Active with its old links.
+  async function restore(row) {
+    if (restoring) return;
+    setRestoring(row.custno);
+    try {
+      const res = await fetch(`/api/customers/${encodeURIComponent(row.custno)}/restore`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: '{}',
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        notify(data.title || 'Could not restore', data.message || 'Please try again.', true);
+        return;
+      }
+      upsert(data.customer);
+      notify('Restored', `Customer ${data.customer.custno} is active again.`);
+    } catch {
+      notify('No connection', 'Check your network and try again.', true);
+    } finally {
+      setRestoring('');
+    }
+  }
 
   const counts = useMemo(() => countByStatus(all), [all]);
 
@@ -33,7 +69,7 @@ export default function CustomersClient({ initial, isAdmin, perm }) {
     [all, q, tab, isAdmin]
   );
 
-  const showActions = perm.edit || perm.del;
+  const showActions = perm.edit || perm.del || isAdmin; // Admins always see Restore on deleted rows
   const cols = 4 + (isAdmin ? 2 : 0) + (showActions ? 1 : 0);
 
   return (
@@ -107,9 +143,14 @@ export default function CustomersClient({ initial, isAdmin, perm }) {
                   {showActions && (
                     <td className={styles.ac}>
                       {deleted ? (
-                        perm.del && (
-                          <button type="button" className={`${styles.btn} ${styles.sm}`} disabled title="Coming in a later ticket">
-                            Restore
+                        isAdmin && (
+                          <button
+                            type="button"
+                            className={`${styles.btn} ${styles.sm}`}
+                            onClick={() => restore(r)}
+                            disabled={restoring === r.custno}
+                          >
+                            {restoring === r.custno ? 'Restoring...' : 'Restore'}
                           </button>
                         )
                       ) : (
@@ -120,7 +161,7 @@ export default function CustomersClient({ initial, isAdmin, perm }) {
                             </button>
                           )}
                           {perm.del && (
-                            <button type="button" className={`${styles.btn} ${styles.sm}`} disabled title="Coming in a later ticket">
+                            <button type="button" className={`${styles.btn} ${styles.sm} ${styles.danger}`} onClick={() => setConfirmDel(r)}>
                               Delete
                             </button>
                           )}
@@ -147,6 +188,15 @@ export default function CustomersClient({ initial, isAdmin, perm }) {
       </p>
 
       {form && <CustomerForm mode={form.mode} row={form.row} onClose={closeForm} onSaved={upsert} notify={notify} />}
+
+      {confirmDel && (
+        <DeleteCustomerDialog
+          row={confirmDel}
+          isAdmin={isAdmin}
+          onClose={() => setConfirmDel(null)}
+          onDeleted={handleDeleted}
+        />
+      )}
 
       {toast && (
         <div className={`${styles.toast} ${toast.err ? styles.err : ''}`} role="status">
