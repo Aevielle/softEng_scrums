@@ -1,0 +1,18 @@
+# Hope, Inc. ERP - Job Timeline (S3-UIX-03)
+
+This document contains the design of the job timeline component for the employee profile: how each promotion, transfer and salary change is shown in order.
+
+1. A design for one timeline item (date, job, department, salary)
+
+SUPERADMIN/ADMIN VIEW
+![alt text](image-1.png)
+
+2. How it looks with 1 item, many items, and no items
+
+SUPERADMIN/ADMIN VIEW
+![alt text](image-2.png)
+![alt text](image-3.png)
+
+3. A version without salary, for users who can't see it
+   USER VIEW
+   ![alt text](image-4.png)
