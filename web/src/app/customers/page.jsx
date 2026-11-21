@@ -20,7 +20,6 @@ export default async function CustomersPage() {
 
   // Which buttons to show. Admins hold every right; a User only the ones ticked in the Rights dialog.
   // This only hides buttons: /api/customers checks the same rights again before anything is saved.
-  // (Delete is built in the next ticket.)
   const rights = await rightsFor(user);
   const perm = { add: rights.has('Add Customer'), edit: rights.has('Edit Customer'), del: rights.has('Delete Customer') };
 

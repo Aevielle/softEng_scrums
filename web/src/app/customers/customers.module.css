@@ -121,3 +121,7 @@ div.ac { display: flex; align-items: center; gap: 6px; white-space: nowrap; }
   .bar { flex-direction: column; align-items: flex-start; }
   .search { width: 100%; }
 }
+/* S2-DEV-03: Delete confirmation */
+.dangerFill { background: linear-gradient(100deg, #b42318, #d92d20); }
+.banner { margin: 14px 0 0; padding: 10px 12px; border-radius: 10px; font-size: 13px; line-height: 1.45; color: var(--er); background: color-mix(in srgb, var(--er) 12%, transparent); border: 1px solid color-mix(in srgb, var(--er) 40%, transparent); }
+.banner b { font-weight: 800; }
