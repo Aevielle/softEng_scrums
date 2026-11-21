@@ -1,6 +1,8 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+// UPDATED 2026-11-21 (v3): stat cards on top, filters left / Add right, no second title, overlay Delete dialog.
+
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { countByStatus, filterProducts, formatPrice } from '@/lib/products/filter';
 import ProductFormDialog from './ProductFormDialog';
 import PriceHistoryDialog from './PriceHistoryDialog';
@@ -8,50 +10,52 @@ import styles from './products.module.css';
 
 const TABS = ['Active', 'Inactive', 'All'];
 
-// Same look as the Delete customer dialog: says plainly that the row is only marked Inactive, not erased.
+// Same dialog as Delete customer (overlay + pop-in animation): says plainly that the row is only marked Inactive, not erased.
 function DeleteDialog({ product, isAdmin, busy, error, onConfirm, onCancel }) {
-  const ref = useRef(null);
   useEffect(() => {
-    const d = ref.current;
-    if (d && !d.open) d.showModal();
-  }, []);
+    const onKey = (e) => {
+      if (e.key === 'Escape' && !busy) onCancel(); // refuse while the delete is saving
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [busy, onCancel]);
 
   return (
-    <dialog
-      ref={ref}
-      className={styles.dlg}
-      aria-labelledby="del-product-title"
-      onCancel={(e) => {
-        e.preventDefault(); // Esc: close ourselves so we can refuse while the delete is saving
-        if (!busy) onCancel();
-      }}
-      onClick={(e) => {
-        if (e.target === ref.current && !busy) onCancel(); // click on the backdrop
-      }}
-    >
-      <div className={styles.dlgBody}>
-        <h3 id="del-product-title" className={styles.dlgTitle}>Delete product {product.prodcode}?</h3>
-        <p className={styles.dlgSub}>
+    <div className={styles.overlay} onClick={() => !busy && onCancel()}>
+      <div
+        className={styles.md}
+        role="alertdialog"
+        aria-modal="true"
+        aria-labelledby="del-product-title"
+        aria-describedby="del-product-text"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <h3 id="del-product-title">Delete product {product.prodcode}?</h3>
+        <p id="del-product-text" className={styles.sub}>
           <b>{product.description || product.prodcode}</b>{' '}
           {isAdmin
             ? 'will be marked Inactive, not erased. It will show shaded in the list, and you can restore it later.'
             : 'will be removed from the list. Sales that use it are not affected.'}
         </p>
+
         {error && (
           <p className={styles.banner} role="alert">
             {error}
           </p>
         )}
-        <div className={styles.dlgActions}>
+
+        <div className={styles.row}>
           <button type="button" className={styles.btn} onClick={onCancel} disabled={busy}>
-            Cancel
+            {error ? 'Close' : 'Cancel'}
           </button>
-          <button type="button" className={`${styles.btn} ${styles.danger}`} onClick={onConfirm} disabled={busy}>
-            {busy ? 'Deleting…' : 'Delete'}
-          </button>
+          {!error && (
+            <button type="button" className={`${styles.btn} ${styles.pri} ${styles.dangerFill}`} onClick={onConfirm} disabled={busy} autoFocus>
+              {busy ? 'Deleting...' : 'Delete product'}
+            </button>
+          )}
         </div>
       </div>
-    </dialog>
+    </div>
   );
 }
 
@@ -163,10 +167,23 @@ export default function ProductsClient({ initial, isAdmin, perm }) {
 
   return (
     <>
-      <div className={styles.bar}>
-        <h2 className={styles.heading}>Product Management</h2>
+      {isAdmin && (
+        <section className={styles.cards} aria-label="Product totals">
+          {[
+            ['Total records', counts.All, styles.cTotal],
+            ['Active', counts.Active, styles.cActive],
+            ['Inactive', counts.Inactive, styles.cInactive],
+          ].map(([label, n, tone]) => (
+            <div key={label} className={`${styles.sc} ${tone}`}>
+              <span>{label}</span>
+              <strong>{n}</strong>
+            </div>
+          ))}
+        </section>
+      )}
 
-        <div className={styles.tools}>
+      <div className={styles.bar}>
+        <div className={styles.filters}>
           {isAdmin && (
             <div className={styles.tabs} role="tablist" aria-label="Filter by status">
               {TABS.map((t) => (
@@ -192,17 +209,17 @@ export default function ProductsClient({ initial, isAdmin, perm }) {
             value={q}
             onChange={(e) => setQ(e.target.value)}
           />
-
-          {perm.add && (
-            <button
-              type="button"
-              className={`${styles.btn} ${styles.pri}`}
-              onClick={() => setDialog({ mode: 'add' })}
-            >
-              + Add Product
-            </button>
-          )}
         </div>
+
+        {perm.add && (
+          <button
+            type="button"
+            className={`${styles.btn} ${styles.pri}`}
+            onClick={() => setDialog({ mode: 'add' })}
+          >
+            + Add Product
+          </button>
+        )}
       </div>
 
       <div className={styles.tw}>
@@ -268,7 +285,7 @@ export default function ProductsClient({ initial, isAdmin, perm }) {
                             onClick={() => {
                               setConfirming(r);
                               setDialogError('');
-                                                      }}
+                            }}
                           >
                             Delete
                           </button>

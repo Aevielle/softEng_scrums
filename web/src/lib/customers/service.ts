@@ -2,6 +2,7 @@ import { supabaseAdmin } from '@/lib/supabase/admin';
 import type { CurrentUser } from '@/lib/auth/permissions';
 import { hasRight } from '@/lib/auth/rights';
 import { makeStamp } from '@/lib/stamp';
+import { CUSTOMER_RIGHTS, type CustomerRightName } from './rights';
 import { ServiceError } from '@/lib/users/service';
 import type { CustomerRow } from './filter';
 import { nextCustNo, validateCustomerInput } from './form';
@@ -39,6 +40,26 @@ export async function listCustomers(actor: Actor): Promise<CustomerRow[]> {
   return (data ?? []) as CustomerRow[];
 }
 
+export type CustomerCounts = { total: number; active: number; inactive: number };
+
+/**
+ * Numbers for the dashboard, counted the same way the Customers page counts them: an Admin sees every row
+ * (the "All" tab), a User only Active ones. Returns null if the lookup fails, so the dashboard still opens.
+ */
+export async function countCustomers(actor: Actor): Promise<CustomerCounts | null> {
+  const head = () => supabaseAdmin.from('customer').select('custno', { count: 'exact', head: true });
+
+  const active = await head().eq('is_deleted', false);
+  if (active.error) return null;
+  const a = active.count ?? 0;
+  if (actor.role === 'user') return { total: a, active: a, inactive: 0 };
+
+  const all = await head();
+  if (all.error) return null;
+  const t = all.count ?? 0;
+  return { total: t, active: a, inactive: t - a };
+}
+
 // ---------------------------------------------------------------------------
 // Add / Edit (S2-DEV-02). Both check the right on the server, validate again, and write the Stamp.
 // ---------------------------------------------------------------------------
@@ -59,7 +80,7 @@ function toRow(r: DbCustomer, actor: Actor): CustomerRow {
   return { ...base, status: r.is_deleted ? 'Inactive' : 'Active', stamp: r.stamp };
 }
 
-async function requireRight(actor: CurrentUser, rightName: 'Add Customer' | 'Edit Customer') {
+async function requireRight(actor: CurrentUser, rightName: CustomerRightName) {
   if (!(await hasRight(actor, rightName))) {
     throw new ServiceError(403, 'FORBIDDEN', `You need the "${rightName}" right to do this.`, 'Not allowed');
   }
@@ -79,7 +100,7 @@ function dbProblem(e: { code?: string }) {
 }
 
 export async function createCustomer(actor: CurrentUser, input: unknown) {
-  await requireRight(actor, 'Add Customer');
+  await requireRight(actor, CUSTOMER_RIGHTS.add);
   const value = checked(input);
 
   // The number is chosen here, never by the browser. If two people save at the same moment they can pick the
@@ -103,7 +124,7 @@ export async function createCustomer(actor: CurrentUser, input: unknown) {
 }
 
 export async function updateCustomer(actor: CurrentUser, custno: string, input: unknown) {
-  await requireRight(actor, 'Edit Customer');
+  await requireRight(actor, CUSTOMER_RIGHTS.edit);
   const value = checked(input);
 
   // The .or() makes "not deleted" part of the update itself, so a deleted customer can never be edited,
@@ -166,9 +187,7 @@ function hasSales(custno: string, n: number) {
 
 /** Delete Customer: needs the "Delete Customer" right. Refused while the customer still has active sales. */
 export async function deleteCustomer(actor: CurrentUser, custno: string) {
-  if (!(await hasRight(actor, 'Delete Customer'))) {
-    throw new ServiceError(403, 'FORBIDDEN', 'You need the "Delete Customer" right to do this.', 'Not allowed');
-  }
+  await requireRight(actor, CUSTOMER_RIGHTS.del);
 
   const existing = await loadCustomer(custno);
   if (existing.is_deleted) {

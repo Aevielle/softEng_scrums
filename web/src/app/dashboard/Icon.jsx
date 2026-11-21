@@ -17,6 +17,7 @@ const PATHS = {
   chev: '<path d="M15 6l-6 6 6 6"/>',
   up: '<path d="M7 17L17 7M8 7h9v9"/>',
   lock: '<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/>',
+  camera: '<path d="M4 8h3l1.5-2h7L17 8h3v11H4z"/><circle cx="12" cy="13" r="3.5"/>',
   dot: '<circle cx="12" cy="12" r="3"/>',
 };
 

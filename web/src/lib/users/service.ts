@@ -333,3 +333,13 @@ export async function setRole(actor: Actor, id: number, rawRole: unknown) {
   }
   return { user: toRow(data as unknown as DbRow) };
 }
+
+/** One account as a table row (used after a change request is approved). No visibility check: callers are Superadmin-only. */
+export async function getUserRow(id: number) {
+  const { data, error } = await supabaseAdmin.from('app_user').select(SELECT).eq('user_id', id).maybeSingle();
+  if (error || !data) {
+    console.error('[users] row lookup failed:', error?.message, error?.code);
+    throw new ServiceError(404, 'NOT_FOUND', 'User not found.');
+  }
+  return toRow(data as unknown as DbRow);
+}

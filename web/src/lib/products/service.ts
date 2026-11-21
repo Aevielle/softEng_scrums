@@ -1,7 +1,7 @@
 import { supabaseAdmin } from '@/lib/supabase/admin';
 import { makeStamp } from '@/lib/stamp';
 import { today } from './common';
-import { currentPrice } from './prices-service';
+import { currentPrice, currentPrices } from './prices-service';
 import type { ProductRow } from './filter';
 import type { ProductInput } from './validate';
 
@@ -13,9 +13,8 @@ type WriteActor = { role: string; email: string };
 // ./prices-service (S2-DEV-07): it skips soft-deleted prices.
 
 async function withPrices<T extends { prodcode: string }>(rows: T[]) {
-  const asOf = today();
-  const prices = await Promise.all(rows.map((r) => currentPrice(r.prodcode, asOf)));
-  return rows.map((r, i) => ({ ...r, price: prices[i] }));
+  const prices = await currentPrices(today()); // one query for the whole list
+  return rows.map((r) => ({ ...r, price: prices.get(r.prodcode) ?? null }));
 }
 
 export async function listProducts(actor: Actor): Promise<ProductRow[]> {
@@ -45,6 +44,26 @@ export async function listProducts(actor: Actor): Promise<ProductRow[]> {
   if (error) throw error;
 
   return withPrices(data ?? []);
+}
+
+export type ProductCounts = { total: number; active: number; inactive: number };
+
+/**
+ * Numbers for the dashboard, counted the same way the Products page counts them: an Admin sees every row
+ * (the "All" tab), a User only Active ones. Returns null if the lookup fails, so the dashboard still opens.
+ */
+export async function countProducts(actor: Actor): Promise<ProductCounts | null> {
+  const head = () => supabaseAdmin.from('product').select('prodcode', { count: 'exact', head: true });
+
+  const active = await head().eq('is_deleted', false);
+  if (active.error) return null;
+  const a = active.count ?? 0;
+  if (actor.role === 'user') return { total: a, active: a, inactive: 0 };
+
+  const all = await head();
+  if (all.error) return null;
+  const t = all.count ?? 0;
+  return { total: t, active: a, inactive: t - a };
 }
 
 // ---------------------------------------------------------------------------

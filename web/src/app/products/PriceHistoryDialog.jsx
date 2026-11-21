@@ -27,6 +27,7 @@ export default function PriceHistoryDialog({ product, isAdmin, perm, onClose, on
   const base = `/api/products/${encodeURIComponent(product.prodcode)}/prices`;
 
   const [prices, setPrices] = useState([]);
+  const [current, setCurrent] = useState(undefined); // price in force today; undefined = still loading, null = none yet
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
   const [tab, setTab] = useState('Active'); // Figure 12 opens on Active
@@ -53,6 +54,7 @@ export default function PriceHistoryDialog({ product, isAdmin, perm, onClose, on
           );
         } else {
           setPrices(data.prices);
+          setCurrent(data.currentPrice);
           onCurrentPrice(product.prodcode, data.currentPrice);
         }
       } catch (e) {
@@ -88,6 +90,7 @@ export default function PriceHistoryDialog({ product, isAdmin, perm, onClose, on
       const gone = !isAdmin && result.price.status === 'Inactive';
       return (gone ? without : [...without, result.price]).sort(byEffdateDesc);
     });
+    setCurrent(result.currentPrice);
     onCurrentPrice(product.prodcode, result.currentPrice);
   }
 
@@ -142,6 +145,11 @@ export default function PriceHistoryDialog({ product, isAdmin, perm, onClose, on
             <p className={styles.dlgSub}>
               {product.description || '—'} · Unit: {product.unit || '—'}
             </p>
+            {current !== undefined && (
+              <p className={styles.dlgSub}>
+                Current price: <b>{formatPrice(current)}</b>
+              </p>
+            )}
           </div>
           <button type="button" className={styles.closeX} onClick={close} aria-label="Close price history">
             ×
@@ -265,7 +273,7 @@ export default function PriceHistoryDialog({ product, isAdmin, perm, onClose, on
                           {perm.delPrice && (
                             <button
                               type="button"
-                              className={`${styles.btn} ${styles.sm}`}
+                              className={`${styles.btn} ${styles.sm} ${styles.danger}`}
                               onClick={() => {
                                 setConfirming(r.effdate);
                                 setForm(null);

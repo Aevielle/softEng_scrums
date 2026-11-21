@@ -10,39 +10,46 @@ import SideWidgets from './SideWidgets';
 import ActivityList from './ActivityList';
 import { SalesChart, ProductChart } from './Charts';
 import DashFooter from './DashFooter';
+import { notesFor } from './notifications';
+import { countCustomers } from '@/lib/customers/service';
+import { countProducts } from '@/lib/products/service';
 
 // ---------------------------------------------------------------------------
 // SAMPLE DATA from the prototype (Student Guide, 3.2). Replace with real queries later,
 // e.g. SELECT COUNT(*) FROM customer WHERE status='Active'.
 // ---------------------------------------------------------------------------
-const STATS = [
-  { label: 'Total Customers', value: '1,248', note: '↑ 12% this month' },
-  { label: 'Products', value: '386', note: '↑ 5 new this week' },
+// Total Customers and Products are real (counted from the database, see below).
+// Open Orders and Revenue stay sample numbers until the sales module feeds them.
+const SAMPLE_STATS = [
   { label: 'Open Orders', value: '94', note: '↑ 8% vs last week' },
   { label: 'Revenue (MTD)', value: '₱84.2k', note: '↑ 18% vs last month' },
 ];
 
-// Quick Actions subtitles
+// Quick Actions subtitles that are still sample text (customers and products are real, see below)
 const SUB = {
-  customers: '4 active customers',
-  products: '4 in catalog',
   hr: '3 employees',
   sales: '3 open orders',
   users: '5 accounts',
   settings: 'Company and access',
 };
+
+const fmt = (n) => n.toLocaleString('en-US');
+
+// "Total" is what the module opens on for an Admin (the All tab); a User only ever sees Active rows.
+function countCard(label, counts, isAdmin, allowed) {
+  if (!allowed) return { label, value: '—', note: 'No access yet' };
+  if (!counts) return { label, value: '—', note: 'Could not load' };
+  return {
+    label,
+    value: fmt(counts.total),
+    note: isAdmin ? `${fmt(counts.active)} active · ${fmt(counts.inactive)} inactive` : 'active in the list',
+  };
+}
 const ADMIN_SUMMARY = '5 accounts · 0 pending · 0 blocked';
 
 const SALES = [['2026-10-01', 234.5], ['2026-10-05', 140], ['2026-10-08', 510]];
 const BY_PRODUCT = [['P-001', 412.5], ['P-005', 235], ['P-003', 140], ['P-002', 97]];
 const SALES_DAYS = SALES.map((s) => s[0]);
-
-// Placeholder activity until an activity log table exists.
-const SAMPLE_OTHERS = [
-  { id: 'o1', who: 'Kim', role: 'user', roleLabel: 'User', text: 'requested access: Add Price', mins: 20 },
-  { id: 'o2', who: 'Geliz', role: 'admin', roleLabel: 'Admin', text: 'updated rights for Kim', mins: 75 },
-  { id: 'o3', who: 'Kim', role: 'user', roleLabel: 'User', text: 'edited customer C-002', mins: 130 },
-];
 
 const BANNER = {
   superadmin: 'You have full system access. You can manage all modules and assign rights.',
@@ -93,12 +100,31 @@ export default async function DashboardPage({ searchParams }) {
   const granted = business.filter((m) => user.allowed.has(m.key)).length;
   const summary = isAdmin ? ADMIN_SUMMARY : `${granted} of ${business.length} modules granted`;
 
+  // Same counting rule as the Customers and Products pages, so the numbers always match.
+  // Only counted when this person may open the module; a failed count shows a dash instead of breaking the page.
+  const canCust = user.allowed.has('customers');
+  const canProd = user.allowed.has('products');
+  const [cust, prod] = await Promise.all([
+    canCust ? countCustomers(user) : null,
+    canProd ? countProducts(user) : null,
+  ]);
+  const stats = [
+    countCard('Total Customers', cust, isAdmin, canCust),
+    countCard('Products', prod, isAdmin, canProd),
+    ...SAMPLE_STATS,
+  ];
+  const sub = {
+    ...SUB,
+    customers: cust ? `${fmt(cust.active)} active customers` : '—',
+    products: prod ? `${fmt(prod.active)} in catalog` : '—',
+  };
+
   const pct = weekTrend(SALES);
   const trend =
     pct === null ? 'No earlier week to compare' : `${pct >= 0 ? '▲' : '▼'} ${Math.abs(pct)}% vs previous week`;
 
-  const ago = (mins) => new Date(Date.now() - mins * 60000).toISOString();
-  const others = isAdmin ? SAMPLE_OTHERS.map((o) => ({ ...o, ts: ago(o.mins) })) : [];
+  // Placeholder activity until an activity log table exists (same sample people as the bell notifications).
+  const others = notesFor(user.role);
   const activity = [
     { id: 'me', who: user.firstName, role: user.role, roleLabel: user.roleLabel, text: 'signed in', ts: new Date().toISOString() },
     ...others,
@@ -125,7 +151,6 @@ export default async function DashboardPage({ searchParams }) {
           roleLabel={user.roleLabel}
           firstName={user.firstName}
           email={user.email}
-          notes={others}
         />
 
         {deniedModule && (
@@ -142,7 +167,7 @@ export default async function DashboardPage({ searchParams }) {
             </section>
 
             <section className={`${styles.stats} ${styles.rise}`} style={{ '--d': 1 }} aria-label="Overview">
-              {STATS.map((s) => (
+              {stats.map((s) => (
                 <div key={s.label} className={styles.stat}>
                   <span>{s.label}</span>
                   <strong>{s.value}</strong>
@@ -162,7 +187,7 @@ export default async function DashboardPage({ searchParams }) {
                     <Link key={m.key} href={m.href} className={`${styles.tile} ${styles[`p${(i % 4) + 1}`]}`}>
                       <div>
                         <b>{m.action}</b>
-                        <p className={styles.sub}>{SUB[m.key]}</p>
+                        <p className={styles.sub}>{sub[m.key]}</p>
                       </div>
                       <span className={styles.go}><Icon name="up" size={18} /></span>
                     </Link>

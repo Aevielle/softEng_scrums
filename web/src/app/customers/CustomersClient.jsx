@@ -74,10 +74,23 @@ export default function CustomersClient({ initial, isAdmin, perm }) {
 
   return (
     <>
-      <div className={styles.bar}>
-        <h2 className={styles.heading}>Customer Management</h2>
+      {isAdmin && (
+        <section className={styles.cards} aria-label="Customer totals">
+          {[
+            ['Total records', counts.All, styles.cTotal],
+            ['Active', counts.Active, styles.cActive],
+            ['Inactive', counts.Inactive, styles.cInactive],
+          ].map(([label, n, tone]) => (
+            <div key={label} className={`${styles.sc} ${tone}`}>
+              <span>{label}</span>
+              <strong>{n}</strong>
+            </div>
+          ))}
+        </section>
+      )}
 
-        <div className={styles.tools}>
+      <div className={styles.bar}>
+        <div className={styles.filters}>
           {isAdmin && (
             <div className={styles.tabs} role="tablist" aria-label="Filter by status">
               {TABS.map((t) => (
@@ -103,13 +116,13 @@ export default function CustomersClient({ initial, isAdmin, perm }) {
             value={q}
             onChange={(e) => setQ(e.target.value)}
           />
-
-          {perm.add && (
-            <button type="button" className={`${styles.btn} ${styles.pri}`} onClick={() => setForm({ mode: 'add' })}>
-              + Add Customer
-            </button>
-          )}
         </div>
+
+        {perm.add && (
+          <button type="button" className={`${styles.btn} ${styles.pri}`} onClick={() => setForm({ mode: 'add' })}>
+            + Add Customer
+          </button>
+        )}
       </div>
 
       <div className={styles.tw}>

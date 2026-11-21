@@ -2,21 +2,35 @@
 
 .bar { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 18px; }
 .heading { margin: 0; font-size: 18px; letter-spacing: -.02em; }
+/* Total records / Active / Inactive cards (Admins only; they follow add, edit, delete and restore at once) */
+.cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px; }
+.sc { display: flex; flex-direction: column; gap: 2px; padding: 14px 18px; border: 1px solid var(--line); border-radius: 16px; }
+.sc span { font-size: 12px; color: var(--muted); }
+.sc strong { font-size: 26px; font-weight: 600; letter-spacing: -.02em; line-height: 1.2; }
+.cTotal { background: color-mix(in srgb, #3fb8a4 22%, var(--card)); }
+.cActive { background: color-mix(in srgb, #8b6bff 22%, var(--card)); }
+.cInactive { background: color-mix(in srgb, var(--muted) 22%, var(--card)); }
+@media (max-width: 700px) { .cards { grid-template-columns: 1fr; } }
+
 .tools { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
+/* filters (tabs + search) on the left, Add Customer on the right, as in the mockup */
+.filters { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
 
 .tabs { display: flex; gap: 4px; padding: 3px; border-radius: 10px; background: var(--hi); }
 .tabs button { padding: 5px 12px; border: 0; border-radius: 8px; background: none; color: var(--muted); font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; transition: background .2s, color .2s; }
 .tabs button:hover { color: var(--text); }
 .tabs .on { background: rgba(79, 111, 232, .22); color: #A9BBFF; }
 
-/* white search bar */
+/* search bar: follows the theme (dark panel like the mockup), magnifier on the right */
 .search {
-  width: 220px; padding: 9px 12px; border: 1px solid #c9d6ff; border-radius: 10px;
-  background: #ffffff; color: #00072d;
-  font: inherit; font-size: 13.5px; transition: border-color .2s, box-shadow .2s;
+  width: 240px; padding: 9px 36px 9px 12px; border: 1px solid var(--line); border-radius: 10px;
+  background-color: color-mix(in srgb, var(--card) 86%, transparent);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2397a3d0' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='M20 20l-3.5-3.5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 12px center; background-size: 16px;
+  color: var(--text); font: inherit; font-size: 13.5px; transition: border-color .2s, box-shadow .2s;
 }
-.search::placeholder { color: #5a6488; }
-.search:focus { outline: 0; border-color: #5b82ff; box-shadow: 0 0 0 3px rgba(91, 130, 255, .35); }
+.search::placeholder { color: var(--muted); }
+.search:focus { outline: 0; border-color: var(--ac); box-shadow: 0 0 0 3px color-mix(in srgb, var(--ac) 30%, transparent); }
 
 .btn {
   padding: 9px 16px; border: 1px solid var(--line); border-radius: 10px; background: var(--card); color: var(--text);
@@ -30,8 +44,9 @@
 .pri:hover:not(:disabled) { filter: brightness(1.12); }
 
 .sm { padding: 4px 10px; font-size: 12px; border-radius: 8px; }
-.danger { color: var(--er); }
-.danger:hover:not(:disabled) { border-color: var(--er); }
+/* Delete button: red text and red outline, never dimmed */
+.btn.danger { color: var(--er); border-color: color-mix(in srgb, var(--er) 55%, var(--line)); opacity: 1; }
+.btn.danger:hover:not(:disabled) { border-color: var(--er); background: color-mix(in srgb, var(--er) 14%, var(--card)); }
 
 /* table: light mode uses the normal panel colours; dark mode uses the sidebar gradient */
 .tw { overflow-x: auto; border: 1px solid var(--table-line, var(--panel-line)); border-radius: 22px; background: var(--table-bg, var(--panel)); }

@@ -1,6 +1,8 @@
 // Price History helpers shared by the dialog (browser) and the API / service (server).
 // No server-only imports here: this file is bundled into the browser.
 
+import { isDeleted } from './common';
+
 export type PriceStatusTab = 'Active' | 'Inactive' | 'All';
 
 export type PriceRow = {
@@ -75,3 +77,16 @@ export function filterPrices(rows: PriceRow[], status: PriceStatusTab): PriceRow
 
 /** Newest effective date first. ISO dates sort correctly as plain text. */
 export const byEffdateDesc = (a: PriceRow, b: PriceRow) => b.effdate.localeCompare(a.effdate);
+
+export function pickCurrentPrice(
+  rows: ReadonlyArray<{ effdate: string; unitprice: number | string; stamp?: string | null }>,
+  asOf: string
+): number | null {
+  let best: { effdate: string; unitprice: number | string } | null = null;
+  for (const r of rows) {
+    const eff = String(r.effdate).slice(0, 10); // tolerate a timestamp-shaped value
+    if (eff > asOf || isDeleted(r.stamp)) continue;
+    if (!best || eff > String(best.effdate).slice(0, 10)) best = r;
+  }
+  return best ? Number(best.unitprice) : null;
+}
