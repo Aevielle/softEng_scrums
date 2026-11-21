@@ -1,5 +1,7 @@
 import { supabaseAdmin } from '@/lib/supabase/admin';
 import { makeStamp } from '@/lib/stamp';
+import { isDeleted, NOT_DELETED, today } from './common';
+import { currentPrice } from './prices-service';
 import type { ProductRow } from './filter';
 import type { ProductInput } from './validate';
 
@@ -7,21 +9,8 @@ type Actor = { role: string };
 /** Whoever is saving: lib/stamp.ts shows the email's part before "@" in the Stamp. */
 type WriteActor = { role: string; email: string };
 
-// Same rule as customers: product has no status column, a row is soft-deleted when its stamp starts with "DELETED".
-const isDeleted = (stamp: string | null | undefined) => /^DELETED/i.test(stamp ?? '');
-
-// "Today" in Manila, so a price effective today shows up at midnight local time, not at 8 AM (UTC).
-const today = () => new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Manila' }); // YYYY-MM-DD
-
-// S2-DBA-02: the price rule lives in the database. null = no price on or before that date.
-async function currentPrice(prodcode: string, asOf: string): Promise<number | null> {
-  const { data, error } = await supabaseAdmin.rpc('get_product_price_as_of', {
-    p_prodcode: prodcode,
-    p_as_of_date: asOf,
-  });
-  if (error) throw error;
-  return data == null ? null : Number(data);
-}
+// Soft delete rule, "today" and the not-deleted filter live in ./common. The current price comes from
+// ./prices-service (S2-DEV-07): it skips soft-deleted prices.
 
 async function withPrices<T extends { prodcode: string }>(rows: T[]) {
   const asOf = today();
@@ -51,7 +40,7 @@ export async function listProducts(actor: Actor): Promise<ProductRow[]> {
   const { data, error } = await supabaseAdmin
     .from('product')
     .select('prodcode, description, unit')
-    .or('stamp.is.null,stamp.not.ilike.DELETED%')
+    .or(NOT_DELETED)
     .order('prodcode', { ascending: true });
   if (error) throw error;
 
@@ -159,7 +148,7 @@ export async function updateProduct(actor: WriteActor, prodcode: string, input: 
     .from('product')
     .update({ description: input.description, unit: input.unit, stamp: makeStamp('EDITED', actor.email) })
     .eq('prodcode', prodcode)
-    .or('stamp.is.null,stamp.not.ilike.DELETED%')
+    .or(NOT_DELETED)
     .select('prodcode, description, unit, stamp')
     .maybeSingle();
   if (error) throw error;
