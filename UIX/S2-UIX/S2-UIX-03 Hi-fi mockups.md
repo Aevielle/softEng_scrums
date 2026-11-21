@@ -1,4 +1,4 @@
-# Hope, Inc. ERP - Hi-fi Mockups (S1-UIX-03)
+# Hope, Inc. ERP - Hi-fi Mockups (S2-UIX-03)
 
 This document contains the hi-fi mockups for the Sprint 2. With a short handoff notes included for Paolo to know how to build each screen.
 

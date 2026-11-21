@@ -1,4 +1,4 @@
-# Hope, Inc. ERP - Design System (S1-UIX-04)
+# Hope, Inc. ERP - Wireframes (S1-UIX-03)
 
 This document contains the wireframes for the main page, User Management list and Rights dialog
 

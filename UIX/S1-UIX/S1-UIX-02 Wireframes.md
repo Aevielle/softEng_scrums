@@ -1,4 +1,4 @@
-# Hope, Inc. ERP - Design System (S1-UIX-02)
+# Hope, Inc. ERP - Wireframes (S1-UIX-02)
 
 This document contains the wireframes for the landing page, sign in, sign up, forgot password, and error popups.
 

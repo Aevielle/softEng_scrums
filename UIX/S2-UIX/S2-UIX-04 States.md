@@ -1,4 +1,4 @@
-# Hope, Inc. ERP - Hi-fi Mockups (S1-UIX-04)
+# Hope, Inc. ERP - Hi-fi Mockups (S2-UIX-04)
 
 This document contains the design of the empty, error, and confirm-delete states for the Sprint 2 screens.
 

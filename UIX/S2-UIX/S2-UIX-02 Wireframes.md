@@ -1,4 +1,4 @@
-# Hope, Inc. ERP - Design System (S1-UIX-04)
+# Hope, Inc. ERP - Design System (S2-UIX-02)
 
 This document contains the wireframes (layout only) for the product screens and the price history dialog. Following Figures 11 to 14 in the Student Guide.
 

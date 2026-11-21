@@ -1,4 +1,4 @@
-# Hope, Inc. ERP - Design System (S1-UIX-04)
+# Hope, Inc. ERP - Design System (S2-UIX-01)
 
 This document contains the wireframes for the customer screens: the list, the Add and Edit form, and the delete and restore buttons. Following Figures 9 and 10 in the Student Guide.
 
