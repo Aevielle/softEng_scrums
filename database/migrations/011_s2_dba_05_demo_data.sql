@@ -16,4 +16,18 @@ SET custname   = EXCLUDED.custname,
     payterm    = EXCLUDED.payterm,
     is_deleted = EXCLUDED.is_deleted;
 
+-- 2. Products (P-001 to P-005, with P-005 soft-deleted / Inactive)
+INSERT INTO public.product (prodcode, description, unit, status, is_deleted)
+VALUES
+    ('P-001', 'Premium Bottled Water 500ml', 'pcs', 'Active', false),
+    ('P-002', 'Canned Tuna Flakes in Oil',   'can', 'Active', false),
+    ('P-003', 'Instant Oatmeal Pack 400g',   'pcs', 'Active', false),
+    ('P-004', 'Unpriced Promo Sample Item',  'pcs', 'Active', false),
+    ('P-005', 'Discontinued Canned Sardines','can', 'Active', true)
+ON CONFLICT (prodcode) DO UPDATE
+SET description = EXCLUDED.description,
+    unit        = EXCLUDED.unit,
+    status      = EXCLUDED.status,
+    is_deleted  = EXCLUDED.is_deleted;
+
 COMMIT;
