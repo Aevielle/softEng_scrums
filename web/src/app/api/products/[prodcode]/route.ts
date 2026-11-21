@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { fail } from '@/lib/users/service';
-import { updateProduct } from '@/lib/products/service';
+import { deleteProduct, updateProduct } from '@/lib/products/service';
 import { validateProductInput } from '@/lib/products/validate';
 import { PRODUCT_RIGHTS } from '@/lib/products/rights';
 import { authorizeProductWrite, productErrorResponse, validationFailed } from '@/lib/products/http';
@@ -20,6 +20,24 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ prodco
 
   try {
     const product = await updateProduct(gate.user, prodcode, check.values);
+    return NextResponse.json({ product });
+  } catch (e) {
+    return productErrorResponse(e) ?? fail(e);
+  }
+}
+
+// DELETE /api/products/P-003
+// Needs the "Delete Product" right, checked here on the server (the button being hidden is never enough).
+// Soft delete: the row stays, Status becomes Inactive and the Stamp becomes DELETED <who> <when>.
+// 200 { product } | 401 | 403 | 404 | 409 (already Inactive, or the product is on an active sale line)
+export async function DELETE(req: Request, { params }: { params: Promise<{ prodcode: string }> }) {
+  const gate = await authorizeProductWrite(req, PRODUCT_RIGHTS.del, { body: false });
+  if (!gate.ok) return gate.response;
+
+  const { prodcode } = await params;
+
+  try {
+    const product = await deleteProduct(gate.user, prodcode);
     return NextResponse.json({ product });
   } catch (e) {
     return productErrorResponse(e) ?? fail(e);
