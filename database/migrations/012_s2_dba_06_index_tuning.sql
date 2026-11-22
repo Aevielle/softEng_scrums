@@ -1,5 +1,6 @@
 -- S2-DBA-06 (#104): Search performance check and idempotent index tuning
 
+-- Enable pg_trgm for fast case-insensitive substring searches (LIKE '%...%' / ILIKE)
 CREATE EXTENSION IF NOT EXISTS pg_trgm;
 
 -- 1. Price history: fast lookup of latest active price per product (eliminates Seq Scan + Sort)
@@ -15,3 +16,12 @@ CREATE INDEX IF NOT EXISTS idx_customer_active_lower_custname_pattern
 CREATE INDEX IF NOT EXISTS idx_customer_active_custname_trgm
     ON public.customer USING gin (LOWER(custname) gin_trgm_ops)
     WHERE is_deleted = false;
+
+-- 3. Product: fast active substring case-insensitive search (e.g., LIKE '%water%')
+CREATE INDEX IF NOT EXISTS idx_product_active_description_trgm
+    ON public.product USING gin (LOWER(description) gin_trgm_ops)
+    WHERE is_deleted = false;
+
+ANALYZE public.customer;
+ANALYZE public.product;
+ANALYZE public.pricehist;
