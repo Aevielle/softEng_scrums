@@ -1,4 +1,4 @@
-// web/src/test/unit/customers-route.test.js
+// web/src/test/unit/api/customers/customers-route.test.js
 const { GET } = require("@/app/api/customers/route");
 const { authorizeApi } = require("@/lib/auth/guard");
 const { listCustomers } = require("@/lib/customers/service");

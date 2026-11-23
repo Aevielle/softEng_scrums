@@ -18,10 +18,11 @@ Use a test database with seeded or throwaway accounts: one Superadmin, one Admin
 | File | Type | Covers |
 |---|---|---|
 | `web/src/test/e2e/customers.spec.ts` | Playwright E2E / API | List and search, add, edit, what a User must not see, access checks |
-| `web/src/test/unit/customers-route.test.js` | Jest | `GET /api/customers` route (existing tests plus CUS-08 to CUS-10) |
-| `web/src/test/unit/customers-filter.test.js` | Jest | `filterCustomers`, `countByStatus` |
-| `web/src/test/unit/customers-service.test.js` | Jest | `listCustomers`, `countCustomers`, `createCustomer`, `updateCustomer` |
-| `web/src/test/unit/auth-guard.test.js` | Jest | `authorizeApi`, `requirePageAccess` |
+| `web/src/test/unit/api/customers/customers.test.jsx` | Jest | `GET /api/customers` route (existing tests plus CUS-08 to CUS-10) |
+| `web/src/test/unit/api/customers/customers.filter.test.jsx` | Jest | `filterCustomers`, `countByStatus` |
+| `web/src/test/unit/api/customers/customers.service.test.jsx` | Jest | `listCustomers`, `countCustomers`, `createCustomer`, `updateCustomer` |
+| `web/src/test/unit/api/auth.guard.test.jsx` | Jest | `authorizeApi`, `requirePageAccess` (CUS-37 to CUS-41) |
+| `web/src/test/unit/auth/guard.test.jsx` | Jest | `authorizeApi`, `requirePageAccess` (general) |
  
 **Playwright command:** `npx playwright test src/test/e2e/customers.spec.ts --project=chromium`
  
@@ -42,29 +43,29 @@ Use a test database with seeded or throwaway accounts: one Superadmin, one Admin
  
 | ID | Scenario | Steps | Pass | Fail | Result | Test |
 |---|---|---|---|---|---|---|
-| CUS-01 | A caller who is not signed in is blocked. | 1. Call `GET /api/customers` with no session. | 401 with code `UNAUTHENTICATED` is returned and no customers are fetched. | Customers are returned or the status is not 401. | Not run | customers.spec.ts; auth-guard.test.js |
-| CUS-02 | A caller without the "customers" right is blocked. | 1. Sign in as an account without the right.<br>2. Call `GET /api/customers`. | The guard response (403, code `FORBIDDEN`) is returned, the guard is called with `customers`, and the list service is not called. | Customers are returned or the list service is called. | Not run | customers-route.test.js; customers.spec.ts |
-| CUS-03 | An Admin lists all customers. | 1. Sign in as Admin.<br>2. Open Customers. | 200 and `{ customers }`. Active and deleted rows both appear; each has `status` (Active/Inactive) and `stamp`. | Non-200, deleted rows are missing, or Status/Stamp are missing. | Not run | customers.spec.ts; customers-service.test.js |
-| CUS-04 | An Admin searches customers. | 1. Sign in as Admin.<br>2. Search `acme` (`?q=acme`). | The filter gets `q: 'acme'`, `status: 'All'`, and only matching rows are shown. | Search text is ignored or altered. | Not run | customers.spec.ts; customers-route.test.js |
-| CUS-05 | Search defaults to empty. | 1. Sign in as Admin.<br>2. Open Customers with no search. | The filter gets `q: ''`, `status: 'All'`. | `q` is null/undefined. | Not run | customers-route.test.js |
-| CUS-06 | An Admin filters by status. | 1. Sign in as Admin.<br>2. Choose Active, then Inactive. | Only rows with the chosen status are shown. | The status is ignored. | Not run | customers.spec.ts; customers-route.test.js |
-| CUS-07 | An Admin sends an invalid status. | 1. Sign in as Admin.<br>2. Call `?status=Banana`. | Status falls back to `All`; the request succeeds. | An error occurs or `Banana` reaches the filter. | Not run | customers-route.test.js |
-| CUS-08 | A Superadmin is treated as an Admin. | 1. Sign in as Superadmin.<br>2. Call `?status=Inactive`. | The filter gets `status: 'Inactive'`. | The status is ignored. | Not run | customers-route.test.js |
-| CUS-09 | A User lists customers. | 1. Sign in as User.<br>2. Open Customers. | 200 and `{ customers }` with Active rows only. | Non-200 or deleted rows appear. | Not run | customers.spec.ts; customers-route.test.js |
-| CUS-10 | A User searches customers. | 1. Sign in as User.<br>2. Search `acme`. | The filter gets `q: 'acme'`, `status: 'All'`; only Active matches show. | Search is ignored or deleted rows match. | Not run | customers.spec.ts; customers-route.test.js |
-| CUS-11 | A User cannot filter by status. | 1. Sign in as User.<br>2. Call `?status=Inactive`. | Status is ignored (`All`) and no Inactive rows are returned. | The filter gets `Inactive` or deleted rows appear. | Not run | customers.spec.ts; customers-route.test.js |
-| CUS-12 | A server error is handled. | 1. Sign in as Admin.<br>2. Make the list service fail. | `fail(err)` is called and its response (500) is returned. | Unhandled exception or raw error leaks. | Not run | customers-route.test.js |
+| CUS-01 | A caller who is not signed in is blocked. | 1. Call `GET /api/customers` with no session. | 401 with code `UNAUTHENTICATED` is returned and no customers are fetched. | Customers are returned or the status is not 401. | Not tested | customers.spec.ts; auth.guard.test.jsx |
+| CUS-02 | A caller without the "customers" right is blocked. | 1. Sign in as an account without the right.<br>2. Call `GET /api/customers`. | The guard response (403, code `FORBIDDEN`) is returned, the guard is called with `customers`, and the list service is not called. | Customers are returned or the list service is called. | Pass | customers.test.jsx |
+| CUS-03 | An Admin lists all customers. | 1. Sign in as Admin.<br>2. Open Customers. | 200 and `{ customers }`. Active and deleted rows both appear; each has `status` (Active/Inactive) and `stamp`. | Non-200, deleted rows are missing, or Status/Stamp are missing. | Pass | customers.service.test.jsx |
+| CUS-04 | An Admin searches customers. | 1. Sign in as Admin.<br>2. Search `acme` (`?q=acme`). | The filter gets `q: 'acme'`, `status: 'All'`, and only matching rows are shown. | Search text is ignored or altered. | Pass | customers.test.jsx |
+| CUS-05 | Search defaults to empty. | 1. Sign in as Admin.<br>2. Open Customers with no search. | The filter gets `q: ''`, `status: 'All'`. | `q` is null/undefined. | Pass | customers.test.jsx |
+| CUS-06 | An Admin filters by status. | 1. Sign in as Admin.<br>2. Choose Active, then Inactive. | Only rows with the chosen status are shown. | The status is ignored. | Pass | customers.test.jsx |
+| CUS-07 | An Admin sends an invalid status. | 1. Sign in as Admin.<br>2. Call `?status=Banana`. | Status falls back to `All`; the request succeeds. | An error occurs or `Banana` reaches the filter. | Pass | customers.test.jsx |
+| CUS-08 | A Superadmin is treated as an Admin. | 1. Sign in as Superadmin.<br>2. Call `?status=Inactive`. | The filter gets `status: 'Inactive'`. | The status is ignored. | Pass | customers.test.jsx |
+| CUS-09 | A User lists customers. | 1. Sign in as User.<br>2. Open Customers. | 200 and `{ customers }` with Active rows only. | Non-200 or deleted rows appear. | Pass | customers.test.jsx |
+| CUS-10 | A User searches customers. | 1. Sign in as User.<br>2. Search `acme`. | The filter gets `q: 'acme'`, `status: 'All'`; only Active matches show. | Search is ignored or deleted rows match. | Pass | customers.test.jsx |
+| CUS-11 | A User cannot filter by status. | 1. Sign in as User.<br>2. Call `?status=Inactive`. | Status is ignored (`All`) and no Inactive rows are returned. | The filter gets `Inactive` or deleted rows appear. | Pass | customers.test.jsx |
+| CUS-12 | A server error is handled. | 1. Sign in as Admin.<br>2. Make the list service fail. | `fail(err)` is called and its response (500) is returned. | Unhandled exception or raw error leaks. | Pass | customers.test.jsx |
  
 ### Add Customer (POST /api/customers)
  
 | ID | Scenario | Steps | Pass | Fail | Result | Test |
 |---|---|---|---|---|---|---|
-| CUS-13 | A customer is added successfully. | 1. Sign in as a user with the Add Customer right.<br>2. Click Add.<br>3. Enter a name, address and a valid payment term.<br>4. Click Save. | 201 `{ customer }`. The next customer number is assigned, the stamp reads `CREATED <email> <time>`, and the customer appears in the list. | Not created, or number/stamp is wrong. | Not run | customers.spec.ts; customers-service.test.js |
-| CUS-14 | Adding with empty fields is rejected. | 1. Click Add.<br>2. Leave required fields blank.<br>3. Click Save. | 400 `INVALID` with per-field errors; no row is created. | A row is created or no error is shown. | Not run | customers.spec.ts; customers-service.test.js |
-| CUS-15 | Adding with wrong payment terms is rejected. | 1. Click Add.<br>2. Fill all fields but enter an invalid payment term.<br>3. Click Save. | 400 `INVALID` (or "Wrong Value" from the DB check `pay_ck`); no row is created. | The customer is saved with the bad term. | Not run | customers.spec.ts; customers-service.test.js |
-| CUS-16 | Adding without the Add Customer right is refused. | 1. Sign in as an account without the right.<br>2. Send a valid POST. | 403 `FORBIDDEN`, checked before validation; no row is created. | A row is created. | Not run | customers.spec.ts; customers-service.test.js |
-| CUS-17 | Browser-supplied number, Status and Stamp are ignored. | 1. Send a POST with extra `custno`, `status`, `stamp`, `is_deleted`. | The server's own number and stamp are used; `is_deleted` is false. | Any supplied value is saved. | Not run | customers.spec.ts; customers-service.test.js |
-| CUS-18 | A non-JSON request is rejected. | 1. Send a POST with a non-JSON content type. | 415 is returned. | The request is accepted. | Not run | customers.spec.ts |
+| CUS-13 | A customer is added successfully. | 1. Sign in as a user with the Add Customer right.<br>2. Click Add.<br>3. Enter a name, address and a valid payment term.<br>4. Click Save. | 201 `{ customer }`. The next customer number is assigned, the stamp reads `CREATED <email> <time>`, and the customer appears in the list. | Not created, or number/stamp is wrong. | Pass | customers.service.test.jsx |
+| CUS-14 | Adding with empty fields is rejected. | 1. Click Add.<br>2. Leave required fields blank.<br>3. Click Save. | 400 `INVALID` with per-field errors; no row is created. | A row is created or no error is shown. | Pass | customers.service.test.jsx |
+| CUS-15 | Adding with wrong payment terms is rejected. | 1. Click Add.<br>2. Fill all fields but enter an invalid payment term.<br>3. Click Save. | 400 `INVALID` (or "Wrong Value" from the DB check `pay_ck`); no row is created. | The customer is saved with the bad term. | Pass | customers.service.test.jsx |
+| CUS-16 | Adding without the Add Customer right is refused. | 1. Sign in as an account without the right.<br>2. Send a valid POST. | 403 `FORBIDDEN`, checked before validation; no row is created. | A row is created. | Pass | customers.service.test.jsx |
+| CUS-17 | Browser-supplied number, Status and Stamp are ignored. | 1. Send a POST with extra `custno`, `status`, `stamp`, `is_deleted`. | The server's own number and stamp are used; `is_deleted` is false. | Any supplied value is saved. | Pass | customers.service.test.jsx |
+| CUS-18 | A non-JSON request is rejected. | 1. Send a POST with a non-JSON content type. | 415 is returned. | The request is accepted. | Not tested | customers.spec.ts |
  
 ### Edit Customer (updateCustomer)
  

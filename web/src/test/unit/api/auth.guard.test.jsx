@@ -4,11 +4,21 @@ const { getCurrentUser } = require('@/lib/auth/permissions');
 const { redirect } = require('next/navigation');
 
 jest.mock('@/lib/auth/permissions');
-jest.mock('next/navigation', () => ({ redirect: jest.fn() }));
+jest.mock('next/navigation', () => ({
+  redirect: jest.fn((url) => {
+    throw new Error(`REDIRECT:${url}`);
+  }),
+}));
 
 const user = (o = {}) => ({ id: 'u1', role: 'user', mustChange: false, allowed: new Set(['customers']), ...o });
 
-beforeEach(() => jest.resetAllMocks());
+beforeEach(() => {
+  jest.resetAllMocks();
+  // Re-apply the throwing behaviour after resetAllMocks clears it.
+  redirect.mockImplementation((url) => {
+    throw new Error(`REDIRECT:${url}`);
+  });
+});
 
 // CUS-37, CUS-38, CUS-39
 it.each([
@@ -37,6 +47,6 @@ it.each([
   [user({ allowed: new Set() }), '/dashboard?denied=customers'],
 ])('requirePageAccess redirects to the right place (%#)', async (u, target) => {
   getCurrentUser.mockResolvedValue(u);
-  await requirePageAccess('customers');
+  await expect(requirePageAccess('customers')).rejects.toThrow(`REDIRECT:${target}`);
   expect(redirect).toHaveBeenCalledWith(target);
 });

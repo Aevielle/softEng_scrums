@@ -1,4 +1,4 @@
-// web/src/test/unit/customers-service.test.js
+// web/src/test/unit/api/customers/customers-service.test.js
 // Do NOT mock '@/lib/users/service' here: the real ServiceError is needed.
 jest.mock('@/lib/supabase/admin', () => ({ supabaseAdmin: { from: jest.fn() } }));
 jest.mock('@/lib/auth/rights');

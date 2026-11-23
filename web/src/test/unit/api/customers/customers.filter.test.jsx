@@ -1,4 +1,4 @@
-// web/src/test/unit/customers-filter.test.js
+// web/src/test/unit/api/customers/customers-filter.test.js
 const { filterCustomers, countByStatus } = require('@/lib/customers/filter');
 
 const rows = [
@@ -37,8 +37,8 @@ it('countByStatus counts admin rows', () => {
   expect(countByStatus(rows)).toEqual({ Active: 2, Inactive: 1, All: 3 });
 });
 
-// CUS-36: FAILS with the current filter.ts (User rows have no status, so a tab empties the list).
-// Passes after changing the check to: if (status !== 'All' && r.status !== undefined && r.status !== status) return false;
+// CUS-36: User rows have no status field. The filter must not remove rows that lack a status.
+// Fixed in filter.ts: skip the status check when r.status is undefined.
 it('does not empty User rows when a status tab is passed (CUS-36)', () => {
   const userRows = rows.map(({ status, stamp, ...r }) => r);
   expect(filterCustomers(userRows, { status: 'Active' })).toHaveLength(3);
