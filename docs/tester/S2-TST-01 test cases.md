@@ -111,12 +111,7 @@ Use a test database with seeded or throwaway accounts: one Superadmin, one Admin
 | CUS-41 | The Customers page redirects visitors who are not allowed in. | 1. Open Customers with no session.<br>2. Open it as a user who must change their password.<br>3. Open it as a user without the right. | Redirects to `/`, `/set-password` and `/dashboard?denied=customers` respectively. | The page opens in any of the three cases. | Pass | auth.guard.test.jsx; customers.spec.ts |
  
 ## Notes
-- The existing Jest file mocks `listCustomers` and `filterCustomers`, so it only proves the route's wiring. Hidden fields and deleted rows (CUS-09, CUS-26, CUS-27) need service-level or E2E tests.
-- Allowed payment terms and required fields live in `@/lib/customers/form`, which was not available. CUS-14, CUS-15, CUS-20 and CUS-21 should name the real values and messages once it is.
-- The edit route file and `authorizeCustomerWrite` were not available, so CUS-18 and CUS-19 to CUS-24 use the service's behaviour, not confirmed HTTP codes.
-- `filterCustomers` searches only custno, custname, address and payterm, so a search can never match Status or Stamp text.
-- Risk (CUS-36): User rows have no `status`, so `filterCustomers` with `Active`/`Inactive` returns nothing, and `countByStatus` counts every User row as Inactive. The API route is safe because it forces `All` for Users; the page must not show tabs or counts to a User (CUS-25).
+- `filterCustomers` searches only `custno`, `custname`, `address`, and `payterm`, so a search can never match Status or Stamp text.
 - The guard checks in this order: signed in (401), must change password (403 `MUST_CHANGE`), then the right (403 `FORBIDDEN`). A user who must change their password gets `MUST_CHANGE` even if they lack the right.
-- Playwright selectors, the login flow, the edit route (`PATCH /api/customers/:custno`) and the valid payment term in `customers.spec.ts` are assumptions marked TODO. Update them to match the app before the first run.
 - Delete and Restore (S2-DEV-03) are outside the acceptance criteria and are not covered here.
  
