@@ -1,4 +1,4 @@
-# Test Plan for S1-TST-XX: Customers
+# Test Plan for S2-TST-01: Customers
  
 ## Test Setup
 Automated E2E and API testing using Playwright, plus Jest unit tests for the route, filter, service and guard.
