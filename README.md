@@ -4,6 +4,7 @@ A small web-based ERP for the fictitious company Hope, Inc. It keeps customers, 
 
 **Live demo:** https://soft-eng-scrums.vercel.app/
 **Next presentation:** December 11, 2026
+**Time:** 1 PM - 4 PM
 
 ## Contents
 - [About the project](#about-the-project)
