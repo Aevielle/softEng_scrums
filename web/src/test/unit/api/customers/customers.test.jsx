@@ -1,3 +1,4 @@
+// web/src/test/unit/api/customers/customers-route.test.js
 const { GET } = require("@/app/api/customers/route");
 const { authorizeApi } = require("@/lib/auth/guard");
 const { listCustomers } = require("@/lib/customers/service");
@@ -85,3 +86,22 @@ it('delegates errors to fail()', async () => {
   expect(res).toBe(failed);
 });
 
+// ---- Added (CUS-08, CUS-09, CUS-10) ----
+it('superadmin is treated as an admin (CUS-08)', async () => {
+  signedIn('superadmin');
+  await call('?status=Inactive');
+  expect(mockFilter).toHaveBeenCalledWith(rows, { q: '', status: 'Inactive' });
+});
+
+it('user can list customers (CUS-09)', async () => {
+  signedIn('user');
+  const res = await call();
+  expect(res.status).toBe(200);
+  expect(mockList).toHaveBeenCalledWith({ id: 'u1', role: 'user' });
+});
+
+it('user can search with q (CUS-10)', async () => {
+  signedIn('user');
+  await call('?q=acme');
+  expect(mockFilter).toHaveBeenCalledWith(rows, { q: 'acme', status: 'All' });
+});
