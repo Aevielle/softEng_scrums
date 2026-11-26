@@ -1,28 +1,41 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { countByStatus, filterEmployees } from '@/lib/employees/filter';
+import EmployeeForm from './EmployeeForm';
 import styles from './hr.module.css';
 
 const TABS = ['Active', 'Inactive', 'All'];
+const byNo = (a, b) => a.empno.localeCompare(b.empno);
 
 /**
- * S3-DEV-03: Employees list (Figures 15 and 20).
+ * Employees list (Figures 15 and 20) with the Add / Edit form (S3-DEV-04).
  *  - Admin / Superadmin: status tabs, Status and Stamp columns, deleted rows shaded.
  *  - User: the server only sends Active rows with no status / stamp, so those parts are simply not drawn.
  *  - Search filters as you type, in the browser, on the rows already loaded.
+ *  - perm = { add, edit }: which buttons to show. Only hides buttons; /api/employees checks the rights again.
  * `onHistory(row)` is the hook for S3-DEV-06 (job history); until it is passed, the button does nothing.
  */
-export default function EmployeesTab({ initial, isAdmin, onHistory }) {
+export default function EmployeesTab({ initial, isAdmin, perm = { add: false, edit: false }, onHistory }) {
+  const [all, setAll] = useState(initial); // grows / changes as employees are added or edited
+  const [form, setForm] = useState(null); // { mode: 'add' } | { mode: 'edit', row }
+  const [toast, setToast] = useState(null); // { title, message, err }
   const [tab, setTab] = useState('All'); // Figure 15 opens on All; only Admins see the tabs
   const [q, setQ] = useState('');
 
-  const counts = useMemo(() => countByStatus(initial), [initial]);
+  useEffect(() => {
+    if (!toast) return;
+    const t = setTimeout(() => setToast(null), 5000);
+    return () => clearTimeout(t);
+  }, [toast]);
+
+  const notify = (title, message, err = false) => setToast({ title, message, err });
+  const upsert = (row) => setAll((l) => [...l.filter((x) => x.empno !== row.empno), row].sort(byNo));
+  const closeForm = () => setForm(null);
+
+  const counts = useMemo(() => countByStatus(all), [all]);
   // A User's rows are already Active-only from the server, so the status filter is skipped for them.
-  const rows = useMemo(
-    () => filterEmployees(initial, { q, status: isAdmin ? tab : 'All' }),
-    [initial, q, tab, isAdmin]
-  );
+  const rows = useMemo(() => filterEmployees(all, { q, status: isAdmin ? tab : 'All' }), [all, q, tab, isAdmin]);
 
   const cols = 8 + (isAdmin ? 2 : 0);
 
@@ -57,6 +70,12 @@ export default function EmployeesTab({ initial, isAdmin, onHistory }) {
             value={q}
             onChange={(e) => setQ(e.target.value)}
           />
+
+          {perm.add && (
+            <button type="button" className={`${styles.btn} ${styles.pri}`} onClick={() => setForm({ mode: 'add' })}>
+              + Add Employee
+            </button>
+          )}
         </div>
       </div>
 
@@ -95,11 +114,18 @@ export default function EmployeesTab({ initial, isAdmin, onHistory }) {
                   )}
                   {isAdmin && <td className={styles.stamp}>{r.stamp || '—'}</td>}
                   <td className={styles.ac}>
-                    {/* Figure 15: a deleted row shows Restore only (a later ticket), so no History here. */}
+                    {/* Figure 15: a deleted row shows Restore only (a later ticket), so no History / Edit here. */}
                     {!deleted && (
-                      <button type="button" className={`${styles.btn} ${styles.sm}`} onClick={() => onHistory?.(r)}>
-                        History
-                      </button>
+                      <>
+                        <button type="button" className={`${styles.btn} ${styles.sm}`} onClick={() => onHistory?.(r)}>
+                          History
+                        </button>
+                        {perm.edit && (
+                          <button type="button" className={`${styles.btn} ${styles.sm}`} onClick={() => setForm({ mode: 'edit', row: r })}>
+                            Edit
+                          </button>
+                        )}
+                      </>
                     )}
                   </td>
                 </tr>
@@ -117,8 +143,17 @@ export default function EmployeesTab({ initial, isAdmin, onHistory }) {
       </div>
 
       <p className={styles.count} role="status" aria-live="polite">
-        Showing {rows.length} of {initial.length}
+        Showing {rows.length} of {all.length}
       </p>
+
+      {form && <EmployeeForm mode={form.mode} row={form.row} onClose={closeForm} onSaved={upsert} notify={notify} />}
+
+      {toast && (
+        <div className={`${styles.toast} ${toast.err ? styles.err : ''}`} role="status">
+          <b>{toast.title}</b>
+          <span>{toast.message}</span>
+        </div>
+      )}
     </>
   );
 }
