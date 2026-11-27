@@ -32,24 +32,27 @@ export function validateDepartmentInput(input: Record<string, unknown>): Checked
   return { ok: true, value: { deptname } };
 }
 
+// Department codes are short in the database (ACT, BR1, IT, PAY ...), so "D-001" does not fit.
+// Set DEPT_CODE_MAX to the real column size of department.deptcode (3 = D01 ... D99; 5 = D0001 ... D9999).
+export const DEPT_CODE_MAX = 3;
+export const DEPT_CODE_PREFIX = 'D';
+
 /**
- * Next department code from the codes already in the table: D-009 -> D-010.
- * It keeps the style of the highest existing code (with or without the dash, same number of digits),
- * and starts at D-001 on an empty table. Pass EVERY code, deleted ones included, so a code is never reused.
+ * Next department code from the codes already in the table: D09 -> D10.
+ * Only codes in this style are counted (ACT, BR1 ... are ignored). Pass EVERY code, deleted ones included,
+ * so a code is never reused. Returns null when the style has no numbers left (D99 with 3 characters).
  */
-export function nextDeptCode(existing: string[]): string {
+export function nextDeptCode(existing: string[]): string | null {
+  const width = DEPT_CODE_MAX - DEPT_CODE_PREFIX.length;
+  if (width < 1) return null;
+  const style = new RegExp(`^${DEPT_CODE_PREFIX}(\\d{${width}})$`, 'i');
+
   let max = 0;
-  let dash = '-';
-  let width = 3;
   for (const e of existing) {
-    const m = /^D(-?)(\d+)$/i.exec(e.trim());
-    if (!m) continue;
-    const n = Number(m[2]);
-    if (n >= max) {
-      max = n;
-      dash = m[1];
-      width = Math.max(3, m[2].length);
-    }
+    const m = style.exec(e.trim());
+    if (m) max = Math.max(max, Number(m[1]));
   }
-  return `D${dash}${String(max + 1).padStart(width, '0')}`;
+  const next = max + 1;
+  if (next >= 10 ** width) return null;
+  return `${DEPT_CODE_PREFIX}${String(next).padStart(width, '0')}`;
 }

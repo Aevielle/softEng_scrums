@@ -72,9 +72,12 @@ function checked(input: unknown) {
 }
 
 // Postgres errors the form can explain: 23514 = CHECK failed, 22001 = text too long.
-function dbProblem(e: { code?: string }) {
+// For 22001 the database's own message is added (it names the column size), so a size mismatch is easy to spot.
+function dbProblem(e: { code?: string; message?: string }) {
   if (e.code === '23514') return new ServiceError(400, 'INVALID', 'That value is not allowed. Check the highlighted fields.', 'Wrong Value');
-  if (e.code === '22001') return new ServiceError(400, 'INVALID', 'Please shorten the highlighted field.', 'Too long');
+  if (e.code === '22001') {
+    return new ServiceError(400, 'INVALID', `Please shorten the highlighted field. (${e.message ?? 'value too long'})`, 'Too long');
+  }
   return null;
 }
 
@@ -98,6 +101,9 @@ export async function createDepartment(actor: CurrentUser, input: unknown) {
     const codes = await supabaseAdmin.from('department').select('deptcode');
     if (codes.error) throw asError(codes.error);
     const deptcode = nextDeptCode((codes.data ?? []).map((r) => String(r.deptcode)));
+    if (!deptcode) {
+      throw new ServiceError(409, 'CODE_FULL', 'There are no more department codes available in this format.', 'Cannot add');
+    }
 
     const { data, error } = await supabaseAdmin
       .from('department')
