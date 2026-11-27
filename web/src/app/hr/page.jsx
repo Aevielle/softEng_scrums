@@ -3,6 +3,8 @@ import { navGroups } from '@/lib/auth/nav';
 import { rightsFor } from '@/lib/auth/rights';
 import { listEmployees } from '@/lib/employees/service';
 import { EMPLOYEE_RIGHTS } from '@/lib/employees/rights';
+import { listDepartments } from '@/lib/departments/service';
+import { DEPARTMENT_RIGHTS } from '@/lib/departments/rights';
 import dash from '../dashboard/dashboard.module.css';
 import Sidebar from '../dashboard/Sidebar';
 import TopBar from '../dashboard/TopBar';
@@ -25,6 +27,16 @@ export default async function HrPage() {
   const rights = await rightsFor(user);
   const perm = { add: rights.has(EMPLOYEE_RIGHTS.add), edit: rights.has(EMPLOYEE_RIGHTS.edit) };
 
+  // S3-DEV-01: same idea for Departments. Admins: every row + Status/Stamp; Users: Active rows only.
+  // Restore is Admin / Superadmin only (no right of its own). /api/departments checks everything again.
+  const departments = await listDepartments(user);
+  const deptPerm = {
+    add: rights.has(DEPARTMENT_RIGHTS.add),
+    edit: rights.has(DEPARTMENT_RIGHTS.edit),
+    del: rights.has(DEPARTMENT_RIGHTS.delete),
+    restore: isAdmin,
+  };
+
   return (
     <div className={dash.shell}>
       <div className={dash.orbs} aria-hidden="true">
@@ -44,7 +56,7 @@ export default async function HrPage() {
           firstName={user.firstName}
           email={user.email}
         />
-        <HrClient employees={employees} isAdmin={isAdmin} perm={perm} />
+        <HrClient employees={employees} isAdmin={isAdmin} perm={perm} departments={departments} deptPerm={deptPerm} />
         <DashFooter />
       </main>
     </div>
