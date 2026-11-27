@@ -13,12 +13,10 @@ BEGIN
 
     CASE TG_TABLE_NAME
         WHEN 'employee' THEN
-            SELECT count(*) INTO v_n FROM (
-                SELECT 1 FROM jobhistory WHERE empno = OLD.empno AND NOT is_deleted
-                UNION ALL
-                SELECT 1 FROM sales      WHERE empno = OLD.empno AND NOT is_deleted) c;
+            SELECT count(*) INTO v_n FROM sales
+             WHERE empno = OLD.empno AND NOT is_deleted;
             IF v_n > 0 THEN
-                RAISE EXCEPTION 'Cannot delete % row: % active related record(s) still exist.', TG_TABLE_NAME, v_n;
+                RAISE EXCEPTION 'Cannot delete employee (%): % active sales record(s) still reference this employee.', OLD.empno, v_n;
             END IF;
         WHEN 'department' THEN
             SELECT count(*) INTO v_n FROM jobhistory
@@ -55,7 +53,7 @@ BEGIN
                 RAISE EXCEPTION 'Cannot delete % row: % active related record(s) still exist.', TG_TABLE_NAME, v_n;
             END IF;
         ELSE
-            NULL;                                   
+            NULL;                                    
     END CASE;
 
     RETURN NEW;
