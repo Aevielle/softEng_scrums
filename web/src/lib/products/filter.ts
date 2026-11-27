@@ -24,7 +24,7 @@ export function filterProducts(rows: ProductRow[], opts: { q?: string; status?: 
   const status = opts.status ?? 'All';
 
   return rows.filter((r) => {
-    if (status !== 'All' && r.status !== status) return false;
+    if (status !== 'All' && r.status !== undefined && r.status !== status) return false;
     if (!q) return true;
     return [r.prodcode, r.description, r.unit].some((v) => (v ?? '').toLowerCase().includes(q));
   });
