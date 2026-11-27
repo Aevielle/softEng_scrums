@@ -220,11 +220,11 @@ export async function deleteProduct(actor: WriteActor, prodcode: string): Promis
   const lines = await activeSaleLines(prodcode);
   if (lines > 0) throw new ProductError('IN_USE', inUseMessage(prodcode, lines));
 
-  // Only is_deleted is written. The S2-DBA-04 trigger writes the Stamp ("DELETE <who> <when>") and also refuses
-  // the delete if a sale line appeared a moment ago. Same as Customers.
+  // Both is_deleted and the Stamp ("DELETED <who> <when>") are written here (same as Customers),
+  // ensuring the audit trail updates even if the DB trigger is absent.
   const { data, error } = await supabaseAdmin
     .from('product')
-    .update({ is_deleted: true })
+    .update({ stamp: makeStamp('DELETED', actor.email), is_deleted: true })
     .eq('prodcode', prodcode)
     .eq('is_deleted', false)
     .select('prodcode, description, unit, stamp, is_deleted')
@@ -252,7 +252,7 @@ export async function restoreProduct(actor: WriteActor, prodcode: string): Promi
 
   const { data, error } = await supabaseAdmin
     .from('product')
-    .update({ is_deleted: false }) // the trigger writes the Stamp ("RESTORE <who> <when>")
+    .update({ stamp: makeStamp('EDITED', actor.email), is_deleted: false })
     .eq('prodcode', prodcode)
     .eq('is_deleted', true)
     .select('prodcode, description, unit, stamp, is_deleted')
