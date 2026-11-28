@@ -5,6 +5,8 @@ import { listEmployees } from '@/lib/employees/service';
 import { EMPLOYEE_RIGHTS } from '@/lib/employees/rights';
 import { listDepartments } from '@/lib/departments/service';
 import { DEPARTMENT_RIGHTS } from '@/lib/departments/rights';
+import { listJobs } from '@/lib/jobs/service';
+import { JOB_RIGHTS } from '@/lib/jobs/rights';
 import dash from '../dashboard/dashboard.module.css';
 import Sidebar from '../dashboard/Sidebar';
 import TopBar from '../dashboard/TopBar';
@@ -37,6 +39,16 @@ export default async function HrPage() {
     restore: isAdmin,
   };
 
+  // S3-DEV-02: same idea for Jobs. Admins: every row + Status/Stamp; Users: Active rows only.
+  // Restore is Admin / Superadmin only (no right of its own). /api/jobs checks everything again.
+  const jobs = await listJobs(user);
+  const jobPerm = {
+    add: rights.has(JOB_RIGHTS.add),
+    edit: rights.has(JOB_RIGHTS.edit),
+    del: rights.has(JOB_RIGHTS.delete),
+    restore: isAdmin,
+  };
+
   return (
     <div className={dash.shell}>
       <div className={dash.orbs} aria-hidden="true">
@@ -56,7 +68,15 @@ export default async function HrPage() {
           firstName={user.firstName}
           email={user.email}
         />
-        <HrClient employees={employees} isAdmin={isAdmin} perm={perm} departments={departments} deptPerm={deptPerm} />
+        <HrClient
+          employees={employees}
+          isAdmin={isAdmin}
+          perm={perm}
+          departments={departments}
+          deptPerm={deptPerm}
+          jobs={jobs}
+          jobPerm={jobPerm}
+        />
         <DashFooter />
       </main>
     </div>

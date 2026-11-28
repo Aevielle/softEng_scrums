@@ -3,13 +3,13 @@
 import { useState } from 'react';
 import EmployeesTab from './EmployeesTab';
 import DepartmentsTab from './DepartmentsTab';
+import JobsTab from './JobsTab';
 import styles from './hr.module.css';
 
 const SECTIONS = ['Employees', 'Jobs', 'Departments'];
 
-// Employees / Jobs / Departments switcher (Figure 15). Jobs is another ticket (S3-UIX-01 wireframes):
-// plug its component in where the placeholder is.
-export default function HrClient({ employees, isAdmin, perm, departments, deptPerm }) {
+// Employees / Jobs / Departments switcher (Figure 15).
+export default function HrClient({ employees, isAdmin, perm, departments, deptPerm, jobs, jobPerm }) {
   const [section, setSection] = useState('Employees');
 
   return (
@@ -30,9 +30,12 @@ export default function HrClient({ employees, isAdmin, perm, departments, deptPe
       </div>
 
       {section === 'Employees' && <EmployeesTab initial={employees} isAdmin={isAdmin} perm={perm} />}
-      {section === 'Jobs' && <p className={styles.empty}>The {section} tab is not built yet.</p>}
 
-      {/* S3-DEV-01: kept mounted (just hidden) so rows added / deleted here are still shown after visiting another tab. */}
+      {/* S3-DEV-01 / S3-DEV-02: kept mounted (just hidden) so rows added / deleted here are still shown after visiting another tab. */}
+      <div hidden={section !== 'Jobs'}>
+        <JobsTab initial={jobs} isAdmin={isAdmin} perm={jobPerm} />
+      </div>
+
       <div hidden={section !== 'Departments'}>
         <DepartmentsTab initial={departments} isAdmin={isAdmin} perm={deptPerm} />
       </div>
