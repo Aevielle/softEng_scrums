@@ -27,7 +27,13 @@ export default async function HrPage() {
   // S3-DEV-04: which buttons to show. Admins hold every right; a User only the ones ticked in the Rights dialog.
   // This only hides buttons: /api/employees checks the same rights again before anything is saved.
   const rights = await rightsFor(user);
-  const perm = { add: rights.has(EMPLOYEE_RIGHTS.add), edit: rights.has(EMPLOYEE_RIGHTS.edit) };
+  // S3-DEV-05: Delete needs the "Delete Employee" right. Restore is Admin / Superadmin only (no right of its own).
+  const perm = {
+    add: rights.has(EMPLOYEE_RIGHTS.add),
+    edit: rights.has(EMPLOYEE_RIGHTS.edit),
+    del: rights.has(EMPLOYEE_RIGHTS.delete),
+    restore: isAdmin,
+  };
 
   // S3-DEV-01: same idea for Departments. Admins: every row + Status/Stamp; Users: Active rows only.
   // Restore is Admin / Superadmin only (no right of its own). /api/departments checks everything again.

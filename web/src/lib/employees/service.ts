@@ -117,3 +117,62 @@ export async function updateEmployee(actor: CurrentUser, empno: string, input: u
   if (!existing.data) throw new ServiceError(404, 'NOT_FOUND', 'That employee no longer exists.', 'Not found');
   throw new ServiceError(409, 'DELETED', 'This employee is deleted. Restore it before editing.', 'Cannot edit');
 }
+
+// ---------------------------------------------------------------------------
+// Delete / Restore (S3-DEV-05).
+// "Deleted" means the RECORD is deleted (is_deleted = true, shown as Inactive). It says nothing about whether the
+// person left the company: that is sepdate, which Delete and Restore never read and never change. So E-004 can be
+// deleted AND carry a separation date, and restoring it brings back the same sepdate.
+// ---------------------------------------------------------------------------
+
+/** Geliz's trigger (S3-DBA-04) raises a plain exception such as "Cannot delete employee (E-001): 2 active sales
+ *  record(s) still reference this employee." Postgres reports a RAISE EXCEPTION as code P0001; we show its text as is. */
+function deleteRefusal(e: { code?: string; message?: string }) {
+  if (e.code === 'P0001' && /^Cannot delete/i.test(e.message ?? '')) {
+    return new ServiceError(409, 'HAS_CHILDREN', e.message as string, 'Cannot delete');
+  }
+  return null;
+}
+
+/** After an update touched no row: say whether the employee is gone or was already in the other state. */
+async function whyNotChanged(empno: string, already: string) {
+  const existing = await supabaseAdmin.from('employee').select('empno').eq('empno', empno).maybeSingle();
+  if (existing.error) throw existing.error;
+  if (!existing.data) return new ServiceError(404, 'NOT_FOUND', 'That employee no longer exists.', 'Not found');
+  return new ServiceError(409, 'CONFLICT', already, 'Nothing to do');
+}
+
+export async function deleteEmployee(actor: CurrentUser, empno: string) {
+  await requireRight(actor, EMPLOYEE_RIGHTS.delete);
+
+  // .eq('is_deleted', false) is part of the update itself, so two people pressing Delete at once cannot both "win".
+  // Only is_deleted and the Stamp change: sepdate and every other column stay exactly as they were.
+  const { data, error } = await supabaseAdmin
+    .from('employee')
+    .update({ is_deleted: true, stamp: makeStamp('DELETED', actor.email) })
+    .eq('empno', empno)
+    .eq('is_deleted', false)
+    .select(SELECT);
+  if (error) throw deleteRefusal(error) ?? error;
+  if (data?.length) return { employee: toRow(data[0] as DbEmployee, actor) };
+
+  throw await whyNotChanged(empno, 'This employee is already deleted.');
+}
+
+export async function restoreEmployee(actor: CurrentUser, empno: string) {
+  // Restore is Admin / Superadmin only and has no right of its own. A User never even receives deleted rows.
+  if (actor.role === 'user') {
+    throw new ServiceError(403, 'FORBIDDEN', 'Only an Admin can restore an employee.', 'Not allowed');
+  }
+
+  const { data, error } = await supabaseAdmin
+    .from('employee')
+    .update({ is_deleted: false, stamp: makeStamp('EDITED', actor.email) })
+    .eq('empno', empno)
+    .eq('is_deleted', true)
+    .select(SELECT);
+  if (error) throw error;
+  if (data?.length) return { employee: toRow(data[0] as DbEmployee, actor) };
+
+  throw await whyNotChanged(empno, 'This employee is already active.');
+}

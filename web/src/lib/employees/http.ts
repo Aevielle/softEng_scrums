@@ -14,23 +14,22 @@ type WriteAuth =
   | { ok: true; user: CurrentUser; body: unknown }
   | { ok: false; response: NextResponse };
 
+const forbidden = (message: string) =>
+  NextResponse.json({ code: 'FORBIDDEN', title: 'Not allowed', message }, { status: 403 });
+
+// A plain cross-site <form> cannot send application/json, so requiring it also blocks that kind of forged request.
+const isJson = (req: Request) => (req.headers.get('content-type') ?? '').toLowerCase().startsWith('application/json');
+
 export async function authorizeEmployeeWrite(req: Request, rightName: string): Promise<WriteAuth> {
   const auth = await authorizeApi('hr');
   if (!auth.ok) return auth;
 
   const rights = await rightsFor(auth.user);
   if (!rights.has(rightName)) {
-    return {
-      ok: false,
-      response: NextResponse.json(
-        { code: 'FORBIDDEN', title: 'Not allowed', message: `You need the "${rightName}" right to do this.` },
-        { status: 403 }
-      ),
-    };
+    return { ok: false, response: forbidden(`You need the "${rightName}" right to do this.`) };
   }
 
-  // A plain cross-site <form> cannot send application/json, so this also blocks that kind of forged request.
-  if (!(req.headers.get('content-type') ?? '').toLowerCase().startsWith('application/json')) {
+  if (!isJson(req)) {
     return { ok: false, response: NextResponse.json({ code: 'INVALID', message: 'Send the employee as JSON.' }, { status: 415 }) };
   }
 
@@ -39,4 +38,33 @@ export async function authorizeEmployeeWrite(req: Request, rightName: string): P
     return { ok: false, response: NextResponse.json({ code: 'INVALID', message: 'Send the employee as JSON.' }, { status: 400 }) };
   }
   return { ok: true, user: auth.user, body };
+}
+
+type ActionAuth = { ok: true; user: CurrentUser } | { ok: false; response: NextResponse };
+
+/** DELETE /api/employees/[empno] (S3-DEV-05): signed in + "hr" module, then the "Delete Employee" right. No body.
+ *  A cross-site <form> cannot send the DELETE method, so no content-type check is needed here. */
+export async function authorizeEmployeeDelete(rightName: string): Promise<ActionAuth> {
+  const auth = await authorizeApi('hr');
+  if (!auth.ok) return auth;
+
+  const rights = await rightsFor(auth.user);
+  if (!rights.has(rightName)) {
+    return { ok: false, response: forbidden(`You need the "${rightName}" right to do this.`) };
+  }
+  return { ok: true, user: auth.user };
+}
+
+/** POST /api/employees/[empno]/restore (S3-DEV-05): signed in + "hr" module, then Admin / Superadmin only.
+ *  POST can be forged by a cross-site <form>, so it must be JSON, like the other write routes. */
+export async function authorizeEmployeeRestore(req: Request): Promise<ActionAuth> {
+  const auth = await authorizeApi('hr');
+  if (!auth.ok) return auth;
+
+  if (auth.user.role === 'user') return { ok: false, response: forbidden('Only an Admin can restore an employee.') };
+
+  if (!isJson(req)) {
+    return { ok: false, response: NextResponse.json({ code: 'INVALID', message: 'Send the request as JSON.' }, { status: 415 }) };
+  }
+  return { ok: true, user: auth.user };
 }

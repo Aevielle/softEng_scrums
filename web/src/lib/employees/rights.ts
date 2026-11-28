@@ -6,6 +6,7 @@
 export const EMPLOYEE_RIGHTS = {
   add: 'Add Employee',
   edit: 'Edit Employee',
+  delete: 'Delete Employee', // S3-DEV-05. Restore has no right of its own: Admin / Superadmin only (like Jobs and Departments).
 } as const;
 
 export type EmployeeRightName = (typeof EMPLOYEE_RIGHTS)[keyof typeof EMPLOYEE_RIGHTS];

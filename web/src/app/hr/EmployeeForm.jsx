@@ -107,7 +107,16 @@ export default function EmployeeForm({ mode, row, onClose, onSaved, notify }) {
         </div>
 
         <label htmlFor="ef-sep">Separation date (optional)</label>
-        <input id="ef-sep" type="date" className={cls('sepdate')} value={f.sepdate} onChange={set('sepdate')} min={f.hiredate || undefined} />
+        <div className={styles.inline}>
+          <input id="ef-sep" type="date" className={cls('sepdate')} value={f.sepdate} onChange={set('sepdate')} min={f.hiredate || undefined} />
+          {/* Not every browser draws a clear button inside the date box, so there is always one here. */}
+          {f.sepdate && (
+            <button type="button" className={`${styles.btn} ${styles.sm}`} onClick={() => setF((s) => ({ ...s, sepdate: '' }))} disabled={busy}>
+              Clear
+            </button>
+          )}
+        </div>
+        <p className={styles.sub}>The day the person left the company. Setting or clearing it does not change the status.</p>
 
         <div className={styles.row}>
           <button type="button" className={styles.btn} onClick={onClose} disabled={busy}>Cancel</button>
