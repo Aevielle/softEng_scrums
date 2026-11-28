@@ -107,6 +107,9 @@
 .two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .sub { margin: 12px 0 0; font-size: 12.5px; line-height: 1.5; color: var(--muted); }
 .row { display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px; }
+/* input + small button on one line (separation date and its Clear button) */
+.inline { display: flex; align-items: center; gap: 8px; }
+.inline input { flex: 1; min-width: 0; }
 @media (max-width: 520px) { .two { grid-template-columns: 1fr; } }
 
 /* toast (same look as the other modules) */
