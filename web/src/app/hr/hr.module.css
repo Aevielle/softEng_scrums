@@ -105,6 +105,16 @@
 .md input:disabled, .md select:disabled { opacity: .6; cursor: not-allowed; }
 .bad, .md input.bad, .md select.bad { border-color: var(--er); box-shadow: 0 0 0 3px color-mix(in srgb, var(--er) 20%, transparent); }
 .two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+/* Job History dialog (S3-DEV-06): wider than the forms because it holds a table */
+.md.wide { width: min(820px, 100%); }
+.hdr { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.hdr h3 { margin: 0; }
+.hbar { margin: 14px 0 12px; }
+.md .tw table { min-width: 560px; }
+.md .tw td, .md .tw th { padding-left: 12px; padding-right: 12px; }
+/* "Current" marker next to the effective date of the current job */
+.cur { margin-left: 8px; background: color-mix(in srgb, var(--ac) 18%, transparent); color: var(--ac); }
 .sub { margin: 12px 0 0; font-size: 12.5px; line-height: 1.5; color: var(--muted); }
 .row { display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px; }
 /* input + small button on one line (separation date and its Clear button) */
