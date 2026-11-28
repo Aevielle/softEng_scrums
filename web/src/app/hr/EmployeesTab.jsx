@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { countByStatus, filterEmployees } from '@/lib/employees/filter';
 import EmployeeForm from './EmployeeForm';
+import HistoryDialog from './HistoryDialog';
 import styles from './hr.module.css';
 
 const TABS = ['Active', 'Inactive', 'All'];
@@ -17,11 +18,19 @@ const byNo = (a, b) => a.empno.localeCompare(b.empno);
  *    Status is about the RECORD. The Sep Date column is about the PERSON leaving the company, so a row can be
  *    Inactive and still show a Sep Date (E-004 in Figure 15), and an Active row can have one too.
  *  - perm = { add, edit, del, restore }: which buttons to show. Only hides buttons; /api/employees checks the rights again.
- * `onHistory(row)` is the hook for S3-DEV-06 (job history); until it is passed, the button does nothing.
+ *  - History (S3-DEV-06) opens the Job History dialog for that employee. histPerm = { view, add, edit, del } are the
+ *    Job History rights: without "View Job History" the button is not drawn at all (salaries are personal data).
+ *    Only hides buttons; /api/employees/[empno]/history checks every right again.
  */
-export default function EmployeesTab({ initial, isAdmin, perm = { add: false, edit: false, del: false, restore: false }, onHistory }) {
+export default function EmployeesTab({
+  initial,
+  isAdmin,
+  perm = { add: false, edit: false, del: false, restore: false },
+  histPerm = { view: false, add: false, edit: false, del: false },
+}) {
   const [all, setAll] = useState(initial); // grows / changes as employees are added, edited, deleted or restored
   const [form, setForm] = useState(null); // { mode: 'add' } | { mode: 'edit', row }
+  const [hist, setHist] = useState(null); // employee row whose Job History dialog is open
   const [toast, setToast] = useState(null); // { title, message, err }
   const [tab, setTab] = useState('All'); // Figure 15 opens on All; only Admins see the tabs
   const [q, setQ] = useState('');
@@ -161,9 +170,11 @@ export default function EmployeesTab({ initial, isAdmin, perm = { add: false, ed
                       )
                     ) : (
                       <>
-                        <button type="button" className={`${styles.btn} ${styles.sm}`} disabled={busy} onClick={() => onHistory?.(r)}>
-                          History
-                        </button>
+                        {histPerm.view && (
+                          <button type="button" className={`${styles.btn} ${styles.sm}`} disabled={busy} onClick={() => setHist(r)}>
+                            History
+                          </button>
+                        )}
                         {perm.edit && (
                           <button type="button" className={`${styles.btn} ${styles.sm}`} disabled={busy} onClick={() => setForm({ mode: 'edit', row: r })}>
                             Edit
@@ -196,6 +207,16 @@ export default function EmployeesTab({ initial, isAdmin, perm = { add: false, ed
       </p>
 
       {form && <EmployeeForm mode={form.mode} row={form.row} onClose={closeForm} onSaved={upsert} notify={notify} />}
+
+      {hist && (
+        <HistoryDialog
+          emp={hist}
+          isAdmin={isAdmin}
+          perm={{ add: histPerm.add, edit: histPerm.edit, del: histPerm.del }}
+          onClose={() => setHist(null)}
+          notify={notify}
+        />
+      )}
 
       {toast && (
         <div className={`${styles.toast} ${toast.err ? styles.err : ''}`} role="status">

@@ -9,7 +9,7 @@ import styles from './hr.module.css';
 const SECTIONS = ['Employees', 'Jobs', 'Departments'];
 
 // Employees / Jobs / Departments switcher (Figure 15).
-export default function HrClient({ employees, isAdmin, perm, departments, deptPerm, jobs, jobPerm }) {
+export default function HrClient({ employees, isAdmin, perm, histPerm, departments, deptPerm, jobs, jobPerm }) {
   const [section, setSection] = useState('Employees');
 
   return (
@@ -29,7 +29,7 @@ export default function HrClient({ employees, isAdmin, perm, departments, deptPe
         ))}
       </div>
 
-      {section === 'Employees' && <EmployeesTab initial={employees} isAdmin={isAdmin} perm={perm} />}
+      {section === 'Employees' && <EmployeesTab initial={employees} isAdmin={isAdmin} perm={perm} histPerm={histPerm} />}
 
       {/* S3-DEV-01 / S3-DEV-02: kept mounted (just hidden) so rows added / deleted here are still shown after visiting another tab. */}
       <div hidden={section !== 'Jobs'}>

@@ -3,6 +3,7 @@ import { navGroups } from '@/lib/auth/nav';
 import { rightsFor } from '@/lib/auth/rights';
 import { listEmployees } from '@/lib/employees/service';
 import { EMPLOYEE_RIGHTS } from '@/lib/employees/rights';
+import { JOBHISTORY_RIGHTS } from '@/lib/jobhistory/rights';
 import { listDepartments } from '@/lib/departments/service';
 import { DEPARTMENT_RIGHTS } from '@/lib/departments/rights';
 import { listJobs } from '@/lib/jobs/service';
@@ -33,6 +34,16 @@ export default async function HrPage() {
     edit: rights.has(EMPLOYEE_RIGHTS.edit),
     del: rights.has(EMPLOYEE_RIGHTS.delete),
     restore: isAdmin,
+  };
+
+  // S3-DEV-06: Job History rights. "View" is separate from the others on purpose: salaries are personal data, so who may
+  // SEE the history is decided on its own. Without it the History button is not drawn and /api/employees/[empno]/history
+  // answers 403. The dialog itself shows Add / Edit / Delete only for the rights held.
+  const histPerm = {
+    view: rights.has(JOBHISTORY_RIGHTS.view),
+    add: rights.has(JOBHISTORY_RIGHTS.add),
+    edit: rights.has(JOBHISTORY_RIGHTS.edit),
+    del: rights.has(JOBHISTORY_RIGHTS.delete),
   };
 
   // S3-DEV-01: same idea for Departments. Admins: every row + Status/Stamp; Users: Active rows only.
@@ -78,6 +89,7 @@ export default async function HrPage() {
           employees={employees}
           isAdmin={isAdmin}
           perm={perm}
+          histPerm={histPerm}
           departments={departments}
           deptPerm={deptPerm}
           jobs={jobs}
